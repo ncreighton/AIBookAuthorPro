@@ -29,21 +29,15 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
     {
         [AIProviderType.Claude] = new()
         {
-            [GenerationMode.Quick] = "claude-3-5-haiku-20241022",
+            [GenerationMode.QuickDraft] = "claude-3-5-haiku-20241022",
             [GenerationMode.Standard] = "claude-sonnet-4-20250514",
             [GenerationMode.Premium] = "claude-opus-4-20250514"
         },
         [AIProviderType.OpenAI] = new()
         {
-            [GenerationMode.Quick] = "gpt-4o-mini",
+            [GenerationMode.QuickDraft] = "gpt-4o-mini",
             [GenerationMode.Standard] = "gpt-4o",
             [GenerationMode.Premium] = "o1-preview"
-        },
-        [AIProviderType.Gemini] = new()
-        {
-            [GenerationMode.Quick] = "gemini-1.5-flash",
-            [GenerationMode.Standard] = "gemini-1.5-pro",
-            [GenerationMode.Premium] = "gemini-2.0-flash-exp"
         }
     };
 
@@ -56,10 +50,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
         ["gpt-4o-mini"] = (0.00015m, 0.0006m),
         ["gpt-4o"] = (0.005m, 0.015m),
         ["o1-preview"] = (0.015m, 0.06m),
-        ["o1-mini"] = (0.003m, 0.012m),
-        ["gemini-1.5-flash"] = (0.000075m, 0.0003m),
-        ["gemini-1.5-pro"] = (0.00125m, 0.005m),
-        ["gemini-2.0-flash-exp"] = (0.00015m, 0.0006m)
+        ["o1-mini"] = (0.003m, 0.012m)
     };
 
     /// <summary>
@@ -109,7 +100,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
 
             if (contextResult.IsFailure)
             {
-                return Result<GenerationResult>.Failure($"Failed to build context: {contextResult.Error}");
+                return Result<GenerationResult>.Failure("Failed to build context: " + contextResult.Error);
             }
 
             var context = contextResult.Value!;
@@ -145,12 +136,12 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
 
             if (!provider.IsConfigured)
             {
-                return Result<GenerationResult>.Failure($"{provider.ProviderName} is not configured. Please add API key in settings.");
+                return Result<GenerationResult>.Failure(provider.ProviderName + " is not configured. Please add API key in settings.");
             }
 
             progress?.Report(new GenerationProgress
             {
-                Phase = $"Generating with {provider.ProviderName}...",
+                Phase = "Generating with " + provider.ProviderName + "...",
                 Percentage = 15
             });
 
@@ -208,7 +199,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Chapter generation failed");
-            return Result<GenerationResult>.Failure($"Generation failed: {ex.Message}", ex);
+            return Result<GenerationResult>.Failure("Generation failed: " + ex.Message, ex);
         }
     }
 
@@ -237,7 +228,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
         {
             yield return new StreamingChunk
             {
-                Text = $"Error: {contextResult.Error}",
+                Text = "Error: " + contextResult.Error,
                 IsFinal = true,
                 FinishReason = "error"
             };
@@ -268,7 +259,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
         {
             yield return new StreamingChunk
             {
-                Text = $"Error: {provider.ProviderName} is not configured.",
+                Text = "Error: " + provider.ProviderName + " is not configured.",
                 IsFinal = true,
                 FinishReason = "error"
             };
@@ -294,7 +285,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
             {
                 yield return new StreamingChunk
                 {
-                    Text = $"Error: {result.Error}",
+                    Text = "Error: " + result.Error,
                     IsFinal = true,
                     FinishReason = "error"
                 };
@@ -327,25 +318,17 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
 
             if (!aiProvider.IsConfigured)
             {
-                return Result<string>.Failure($"{aiProvider.ProviderName} is not configured.");
+                return Result<string>.Failure(aiProvider.ProviderName + " is not configured.");
             }
+
+            var systemPromptText = "You are an expert editor and writing assistant. Your task is to refine and improve the given text according to the instructions provided. Maintain the author's voice and style while making improvements.\n\nGuidelines:\n1. Preserve the core meaning and plot points\n2. Maintain consistent character voices\n3. Keep approximately the same length unless instructed otherwise\n4. Return only the refined text, no explanations";
+
+            var userPromptText = "Original text:\n" + content + "\n\nRefinement instructions:\n" + instructions + "\n\nRefined version:";
 
             var request = new GenerationRequest
             {
-                SystemPrompt = @"You are an expert editor and writing assistant. Your task is to refine and improve the given text according to the instructions provided. Maintain the author's voice and style while making improvements.
-
-Guidelines:
-1. Preserve the core meaning and plot points
-2. Maintain consistent character voices
-3. Keep approximately the same length unless instructed otherwise
-4. Return only the refined text, no explanations",
-                UserPrompt = $"""Original text:
-{content}
-
-Refinement instructions:
-{instructions}
-
-Refined version:""",
+                SystemPrompt = systemPromptText,
+                UserPrompt = userPromptText,
                 Provider = provider,
                 ModelId = GetModelForMode(provider, GenerationMode.Standard),
                 Temperature = 0.5,
@@ -365,7 +348,7 @@ Refined version:""",
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to refine content");
-            return Result<string>.Failure($"Refinement failed: {ex.Message}", ex);
+            return Result<string>.Failure("Refinement failed: " + ex.Message, ex);
         }
     }
 
@@ -424,8 +407,8 @@ Refined version:""",
         [
             new GenerationModeInfo
             {
-                Mode = GenerationMode.Quick,
-                Name = "Quick",
+                Mode = GenerationMode.QuickDraft,
+                Name = "Quick Draft",
                 Description = "Fast generation using economical models. Best for drafts and exploration.",
                 RecommendedFor = "First drafts, brainstorming, experimentation",
                 EstimatedTime = "30-60 seconds",
@@ -503,17 +486,7 @@ Refined version:""",
             WordCount = CountWords(initialContent)
         });
 
-        var refinementPrompt = $@"Review and improve the following chapter draft. Focus on:
-1. Strengthening prose and eliminating weak phrases
-2. Enhancing sensory details and immersion
-3. Improving dialogue naturalness
-4. Ensuring consistent pacing
-5. Tightening any loose scenes
-
-Original draft:
-{initialContent}
-
-Provide the improved version:";
+        var refinementPrompt = "Review and improve the following chapter draft. Focus on:\n1. Strengthening prose and eliminating weak phrases\n2. Enhancing sensory details and immersion\n3. Improving dialogue naturalness\n4. Ensuring consistent pacing\n5. Tightening any loose scenes\n\nOriginal draft:\n" + initialContent + "\n\nProvide the improved version:";
 
         var refinementRequest = new GenerationRequest
         {
@@ -572,7 +545,6 @@ Provide the improved version:";
         {
             AIProviderType.Claude => "claude-sonnet-4-20250514",
             AIProviderType.OpenAI => "gpt-4o",
-            AIProviderType.Gemini => "gemini-1.5-pro",
             _ => "claude-sonnet-4-20250514"
         };
     }
