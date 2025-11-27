@@ -14,12 +14,28 @@ using Microsoft.Extensions.Logging;
 namespace AIBookAuthorPro.UI.ViewModels;
 
 /// <summary>
+/// Navigation destinations for the application.
+/// </summary>
+public enum NavigationDestination
+{
+    Dashboard,
+    Editor,
+    Characters,
+    Locations,
+    Outline,
+    Research,
+    Export,
+    Settings
+}
+
+/// <summary>
 /// Main view model for the application shell.
 /// </summary>
 public partial class MainViewModel : ObservableObject
 {
     private readonly IProjectService _projectService;
     private readonly IAIProviderFactory _aiProviderFactory;
+    private readonly ISettingsService _settingsService;
     private readonly ILogger<MainViewModel> _logger;
 
     [ObservableProperty]
@@ -47,18 +63,48 @@ public partial class MainViewModel : ObservableObject
     private ObservableObject? _currentView;
 
     [ObservableProperty]
-    private string _selectedNavigationItem = "Editor";
+    private NavigationDestination _currentNavigation = NavigationDestination.Dashboard;
 
+    [ObservableProperty]
+    private string _selectedNavigationItem = "Dashboard";
+
+    [ObservableProperty]
+    private bool _isNavigationExpanded = true;
+
+    /// <summary>
+    /// Gets the recent projects list.
+    /// </summary>
     public ObservableCollection<ProjectInfo> RecentProjects { get; } = new();
+
+    /// <summary>
+    /// Gets the chapters list.
+    /// </summary>
     public ObservableCollection<Chapter> Chapters { get; } = new();
+
+    /// <summary>
+    /// Event raised when navigation to a view is requested.
+    /// </summary>
+    public event EventHandler<NavigationEventArgs>? NavigationRequested;
+
+    /// <summary>
+    /// Event raised when export dialog should be shown.
+    /// </summary>
+    public event EventHandler? ShowExportDialogRequested;
+
+    /// <summary>
+    /// Event raised when settings dialog should be shown.
+    /// </summary>
+    public event EventHandler? ShowSettingsDialogRequested;
 
     public MainViewModel(
         IProjectService projectService,
         IAIProviderFactory aiProviderFactory,
+        ISettingsService settingsService,
         ILogger<MainViewModel> logger)
     {
         _projectService = projectService;
         _aiProviderFactory = aiProviderFactory;
+        _settingsService = settingsService;
         _logger = logger;
 
         LoadRecentProjectsCommand.Execute(null);
@@ -80,6 +126,7 @@ public partial class MainViewModel : ObservableObject
             IsProjectOpen = true;
             UpdateChaptersList();
             StatusMessage = "New project created";
+            NavigateTo(NavigationDestination.Dashboard);
         }
         else
         {
@@ -111,6 +158,7 @@ public partial class MainViewModel : ObservableObject
                 UpdateChaptersList();
                 Title = $"AI Book Author Pro - {CurrentProject.Metadata.Title}";
                 StatusMessage = "Project opened successfully";
+                NavigateTo(NavigationDestination.Dashboard);
             }
             else
             {
@@ -202,6 +250,7 @@ public partial class MainViewModel : ObservableObject
         SelectedChapter = null;
         Title = "AI Book Author Pro";
         StatusMessage = "Project closed";
+        NavigateTo(NavigationDestination.Dashboard);
     }
 
     [RelayCommand]
@@ -228,7 +277,7 @@ public partial class MainViewModel : ObservableObject
         {
             Id = Guid.NewGuid(),
             Title = $"Chapter {CurrentProject.Chapters.Count + 1}",
-            Number = CurrentProject.Chapters.Count + 1,
+            Order = CurrentProject.Chapters.Count + 1,
             CreatedAt = DateTime.UtcNow,
             ModifiedAt = DateTime.UtcNow
         };
@@ -256,7 +305,7 @@ public partial class MainViewModel : ObservableObject
         // Renumber remaining chapters
         for (int i = 0; i < CurrentProject.Chapters.Count; i++)
         {
-            CurrentProject.Chapters[i].Number = i + 1;
+            CurrentProject.Chapters[i].Order = i + 1;
         }
 
         _projectService.MarkAsModified();
@@ -264,11 +313,54 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void NavigateTo(string destination)
+    private void NavigateTo(NavigationDestination destination)
     {
-        SelectedNavigationItem = destination;
+        CurrentNavigation = destination;
+        SelectedNavigationItem = destination.ToString();
         _logger.LogDebug("Navigating to: {Destination}", destination);
-        // View switching is handled by the View based on SelectedNavigationItem
+
+        // Raise navigation event for view to handle
+        NavigationRequested?.Invoke(this, new NavigationEventArgs(destination));
+    }
+
+    [RelayCommand]
+    private void NavigateToString(string destination)
+    {
+        if (Enum.TryParse<NavigationDestination>(destination, out var nav))
+        {
+            NavigateTo(nav);
+        }
+    }
+
+    [RelayCommand]
+    private void ShowExportDialog()
+    {
+        if (!IsProjectOpen) return;
+
+        _logger.LogDebug("Showing export dialog");
+        ShowExportDialogRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void ShowSettings()
+    {
+        _logger.LogDebug("Showing settings dialog");
+        ShowSettingsDialogRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void ToggleNavigation()
+    {
+        IsNavigationExpanded = !IsNavigationExpanded;
+    }
+
+    [RelayCommand]
+    private void EditChapter(Chapter? chapter)
+    {
+        if (chapter == null) return;
+
+        SelectedChapter = chapter;
+        NavigateTo(NavigationDestination.Editor);
     }
 
     partial void OnSelectedChapterChanged(Chapter? value)
@@ -291,11 +383,36 @@ public partial class MainViewModel : ObservableObject
         Chapters.Clear();
         if (CurrentProject?.Chapters != null)
         {
-            foreach (var chapter in CurrentProject.Chapters.OrderBy(c => c.Number))
+            foreach (var chapter in CurrentProject.Chapters.OrderBy(c => c.Order))
             {
                 Chapters.Add(chapter);
             }
         }
         SelectedChapter = Chapters.FirstOrDefault();
+    }
+}
+
+/// <summary>
+/// Event args for navigation requests.
+/// </summary>
+public class NavigationEventArgs : EventArgs
+{
+    /// <summary>
+    /// Gets the navigation destination.
+    /// </summary>
+    public NavigationDestination Destination { get; }
+
+    /// <summary>
+    /// Gets optional navigation parameter.
+    /// </summary>
+    public object? Parameter { get; }
+
+    /// <summary>
+    /// Initializes a new instance of NavigationEventArgs.
+    /// </summary>
+    public NavigationEventArgs(NavigationDestination destination, object? parameter = null)
+    {
+        Destination = destination;
+        Parameter = parameter;
     }
 }
