@@ -25,7 +25,7 @@ public sealed class GenerationRequest
     /// <summary>
     /// Gets or sets the AI provider to use.
     /// </summary>
-    public AIProviderType Provider { get; set; } = AIProviderType.Anthropic;
+    public AIProviderType Provider { get; set; } = AIProviderType.Claude;
 
     /// <summary>
     /// Gets or sets the specific model to use.
