@@ -1,0 +1,539 @@
+<UserControl
+    x:Class="AIBookAuthorPro.UI.Views.ProjectDashboardView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:converters="clr-namespace:AIBookAuthorPro.UI.Converters"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:ProjectDashboardViewModel}"
+    d:DesignHeight="800"
+    d:DesignWidth="1200">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <converters:ChapterStatusToColorConverter x:Key="StatusToColor" />
+        <converters:WordCountDisplayConverter x:Key="WordCountDisplay" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card
+            Grid.Row="0"
+            Margin="16,16,16,8"
+            Padding="24"
+            materialDesign:ElevationAssist.Elevation="Dp2">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock
+                        Text="{Binding Project.Name}"
+                        Style="{StaticResource MaterialDesignHeadline4TextBlock}" />
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <materialDesign:Chip
+                            Content="{Binding Project.Metadata.Genre}"
+                            IconBackground="{DynamicResource PrimaryHueMidBrush}"
+                            IconForeground="{DynamicResource PrimaryHueMidForegroundBrush}">
+                            <materialDesign:Chip.Icon>
+                                <materialDesign:PackIcon Kind="BookOpen" />
+                            </materialDesign:Chip.Icon>
+                        </materialDesign:Chip>
+                        <TextBlock
+                            Text="{Binding Project.Metadata.Author}"
+                            Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                            Foreground="{DynamicResource MaterialDesignBodyLight}"
+                            VerticalAlignment="Center"
+                            Margin="16,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal">
+
+                    <Button
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Command="{Binding SaveProjectCommand}"
+                        Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0" />
+                            <TextBlock Text="Save" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Command="{Binding NavigateToExportCommand}"
+                        Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Export" Margin="0,0,8,0" />
+                            <TextBlock Text="Export" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding NavigateToSettingsCommand}"
+                        ToolTip="Settings">
+                        <materialDesign:PackIcon Kind="Cog" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Statistics Cards -->
+        <ScrollViewer
+            Grid.Row="1"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Disabled"
+            Margin="8,0">
+
+            <StackPanel Orientation="Horizontal">
+                <!-- Word Count Card -->
+                <materialDesign:Card
+                    Width="200"
+                    Margin="8"
+                    Padding="16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Kind="FormatText"
+                                Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                Width="24"
+                                Height="24" />
+                            <TextBlock
+                                Text="Word Count"
+                                Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                VerticalAlignment="Center"
+                                Margin="8,0,0,0" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{Binding Statistics.TotalWordCount, StringFormat='{}{0:N0}'}"
+                            Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                            Margin="0,8,0,0" />
+                        <ProgressBar
+                            Value="{Binding Statistics.CompletionPercentage}"
+                            Maximum="100"
+                            Height="4"
+                            Margin="0,8,0,4" />
+                        <TextBlock
+                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                            Foreground="{DynamicResource MaterialDesignBodyLight}">
+                            <Run Text="{Binding Statistics.CompletionPercentage, StringFormat='{}{0:F0}%'}" />
+                            <Run Text="of" />
+                            <Run Text="{Binding Statistics.TargetWordCount, StringFormat='{}{0:N0}'}" />
+                        </TextBlock>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Chapters Card -->
+                <materialDesign:Card
+                    Width="200"
+                    Margin="8"
+                    Padding="16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Kind="BookOpenPageVariant"
+                                Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                Width="24"
+                                Height="24" />
+                            <TextBlock
+                                Text="Chapters"
+                                Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                VerticalAlignment="Center"
+                                Margin="8,0,0,0" />
+                        </StackPanel>
+                        <TextBlock
+                            Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                            Margin="0,8,0,0">
+                            <Run Text="{Binding Statistics.CompletedChapters}" />
+                            <Run Text="/" FontSize="16" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <Run Text="{Binding Statistics.TotalChapters}" FontSize="16" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                        </TextBlock>
+                        <TextBlock
+                            Text="completed"
+                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                            Foreground="{DynamicResource MaterialDesignBodyLight}"
+                            Margin="0,4,0,0" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Characters Card -->
+                <materialDesign:Card
+                    Width="160"
+                    Margin="8"
+                    Padding="16"
+                    Cursor="Hand"
+                    MouseLeftButtonUp="OnCharactersCardClick">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Kind="AccountGroup"
+                                Foreground="#9C27B0"
+                                Width="24"
+                                Height="24" />
+                            <TextBlock
+                                Text="Characters"
+                                Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                VerticalAlignment="Center"
+                                Margin="8,0,0,0" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{Binding Statistics.CharacterCount}"
+                            Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                            Margin="0,8,0,0" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Locations Card -->
+                <materialDesign:Card
+                    Width="160"
+                    Margin="8"
+                    Padding="16"
+                    Cursor="Hand"
+                    MouseLeftButtonUp="OnLocationsCardClick">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Kind="MapMarker"
+                                Foreground="#E91E63"
+                                Width="24"
+                                Height="24" />
+                            <TextBlock
+                                Text="Locations"
+                                Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                VerticalAlignment="Center"
+                                Margin="8,0,0,0" />
+                        </StackPanel>
+                        <TextBlock
+                            Text="{Binding Statistics.LocationCount}"
+                            Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                            Margin="0,8,0,0" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Reading Time Card -->
+                <materialDesign:Card
+                    Width="180"
+                    Margin="8"
+                    Padding="16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Kind="ClockOutline"
+                                Foreground="#00BCD4"
+                                Width="24"
+                                Height="24" />
+                            <TextBlock
+                                Text="Reading Time"
+                                Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                VerticalAlignment="Center"
+                                Margin="8,0,0,0" />
+                        </StackPanel>
+                        <TextBlock
+                            Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                            Margin="0,8,0,0">
+                            <Run Text="{Binding Statistics.EstimatedReadingTimeMinutes}" />
+                            <Run Text="min" FontSize="14" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                        </TextBlock>
+                    </StackPanel>
+                </materialDesign:Card>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="2" Margin="16,8,16,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="300" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Chapter List -->
+            <materialDesign:Card
+                Grid.Column="0"
+                Margin="0,0,8,0"
+                Padding="0">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Chapter List Header -->
+                    <Border
+                        Background="{DynamicResource MaterialDesignCardBackground}"
+                        Padding="16"
+                        BorderThickness="0,0,0,1"
+                        BorderBrush="{DynamicResource MaterialDesignDivider}">
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock
+                                    Text="Chapters"
+                                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                    VerticalAlignment="Center" />
+
+                                <!-- Filter chips -->
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Margin="24,0,0,0">
+
+                                    <ToggleButton
+                                        Style="{StaticResource MaterialDesignFlatToggleButton}"
+                                        Content="All"
+                                        IsChecked="{Binding StatusFilter, Converter={StaticResource NullToBoolConverter}}"
+                                        Margin="0,0,4,0" />
+
+                                    <!-- Additional status filters would go here -->
+                                </StackPanel>
+                            </StackPanel>
+
+                            <StackPanel
+                                Grid.Column="1"
+                                Orientation="Horizontal">
+
+                                <TextBox
+                                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                    materialDesign:HintAssist.Hint="Search chapters..."
+                                    materialDesign:TextFieldAssist.HasClearButton="True"
+                                    Width="200"
+                                    Margin="0,0,8,0" />
+
+                                <Button
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Command="{Binding CreateNewChapterCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Margin="0,0,8,0" />
+                                        <TextBlock Text="New Chapter" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Chapter ListView -->
+                    <ListView
+                        Grid.Row="1"
+                        ItemsSource="{Binding FilteredChapters}"
+                        SelectedItem="{Binding SelectedChapter}"
+                        SelectionMode="Single">
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Chapter Number -->
+                                    <Border
+                                        Width="40"
+                                        Height="40"
+                                        CornerRadius="20"
+                                        Background="{DynamicResource PrimaryHueLightBrush}">
+                                        <TextBlock
+                                            Text="{Binding Order}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontWeight="Bold" />
+                                    </Border>
+
+                                    <!-- Title and Summary -->
+                                    <StackPanel Grid.Column="1" Margin="16,0">
+                                        <TextBlock
+                                            Text="{Binding Title}"
+                                            Style="{StaticResource MaterialDesignSubtitle1TextBlock}" />
+                                        <TextBlock
+                                            Text="{Binding Summary}"
+                                            Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                            Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                            TextTrimming="CharacterEllipsis"
+                                            MaxWidth="400" />
+                                    </StackPanel>
+
+                                    <!-- Status -->
+                                    <StackPanel
+                                        Grid.Column="2"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center">
+                                        <Ellipse
+                                            Width="8"
+                                            Height="8"
+                                            Fill="{Binding Status, Converter={StaticResource StatusToColor}}"
+                                            Margin="0,0,6,0" />
+                                        <TextBlock
+                                            Text="{Binding Status}"
+                                            Style="{StaticResource MaterialDesignCaptionTextBlock}" />
+                                    </StackPanel>
+
+                                    <!-- Actions -->
+                                    <StackPanel
+                                        Grid.Column="3"
+                                        Orientation="Horizontal">
+
+                                        <Button
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            Command="{Binding DataContext.OpenChapterCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Edit">
+                                            <materialDesign:PackIcon Kind="Pencil" />
+                                        </Button>
+
+                                        <materialDesign:PopupBox
+                                            PlacementMode="BottomAndAlignRightEdges"
+                                            StaysOpen="False">
+                                            <StackPanel>
+                                                <Button
+                                                    Content="Duplicate"
+                                                    Command="{Binding DataContext.DuplicateChapterCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                    CommandParameter="{Binding}" />
+                                                <Button
+                                                    Content="Move Up"
+                                                    Command="{Binding DataContext.MoveChapterUpCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                    CommandParameter="{Binding}" />
+                                                <Button
+                                                    Content="Move Down"
+                                                    Command="{Binding DataContext.MoveChapterDownCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                    CommandParameter="{Binding}" />
+                                                <Separator />
+                                                <Button
+                                                    Content="Delete"
+                                                    Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                                                    Command="{Binding DataContext.DeleteChapterCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                    CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </materialDesign:PopupBox>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- Side Panel -->
+            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                <!-- Recent Chapters -->
+                <materialDesign:Card Padding="16" Margin="0,0,0,8">
+                    <StackPanel>
+                        <TextBlock
+                            Text="RECENT CHAPTERS"
+                            Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                            Foreground="{DynamicResource MaterialDesignBodyLight}"
+                            Margin="0,0,0,12" />
+
+                        <ItemsControl ItemsSource="{Binding RecentChapters}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        HorizontalContentAlignment="Left"
+                                        Command="{Binding DataContext.OpenChapterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        Margin="-16,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse
+                                                Width="8"
+                                                Height="8"
+                                                Fill="{Binding Status, Converter={StaticResource StatusToColor}}"
+                                                Margin="0,0,12,0" />
+                                            <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" MaxWidth="200" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Quick Actions -->
+                <materialDesign:Card Padding="16">
+                    <StackPanel>
+                        <TextBlock
+                            Text="QUICK ACTIONS"
+                            Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                            Foreground="{DynamicResource MaterialDesignBodyLight}"
+                            Margin="0,0,0,12" />
+
+                        <Button
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            HorizontalContentAlignment="Left"
+                            Command="{Binding NavigateToCharactersCommand}"
+                            Margin="0,0,0,8">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="AccountGroup" Margin="0,0,12,0" />
+                                <TextBlock Text="Manage Characters" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            HorizontalContentAlignment="Left"
+                            Command="{Binding NavigateToLocationsCommand}"
+                            Margin="0,0,0,8">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="MapMarker" Margin="0,0,12,0" />
+                                <TextBlock Text="Manage Locations" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            HorizontalContentAlignment="Left"
+                            Command="{Binding NavigateToOutlineCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FormatListBulleted" Margin="0,0,12,0" />
+                                <TextBlock Text="Edit Outline" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </materialDesign:Card>
+            </StackPanel>
+        </Grid>
+
+        <!-- Loading Overlay -->
+        <Border
+            Grid.RowSpan="3"
+            Background="{DynamicResource MaterialDesignPaper}"
+            Opacity="0.8"
+            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+            <StackPanel
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center">
+                <ProgressBar
+                    Style="{StaticResource MaterialDesignCircularProgressBar}"
+                    IsIndeterminate="True"
+                    Width="48"
+                    Height="48" />
+                <TextBlock
+                    Text="{Binding StatusMessage}"
+                    Margin="0,16,0,0"
+                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
