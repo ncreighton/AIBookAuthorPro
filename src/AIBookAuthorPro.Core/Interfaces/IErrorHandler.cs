@@ -3,6 +3,8 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using AIBookAuthorPro.Core.Common;
+
 namespace AIBookAuthorPro.Core.Interfaces;
 
 /// <summary>
