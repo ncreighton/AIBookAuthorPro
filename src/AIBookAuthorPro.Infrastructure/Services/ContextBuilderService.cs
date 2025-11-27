@@ -73,7 +73,7 @@ public sealed class ContextBuilderService : IContextBuilderService
 
                 if (summaryResult.IsSuccess)
                 {
-                    context.PreviousSummary = summaryResult.Value;
+                    context = context with { PreviousSummary = summaryResult.Value };
                 }
                 else
                 {
@@ -84,7 +84,7 @@ public sealed class ContextBuilderService : IContextBuilderService
             // Build character context
             if (options.IncludeCharacters)
             {
-                var characterIds = options.CustomCharacterIds??
+                var characterIds = options.CustomCharacterIds ??
                     GetRelevantCharacterIds(project, chapter);
 
                 var charResult = BuildCharacterContext(
@@ -94,14 +94,14 @@ public sealed class ContextBuilderService : IContextBuilderService
 
                 if (charResult.IsSuccess && charResult.Value != null)
                 {
-                    context.CharacterContexts = [.. charResult.Value];
+                    context = context with { CharacterContexts = charResult.Value };
                 }
             }
 
             // Build location context
             if (options.IncludeLocations)
             {
-                var locationIds = options.CustomLocationIds??
+                var locationIds = options.CustomLocationIds ??
                     GetRelevantLocationIds(project, chapter);
 
                 var locResult = BuildLocationContext(
@@ -111,7 +111,7 @@ public sealed class ContextBuilderService : IContextBuilderService
 
                 if (locResult.IsSuccess && locResult.Value != null)
                 {
-                    context.LocationContexts = [.. locResult.Value];
+                    context = context with { LocationContexts = locResult.Value };
                 }
             }
 
@@ -445,20 +445,11 @@ public sealed class ContextBuilderService : IContextBuilderService
                 currentTokens, maxTokens);
 
             // Create a copy with potentially reduced context
-            var optimized = new GenerationContext
+            var optimized = context with
             {
-                ProjectId = context.ProjectId,
-                ChapterId = context.ChapterId,
-                ChapterNumber = context.ChapterNumber,
-                BookTitle = context.BookTitle,
-                Genre = context.Genre,
-                TargetAudience = context.TargetAudience,
-                Style = context.Style,
-                PointOfView = context.PointOfView,
-                Tense = context.Tense,
-                ChapterOutline = context.ChapterOutline,
-                CustomNotes = context.CustomNotes,
-                TargetWordCount = context.TargetWordCount
+                PreviousSummary = null,
+                CharacterContexts = [],
+                LocationContexts = []
             };
 
             currentTokens = EstimateContextTokens(optimized);
@@ -469,7 +460,7 @@ public sealed class ContextBuilderService : IContextBuilderService
                 var summaryTokens = (int)Math.Ceiling(context.PreviousSummary.Length / CharsPerToken);
                 if (currentTokens + summaryTokens <= maxTokens)
                 {
-                    optimized.PreviousSummary = context.PreviousSummary;
+                    optimized = optimized with { PreviousSummary = context.PreviousSummary };
                     currentTokens += summaryTokens;
                 }
                 else
@@ -478,19 +469,20 @@ public sealed class ContextBuilderService : IContextBuilderService
                     var allowedChars = (int)((maxTokens - currentTokens) * CharsPerToken * 0.8);
                     if (allowedChars > 200)
                     {
-                        optimized.PreviousSummary = context.PreviousSummary[..allowedChars] + "...";
+                        optimized = optimized with { PreviousSummary = context.PreviousSummary[..allowedChars] + "..." };
                         currentTokens = EstimateContextTokens(optimized);
                     }
                 }
             }
 
             // Add characters one by one
+            var newCharContexts = new List<string>();
             foreach (var charContext in context.CharacterContexts)
             {
                 var charTokens = (int)Math.Ceiling(charContext.Length / CharsPerToken);
                 if (currentTokens + charTokens <= maxTokens)
                 {
-                    optimized.CharacterContexts.Add(charContext);
+                    newCharContexts.Add(charContext);
                     currentTokens += charTokens;
                 }
                 else
@@ -498,14 +490,16 @@ public sealed class ContextBuilderService : IContextBuilderService
                     break;
                 }
             }
+            optimized = optimized with { CharacterContexts = newCharContexts };
 
             // Add locations one by one
+            var newLocContexts = new List<string>();
             foreach (var locContext in context.LocationContexts)
             {
                 var locTokens = (int)Math.Ceiling(locContext.Length / CharsPerToken);
                 if (currentTokens + locTokens <= maxTokens)
                 {
-                    optimized.LocationContexts.Add(locContext);
+                    newLocContexts.Add(locContext);
                     currentTokens += locTokens;
                 }
                 else
@@ -513,6 +507,7 @@ public sealed class ContextBuilderService : IContextBuilderService
                     break;
                 }
             }
+            optimized = optimized with { LocationContexts = newLocContexts };
 
             _logger.LogDebug("Optimized context to {Tokens} tokens", EstimateContextTokens(optimized));
 
@@ -608,8 +603,8 @@ public sealed class ContextBuilderService : IContextBuilderService
     {
         PointOfView.FirstPerson => "First Person (I/We)",
         PointOfView.SecondPerson => "Second Person (You)",
-        PointOfView.ThirdLimited => "Third Person Limited",
-        PointOfView.ThirdOmniscient => "Third Person Omniscient",
+        PointOfView.ThirdPersonLimited => "Third Person Limited",
+        PointOfView.ThirdPersonOmniscient => "Third Person Omniscient",
         _ => pov.ToString()
     };
 
@@ -617,7 +612,6 @@ public sealed class ContextBuilderService : IContextBuilderService
     {
         Tense.Past => "Past Tense",
         Tense.Present => "Present Tense",
-        Tense.Future => "Future Tense",
         _ => tense.ToString()
     };
 
