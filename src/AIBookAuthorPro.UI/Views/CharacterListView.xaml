@@ -1,0 +1,278 @@
+<UserControl
+    x:Class="AIBookAuthorPro.UI.Views.CharacterListView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:converters="clr-namespace:AIBookAuthorPro.UI.Converters"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:CharacterListViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="1000">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <materialDesign:Card
+            Grid.Row="0"
+            Margin="16,16,16,8"
+            Padding="24"
+            materialDesign:ElevationAssist.Elevation="Dp2">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Button
+                    Style="{StaticResource MaterialDesignIconButton}"
+                    Command="{Binding GoBackCommand}"
+                    ToolTip="Back to Dashboard"
+                    Margin="0,0,16,0">
+                    <materialDesign:PackIcon Kind="ArrowLeft" Width="24" Height="24" />
+                </Button>
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock
+                        Text="Characters"
+                        Style="{StaticResource MaterialDesignHeadline5TextBlock}" />
+                    <TextBlock
+                        Text="{Binding StatusMessage}"
+                        Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                        Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                </StackPanel>
+
+                <Button
+                    Grid.Column="2"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Command="{Binding CreateNewCharacterCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Plus" Margin="0,0,8,0" />
+                        <TextBlock Text="New Character" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Filters -->
+        <materialDesign:Card
+            Grid.Row="1"
+            Margin="16,0,16,8"
+            Padding="16">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Role Filter Chips -->
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Text="Filter:"
+                        VerticalAlignment="Center"
+                        Margin="0,0,16,0" />
+
+                    <ToggleButton
+                        Style="{StaticResource MaterialDesignFlatToggleButton}"
+                        Content="All"
+                        IsChecked="{Binding RoleFilter, Converter={StaticResource NullToBoolConverter}}"
+                        Command="{Binding ClearFiltersCommand}"
+                        Margin="0,0,8,0" />
+
+                    <ToggleButton
+                        Style="{StaticResource MaterialDesignFlatToggleButton}"
+                        Content="Protagonist"
+                        Command="{Binding FilterByRoleCommand}"
+                        CommandParameter="{x:Static vm:CharacterRoleValue.Protagonist}"
+                        Margin="0,0,8,0" />
+
+                    <ToggleButton
+                        Style="{StaticResource MaterialDesignFlatToggleButton}"
+                        Content="Antagonist"
+                        Command="{Binding FilterByRoleCommand}"
+                        CommandParameter="{x:Static vm:CharacterRoleValue.Antagonist}"
+                        Margin="0,0,8,0" />
+
+                    <ToggleButton
+                        Style="{StaticResource MaterialDesignFlatToggleButton}"
+                        Content="Supporting"
+                        Command="{Binding FilterByRoleCommand}"
+                        CommandParameter="{x:Static vm:CharacterRoleValue.Supporting}" />
+                </StackPanel>
+
+                <!-- Search -->
+                <TextBox
+                    Grid.Column="1"
+                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Search characters..."
+                    materialDesign:TextFieldAssist.HasClearButton="True"
+                    Width="250" />
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Character Grid -->
+        <ScrollViewer
+            Grid.Row="2"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled"
+            Padding="8,0">
+
+            <ItemsControl ItemsSource="{Binding FilteredCharacters}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <materialDesign:Card
+                            Width="280"
+                            Margin="8"
+                            Cursor="Hand"
+                            MouseLeftButtonUp="OnCharacterCardClick">
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="120" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Avatar Area -->
+                                <Border
+                                    Background="{DynamicResource PrimaryHueLightBrush}"
+                                    CornerRadius="4,4,0,0">
+
+                                    <Grid>
+                                        <!-- Placeholder Avatar -->
+                                        <Border
+                                            Width="80"
+                                            Height="80"
+                                            CornerRadius="40"
+                                            Background="{DynamicResource PrimaryHueMidBrush}"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center">
+                                            <TextBlock
+                                                Text="{Binding Name, Converter={StaticResource InitialsConverter}}"
+                                                FontSize="28"
+                                                FontWeight="Bold"
+                                                Foreground="White"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center" />
+                                        </Border>
+
+                                        <!-- Role Badge -->
+                                        <materialDesign:Chip
+                                            Content="{Binding Role}"
+                                            Margin="8"
+                                            VerticalAlignment="Top"
+                                            HorizontalAlignment="Right"
+                                            FontSize="10" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Info Area -->
+                                <StackPanel Grid.Row="1" Margin="16">
+                                    <TextBlock
+                                        Text="{Binding Name}"
+                                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                        TextTrimming="CharacterEllipsis" />
+
+                                    <TextBlock
+                                        Text="{Binding Occupation}"
+                                        Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                        Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                        TextTrimming="CharacterEllipsis"
+                                        Margin="0,4,0,0" />
+
+                                    <TextBlock
+                                        Text="{Binding Description}"
+                                        Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                        TextTrimming="CharacterEllipsis"
+                                        MaxHeight="40"
+                                        Margin="0,8,0,0" />
+
+                                    <!-- Actions -->
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        Margin="0,12,0,0">
+
+                                        <Button
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            Command="{Binding DataContext.EditCharacterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Edit">
+                                            <materialDesign:PackIcon Kind="Pencil" />
+                                        </Button>
+
+                                        <Button
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            Command="{Binding DataContext.DuplicateCharacterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="Duplicate">
+                                            <materialDesign:PackIcon Kind="ContentCopy" />
+                                        </Button>
+
+                                        <Button
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            Command="{Binding DataContext.DeleteCharacterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                                            ToolTip="Delete">
+                                            <materialDesign:PackIcon Kind="Delete" />
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </materialDesign:Card>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Empty State -->
+        <StackPanel
+            Grid.Row="2"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            Visibility="{Binding FilteredCharacters.Count, Converter={StaticResource ZeroToVisibilityConverter}}">
+
+            <materialDesign:PackIcon
+                Kind="AccountGroup"
+                Width="64"
+                Height="64"
+                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                HorizontalAlignment="Center" />
+
+            <TextBlock
+                Text="No characters found"
+                Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                HorizontalAlignment="Center"
+                Margin="0,16,0,0" />
+
+            <Button
+                Style="{StaticResource MaterialDesignOutlinedButton}"
+                Content="Create First Character"
+                Command="{Binding CreateNewCharacterCommand}"
+                HorizontalAlignment="Center"
+                Margin="0,16,0,0" />
+        </StackPanel>
+    </Grid>
+</UserControl>
