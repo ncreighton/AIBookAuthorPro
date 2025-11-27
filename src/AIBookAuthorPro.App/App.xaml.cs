@@ -5,6 +5,7 @@
 
 using System.Windows;
 using AIBookAuthorPro.Core.Interfaces;
+using AIBookAuthorPro.Infrastructure.AI;
 using AIBookAuthorPro.Infrastructure.Services;
 using AIBookAuthorPro.UI.ViewModels;
 using AIBookAuthorPro.UI.Views;
@@ -59,15 +60,19 @@ public partial class App : Application
         services.AddSingleton<IProjectService, ProjectService>();
         services.AddSingleton<IExportService, ExportService>();
         services.AddSingleton<INotificationService, NotificationService>();
-        services.AddSingleton<NotificationService>();
+        services.AddSingleton<NotificationService>(); // Concrete type for NotificationHost
         services.AddSingleton<IErrorHandler, ErrorHandler>();
 
         // AI Services
         services.AddSingleton<ITokenCounter, TokenCounter>();
-        services.AddTransient<IAIProvider, ClaudeProvider>();
-        services.AddTransient<IAIProviderFactory, AIProviderFactory>();
+        services.AddSingleton<IAIProviderFactory, AIProviderFactory>();
+        services.AddTransient<IContextBuilderService, ContextBuilderService>();
         services.AddTransient<IChapterGeneratorService, ChapterGeneratorService>();
-        services.AddTransient<IContextBuilder, ContextBuilder>();
+        
+        // Register AI providers
+        services.AddTransient<AnthropicProvider>();
+        services.AddTransient<OpenAIProvider>();
+        services.AddTransient<GeminiProvider>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
