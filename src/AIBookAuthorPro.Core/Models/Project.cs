@@ -305,12 +305,27 @@ public sealed class BookMetadata
     /// <summary>
     /// Gets or sets the target audience description.
     /// </summary>
-    public string? TargetAudience { get; set; }
+    public string TargetAudience { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the book category.
     /// </summary>
     public BookCategory Category { get; set; } = BookCategory.Fiction;
+
+    /// <summary>
+    /// Gets or sets the writing style description.
+    /// </summary>
+    public string WritingStyle { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the point of view for the book.
+    /// </summary>
+    public PointOfView PointOfView { get; set; } = PointOfView.ThirdPersonLimited;
+
+    /// <summary>
+    /// Gets or sets the tense for the book.
+    /// </summary>
+    public Tense Tense { get; set; } = Tense.Past;
 }
 
 /// <summary>
