@@ -35,10 +35,10 @@ public interface IErrorHandler
     /// <summary>
     /// Wraps an async action with error handling.
     /// </summary>
-    Task<Result> TryExecuteAsync(Func<Task> action, string? context = null, CancellationToken ct = default);
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result> TryExecuteAsync(Func<System.Threading.Tasks.Task> action, string? context = null, CancellationToken ct = default);
 
     /// <summary>
     /// Wraps an async function with error handling.
     /// </summary>
-    Task<Result<T>> TryExecuteAsync<T>(Func<Task<T>> func, string? context = null, CancellationToken ct = default);
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result<T>> TryExecuteAsync<T>(Func<System.Threading.Tasks.Task<T>> func, string? context = null, CancellationToken ct = default);
 }
