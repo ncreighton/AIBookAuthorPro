@@ -3,36 +3,29 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.IO;
 using System.Windows;
+using System.Windows.Threading;
+using AIBookAuthorPro.Core.Interfaces;
+using AIBookAuthorPro.Infrastructure;
+using AIBookAuthorPro.Infrastructure.AI;
+using AIBookAuthorPro.UI.ViewModels;
 using AIBookAuthorPro.UI.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 
-namespace AIBookAuthorPro;
+namespace AIBookAuthorPro.App;
 
 /// <summary>
-/// Application entry point and DI container configuration.
+/// Application entry point with dependency injection and configuration setup.
 /// </summary>
 public partial class App : Application
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfiguration _configuration;
 
-    /// <summary>
-    /// Gets the current application instance.
-    /// </summary>
-    public new static App Current => (App)Application.Current;
-
-    /// <summary>
-    /// Gets the service provider for dependency injection.
-    /// </summary>
-    public IServiceProvider Services => _serviceProvider;
-
-    /// <summary>
-    /// Initializes a new instance of the App class.
-    /// </summary>
     public App()
     {
         // Build configuration
@@ -42,27 +35,28 @@ public partial class App : Application
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(_configuration)
             .Enrich.FromLogContext()
+            .WriteTo.Debug()
             .WriteTo.File(
-                path: Path.Combine(
+                Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "AIBookAuthorPro", "logs", "app-.log"),
+                    "AIBookAuthorPro",
+                    "logs",
+                    "app-.log"),
                 rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 30)
-            .WriteTo.Console()
+                retainedFileCountLimit: 7)
             .CreateLogger();
 
-        // Build DI container
+        Log.Information("AI Book Author Pro starting...");
+
+        // Build service provider
         var services = new ServiceCollection();
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
-
-        Log.Information("AI Book Author Pro starting...");
     }
 
     /// <summary>
-    /// Configures the application services.
+    /// Configures application services.
     /// </summary>
-    /// <param name="services">The service collection.</param>
     private void ConfigureServices(IServiceCollection services)
     {
         // Configuration
@@ -75,61 +69,44 @@ public partial class App : Application
             builder.AddSerilog(dispose: true);
         });
 
-        // Register ViewModels
-        RegisterViewModels(services);
+        // AI Provider settings
+        services.Configure<AnthropicSettings>(
+            _configuration.GetSection("AIProviders:Anthropic"));
+        services.Configure<OpenAISettings>(
+            _configuration.GetSection("AIProviders:OpenAI"));
+        services.Configure<GeminiSettings>(
+            _configuration.GetSection("AIProviders:Gemini"));
 
-        // Register Services
-        RegisterServices(services);
+        // Infrastructure services
+        services.AddInfrastructure();
 
-        // Register Views
-        RegisterViews(services);
-    }
+        // ViewModels
+        services.AddTransient<MainViewModel>();
 
-    /// <summary>
-    /// Registers ViewModels with the DI container.
-    /// </summary>
-    private static void RegisterViewModels(IServiceCollection services)
-    {
-        // Main ViewModels
-        services.AddTransient<UI.ViewModels.MainWindowViewModel>();
-        services.AddTransient<UI.ViewModels.DashboardViewModel>();
-        services.AddTransient<UI.ViewModels.ProjectEditorViewModel>();
-        services.AddTransient<UI.ViewModels.ChapterEditorViewModel>();
-        services.AddTransient<UI.ViewModels.SettingsViewModel>();
-    }
-
-    /// <summary>
-    /// Registers application services with the DI container.
-    /// </summary>
-    private static void RegisterServices(IServiceCollection services)
-    {
-        // TODO: Register services as they are implemented
-        // services.AddSingleton<IProjectService, ProjectService>();
-        // services.AddSingleton<IAIProviderFactory, AIProviderFactory>();
-        // services.AddHttpClient<ClaudeProvider>();
-        // services.AddHttpClient<OpenAIProvider>();
-    }
-
-    /// <summary>
-    /// Registers Views with the DI container.
-    /// </summary>
-    private static void RegisterViews(IServiceCollection services)
-    {
+        // Views
         services.AddTransient<MainWindow>();
     }
 
     /// <summary>
-    /// Builds the application configuration.
+    /// Builds the configuration from appsettings files and environment variables.
     /// </summary>
-    /// <returns>The configuration root.</returns>
     private static IConfiguration BuildConfiguration()
     {
         var builder = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json", 
-                optional: true, reloadOnChange: true)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile(
+                $"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json",
+                optional: true,
+                reloadOnChange: true)
             .AddEnvironmentVariables("AIBOOKAUTHOR_");
+
+        // Check for user secrets in development
+        var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        if (env == "Development")
+        {
+            // User secrets would be added here for development
+        }
 
         return builder.Build();
     }
@@ -146,11 +123,24 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
-        // Create and show main window
-        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-        mainWindow.Show();
+        try
+        {
+            // Create and show main window
+            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+            mainWindow.Show();
 
-        Log.Information("AI Book Author Pro started successfully");
+            Log.Information("AI Book Author Pro started successfully");
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Application failed to start");
+            MessageBox.Show(
+                $"Failed to start application:\n\n{ex.Message}",
+                "Startup Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            Shutdown(1);
+        }
     }
 
     /// <summary>
@@ -166,11 +156,11 @@ public partial class App : Application
     /// <summary>
     /// Handles unhandled exceptions on the dispatcher thread.
     /// </summary>
-    private void App_DispatcherUnhandledException(object sender, 
-        System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    private void App_DispatcherUnhandledException(object sender,
+        DispatcherUnhandledExceptionEventArgs e)
     {
         Log.Error(e.Exception, "Unhandled exception on dispatcher thread");
-        
+
         MessageBox.Show(
             $"An unexpected error occurred:\n\n{e.Exception.Message}\n\nThe application will attempt to continue.",
             "Error",
