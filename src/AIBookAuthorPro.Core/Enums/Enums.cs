@@ -69,6 +69,37 @@ public enum OpenAIModel
 }
 
 /// <summary>
+/// Represents the generation mode for AI content creation.
+/// </summary>
+public enum GenerationMode
+{
+    /// <summary>
+    /// Standard generation mode - balanced quality and speed.
+    /// </summary>
+    Standard = 0,
+    
+    /// <summary>
+    /// Fast mode - prioritizes speed over quality, uses faster models.
+    /// </summary>
+    Fast = 1,
+    
+    /// <summary>
+    /// High quality mode - prioritizes quality, uses premium models.
+    /// </summary>
+    HighQuality = 2,
+    
+    /// <summary>
+    /// Creative mode - higher temperature for more creative output.
+    /// </summary>
+    Creative = 3,
+    
+    /// <summary>
+    /// Precise mode - lower temperature for more consistent, factual output.
+    /// </summary>
+    Precise = 4
+}
+
+/// <summary>
 /// Represents point of view options for writing.
 /// </summary>
 public enum PointOfView
