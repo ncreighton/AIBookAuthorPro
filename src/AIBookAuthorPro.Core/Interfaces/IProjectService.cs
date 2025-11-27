@@ -16,7 +16,7 @@ public interface IProjectService
     /// <summary>
     /// Creates a new project.
     /// </summary>
-    System.Threading.Tasks.Task<Result<Project>> CreateAsync(
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result<Project>> CreateAsync(
         string name,
         string? templateName = null,
         CancellationToken cancellationToken = default);
@@ -24,14 +24,14 @@ public interface IProjectService
     /// <summary>
     /// Loads a project from file.
     /// </summary>
-    System.Threading.Tasks.Task<Result<Project>> LoadAsync(
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result<Project>> LoadAsync(
         string filePath,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Saves a project to file.
     /// </summary>
-    System.Threading.Tasks.Task<Result> SaveAsync(
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result> SaveAsync(
         Project project,
         string? filePath = null,
         CancellationToken cancellationToken = default);
@@ -39,21 +39,21 @@ public interface IProjectService
     /// <summary>
     /// Gets recent projects.
     /// </summary>
-    System.Threading.Tasks.Task<Result<IReadOnlyList<ProjectSummary>>> GetRecentProjectsAsync(
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result<IReadOnlyList<ProjectSummary>>> GetRecentProjectsAsync(
         int count = 10,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a project.
     /// </summary>
-    System.Threading.Tasks.Task<Result> DeleteAsync(
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result> DeleteAsync(
         string filePath,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Exports a project to a different format.
     /// </summary>
-    System.Threading.Tasks.Task<Result> ExportAsync(
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result> ExportAsync(
         Project project,
         Enums.ExportFormat format,
         string outputPath,
