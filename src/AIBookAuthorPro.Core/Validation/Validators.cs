@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.IO;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
 
@@ -39,6 +40,17 @@ public static class Validators
             errors.AddRange(metadataResult.Errors);
         }
 
+        // Validate target word count on Project (not BookMetadata)
+        if (project.TargetWordCount < 0)
+        {
+            errors.Add(new ValidationError(nameof(project.TargetWordCount), "Target word count cannot be negative"));
+        }
+
+        if (project.TargetWordCount > 1000000)
+        {
+            errors.Add(new ValidationError(nameof(project.TargetWordCount), "Target word count cannot exceed 1,000,000"));
+        }
+
         return errors.Count == 0 ? ValidationResult.Success() : ValidationResult.Failure(errors);
     }
 
@@ -56,16 +68,6 @@ public static class Validators
         else if (metadata.Title.Length > 300)
         {
             errors.Add(new ValidationError(nameof(metadata.Title), "Book title cannot exceed 300 characters"));
-        }
-
-        if (metadata.TargetWordCount < 0)
-        {
-            errors.Add(new ValidationError(nameof(metadata.TargetWordCount), "Target word count cannot be negative"));
-        }
-
-        if (metadata.TargetWordCount > 1000000)
-        {
-            errors.Add(new ValidationError(nameof(metadata.TargetWordCount), "Target word count cannot exceed 1,000,000"));
         }
 
         return errors.Count == 0 ? ValidationResult.Success() : ValidationResult.Failure(errors);
