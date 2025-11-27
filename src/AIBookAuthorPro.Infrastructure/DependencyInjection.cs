@@ -35,6 +35,15 @@ public static class DependencyInjection
         // Core services
         services.AddSingleton<IProjectService, ProjectService>();
 
+        // FlowDocument service (WPF-specific, but lives in Infrastructure)
+        services.AddSingleton<IFlowDocumentService, FlowDocumentService>();
+
+        // Context building service
+        services.AddSingleton<IContextBuilderService, ContextBuilderService>();
+
+        // Generation pipeline service
+        services.AddSingleton<IGenerationPipelineService, GenerationPipelineService>();
+
         // Exporters
         services.AddSingleton<IDocumentExporter, DocxExporter>();
         services.AddSingleton<DocumentExporterFactory>();
