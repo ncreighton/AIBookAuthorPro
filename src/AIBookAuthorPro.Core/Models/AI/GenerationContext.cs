@@ -10,7 +10,7 @@ namespace AIBookAuthorPro.Core.Models.AI;
 /// <summary>
 /// Contains all context needed for AI generation.
 /// </summary>
-public sealed class GenerationContext
+public sealed record GenerationContext
 {
     /// <summary>
     /// Gets or sets the project ID.
