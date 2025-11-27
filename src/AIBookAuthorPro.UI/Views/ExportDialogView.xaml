@@ -15,6 +15,8 @@
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
         <converters:BoolToVisibilityConverter x:Key="InvertedBoolToVisibility" Invert="True" />
+        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        <converters:NullToVisibilityConverter x:Key="NullToVisibility" />
     </UserControl.Resources>
 
     <Grid>
@@ -229,17 +231,19 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Padding="16">
-                        <TextBlock
-                            Text="Chapters to Export"
-                            Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                            Margin="0,0,0,8" />
+                    <Border Padding="16">
+                        <StackPanel>
+                            <TextBlock
+                                Text="Chapters to Export"
+                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                Margin="0,0,0,8" />
 
-                        <CheckBox
-                            Content="Select all"
-                            IsChecked="{Binding SelectAllChapters}"
-                            FontWeight="Medium" />
-                    </StackPanel>
+                            <CheckBox
+                                Content="Select all"
+                                IsChecked="{Binding SelectAllChapters}"
+                                FontWeight="Medium" />
+                        </StackPanel>
+                    </Border>
 
                     <ListView
                         Grid.Row="1"
