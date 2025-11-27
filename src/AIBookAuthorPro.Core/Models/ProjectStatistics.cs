@@ -104,7 +104,10 @@ public sealed class ProjectStatistics
         }
 
         var totalWords = project.Chapters.Sum(c => CountWords(c.Content));
-        var targetWords = project.Metadata?.TargetWordCount ?? project.Chapters.Sum(c => c.TargetWordCount);
+        // TargetWordCount is on Project, not BookMetadata
+        var targetWords = project.TargetWordCount > 0 
+            ? project.TargetWordCount 
+            : project.Chapters.Sum(c => c.TargetWordCount);
 
         return new ProjectStatistics
         {
