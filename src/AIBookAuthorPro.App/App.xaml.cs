@@ -80,26 +80,38 @@ public partial class App : Application
         // Infrastructure services
         services.AddInfrastructure();
 
-        // ViewModels
+        // ViewModels - Core
         services.AddTransient<MainViewModel>();
+        
+        // ViewModels - Editor
         services.AddTransient<ChapterEditorViewModel>();
         services.AddTransient<AIGenerationViewModel>();
+        
+        // ViewModels - Project Management (Phase 4)
         services.AddTransient<ProjectDashboardViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<CharacterListViewModel>();
         services.AddTransient<CharacterEditorViewModel>();
         services.AddTransient<LocationListViewModel>();
         services.AddTransient<LocationEditorViewModel>();
+        services.AddTransient<OutlineEditorViewModel>();
         services.AddTransient<ExportViewModel>();
 
-        // Views
+        // Views - Core
         services.AddTransient<MainWindow>();
+        
+        // Views - Editor
         services.AddTransient<ChapterEditorView>();
         services.AddTransient<AIGenerationDialog>();
+        
+        // Views - Project Management (Phase 4)
         services.AddTransient<ProjectDashboardView>();
         services.AddTransient<SettingsView>();
         services.AddTransient<CharacterListView>();
+        services.AddTransient<CharacterEditorView>();
         services.AddTransient<LocationListView>();
+        services.AddTransient<LocationEditorView>();
+        services.AddTransient<OutlineEditorView>();
         services.AddTransient<ExportDialogView>();
     }
 

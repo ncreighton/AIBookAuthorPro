@@ -1,0 +1,33 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:AIBookAuthorPro.UI.Converters">
+
+    <!-- Boolean Converters -->
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    <converters:BoolToVisibilityConverter x:Key="InvertedBoolToVisibility" Invert="True" />
+    <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    
+    <!-- Null Converters -->
+    <converters:NullToVisibilityConverter x:Key="NullToVisibility" />
+    <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibility" />
+    <converters:NullToBoolConverter x:Key="NullToBoolConverter" />
+    
+    <!-- Numeric Converters -->
+    <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibility" />
+    <converters:FileSizeConverter x:Key="FileSizeConverter" />
+    
+    <!-- Character Converters -->
+    <converters:InitialsConverter x:Key="InitialsConverter" />
+    <converters:CharacterRoleToColorConverter x:Key="CharacterRoleToColorConverter" />
+    
+    <!-- Outline Converters -->
+    <converters:ChapterTypeVisibilityConverter x:Key="ChapterTypeVisibility" />
+    <converters:OutlineTypeToIconConverter x:Key="OutlineTypeToIconConverter" />
+    <converters:StringToOutlineTypeConverter x:Key="StringToOutlineTypeConverter" />
+    
+    <!-- Export Converters -->
+    <converters:ExportFormatToNameConverter x:Key="ExportFormatToNameConverter" />
+    <converters:ExportFormatToIconConverter x:Key="ExportFormatToIconConverter" />
+
+</ResourceDictionary>
