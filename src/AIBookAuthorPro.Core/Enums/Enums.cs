@@ -69,32 +69,6 @@ public enum OpenAIModel
 }
 
 /// <summary>
-/// Represents the generation mode/quality level.
-/// </summary>
-public enum GenerationMode
-{
-    /// <summary>
-    /// Single-pass generation, fast but basic quality.
-    /// </summary>
-    QuickDraft = 0,
-    
-    /// <summary>
-    /// Plan, draft, refine - balanced approach.
-    /// </summary>
-    Standard = 1,
-    
-    /// <summary>
-    /// Multi-pass with critique and polish - highest quality.
-    /// </summary>
-    Premium = 2,
-    
-    /// <summary>
-    /// User-defined custom pipeline.
-    /// </summary>
-    Custom = 3
-}
-
-/// <summary>
 /// Represents point of view options for writing.
 /// </summary>
 public enum PointOfView
@@ -227,6 +201,119 @@ public enum ChapterStatus
     /// Chapter is complete and polished.
     /// </summary>
     Complete = 5
+}
+
+/// <summary>
+/// Represents the type of a chapter.
+/// </summary>
+public enum ChapterType
+{
+    /// <summary>
+    /// Standard chapter.
+    /// </summary>
+    Standard = 0,
+    
+    /// <summary>
+    /// Prologue chapter.
+    /// </summary>
+    Prologue = 1,
+    
+    /// <summary>
+    /// Epilogue chapter.
+    /// </summary>
+    Epilogue = 2,
+    
+    /// <summary>
+    /// Interlude chapter.
+    /// </summary>
+    Interlude = 3,
+    
+    /// <summary>
+    /// Flashback chapter.
+    /// </summary>
+    Flashback = 4
+}
+
+/// <summary>
+/// Represents the role of a character in the story.
+/// </summary>
+public enum CharacterRole
+{
+    /// <summary>
+    /// Main character, hero of the story.
+    /// </summary>
+    Protagonist = 0,
+    
+    /// <summary>
+    /// Main opposing force.
+    /// </summary>
+    Antagonist = 1,
+    
+    /// <summary>
+    /// Important secondary character.
+    /// </summary>
+    Supporting = 2,
+    
+    /// <summary>
+    /// Less important character.
+    /// </summary>
+    Minor = 3,
+    
+    /// <summary>
+    /// Guide or teacher character.
+    /// </summary>
+    Mentor = 4,
+    
+    /// <summary>
+    /// Romantic interest.
+    /// </summary>
+    LoveInterest = 5,
+    
+    /// <summary>
+    /// Loyal companion.
+    /// </summary>
+    Sidekick = 6,
+    
+    /// <summary>
+    /// Story narrator.
+    /// </summary>
+    Narrator = 7
+}
+
+/// <summary>
+/// Represents the type of outline item.
+/// </summary>
+public enum OutlineItemType
+{
+    /// <summary>
+    /// Major section/act of the book.
+    /// </summary>
+    Act = 0,
+    
+    /// <summary>
+    /// Part/section within an act.
+    /// </summary>
+    Part = 1,
+    
+    /// <summary>
+    /// A chapter.
+    /// </summary>
+    Chapter = 2,
+    
+    /// <summary>
+    /// A scene within a chapter.
+    /// </summary>
+    Scene = 3,
+    
+    /// <summary>
+    /// A story beat within a scene.
+    /// </summary>
+    Beat = 4,
+    
+    /// <summary>
+    /// A note/comment in the outline.
+    /// </summary>
+    Note = 5
 }
 
 /// <summary>
