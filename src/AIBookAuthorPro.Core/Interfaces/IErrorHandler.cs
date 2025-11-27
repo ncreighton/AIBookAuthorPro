@@ -7,38 +7,38 @@ using AIBookAuthorPro.Core.Common;
 
 namespace AIBookAuthorPro.Core.Interfaces;
 
-/// <summary>
+/// &lt;summary&gt;
 /// Service for centralized error handling.
-/// </summary>
+/// &lt;/summary&gt;
 public interface IErrorHandler
 {
-    /// <summary>
+    /// &lt;summary&gt;
     /// Handles an exception with logging and optional user notification.
-    /// </summary>
+    /// &lt;/summary&gt;
     void Handle(Exception exception, string? context = null, bool showNotification = true);
 
-    /// <summary>
+    /// &lt;summary&gt;
     /// Handles an exception and returns a Result with the error.
-    /// </summary>
-    Result<T> HandleWithResult<T>(Exception exception, string? context = null, bool showNotification = true);
+    /// &lt;/summary&gt;
+    Result&lt;T&gt; HandleWithResult&lt;T&gt;(Exception exception, string? context = null, bool showNotification = true);
 
-    /// <summary>
+    /// &lt;summary&gt;
     /// Wraps an action with error handling.
-    /// </summary>
+    /// &lt;/summary&gt;
     Result TryExecute(Action action, string? context = null);
 
-    /// <summary>
+    /// &lt;summary&gt;
     /// Wraps a function with error handling.
-    /// </summary>
-    Result<T> TryExecute<T>(Func<T> func, string? context = null);
+    /// &lt;/summary&gt;
+    Result&lt;T&gt; TryExecute&lt;T&gt;(Func&lt;T&gt; func, string? context = null);
 
-    /// <summary>
+    /// &lt;summary&gt;
     /// Wraps an async action with error handling.
-    /// </summary>
-    Task<Result> TryExecuteAsync(Func<Task> action, string? context = null, CancellationToken ct = default);
+    /// &lt;/summary&gt;
+    Task&lt;Result&gt; TryExecuteAsync(Func&lt;Task&gt; action, string? context = null, CancellationToken ct = default);
 
-    /// <summary>
+    /// &lt;summary&gt;
     /// Wraps an async function with error handling.
-    /// </summary>
-    Task<Result<T>> TryExecuteAsync<T>(Func<Task<T>> func, string? context = null, CancellationToken ct = default);
+    /// &lt;/summary&gt;
+    Task&lt;Result&lt;T&gt;&gt; TryExecuteAsync&lt;T&gt;(Func&lt;Task&lt;T&gt;&gt; func, string? context = null, CancellationToken ct = default);
 }
