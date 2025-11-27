@@ -14,15 +14,15 @@ using Microsoft.Extensions.Logging;
 
 namespace AIBookAuthorPro.App;
 
-/// <summary>
+/// &lt;summary&gt;
 /// Application entry point.
-/// </summary>
+/// &lt;/summary&gt;
 public partial class App : Application
 {
     private IServiceProvider _serviceProvider = null!;
-    private ILogger<App>? _logger;
+    private ILogger&lt;App&gt;? _logger;
 
-    /// <inheritdoc />
+    /// &lt;inheritdoc /&gt;
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -32,14 +32,14 @@ public partial class App : Application
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
 
-        _logger = _serviceProvider.GetRequiredService<ILogger<App>>();
+        _logger = _serviceProvider.GetRequiredService&lt;ILogger&lt;App&gt;&gt;();
         _logger.LogInformation("AI Book Author Pro starting up...");
 
         // Set up global exception handling
         SetupExceptionHandling();
 
         // Show main window
-        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+        var mainWindow = _serviceProvider.GetRequiredService&lt;MainWindow&gt;();
         mainWindow.Show();
 
         _logger.LogInformation("Application started successfully");
@@ -48,88 +48,90 @@ public partial class App : Application
     private void ConfigureServices(IServiceCollection services)
     {
         // Logging
-        services.AddLogging(builder =>
+        services.AddLogging(builder =&gt;
         {
             builder.SetMinimumLevel(LogLevel.Debug);
             builder.AddDebug();
         });
 
         // Core Services
-        services.AddSingleton<IFileSystemService, FileSystemService>();
-        services.AddSingleton<ISettingsService, SettingsService>();
-        services.AddSingleton<IProjectService, ProjectService>();
-        services.AddSingleton<IExportService, ExportService>();
-        services.AddSingleton<INotificationService, NotificationService>();
-        services.AddSingleton<NotificationService>(); // Concrete type for NotificationHost
-        services.AddSingleton<IErrorHandler, ErrorHandler>();
+        services.AddSingleton&lt;IFileSystemService, FileSystemService&gt;();
+        services.AddSingleton&lt;ISettingsService, SettingsService&gt;();
+        services.AddSingleton&lt;IProjectService, ProjectService&gt;();
+        services.AddSingleton&lt;IExportService, ExportService&gt;();
+        services.AddSingleton&lt;INotificationService, NotificationService&gt;();
+        services.AddSingleton&lt;NotificationService&gt;(); // Concrete type for NotificationHost
+        services.AddSingleton&lt;IErrorHandler, ErrorHandler&gt;();
+        services.AddSingleton&lt;IFlowDocumentService, FlowDocumentService&gt;();
 
         // AI Services
-        services.AddSingleton<ITokenCounter, TokenCounter>();
-        services.AddSingleton<IAIProviderFactory, AIProviderFactory>();
-        services.AddTransient<IContextBuilderService, ContextBuilderService>();
-        services.AddTransient<IChapterGeneratorService, ChapterGeneratorService>();
+        services.AddSingleton&lt;ITokenCounter, TokenCounter&gt;();
+        services.AddSingleton&lt;IAIProviderFactory, AIProviderFactory&gt;();
+        services.AddTransient&lt;IContextBuilderService, ContextBuilderService&gt;();
+        services.AddTransient&lt;IChapterGeneratorService, ChapterGeneratorService&gt;();
+        services.AddTransient&lt;IGenerationPipelineService, GenerationPipelineService&gt;();
         
         // Register AI providers
-        services.AddTransient<AnthropicProvider>();
-        services.AddTransient<OpenAIProvider>();
-        services.AddTransient<GeminiProvider>();
+        services.AddTransient&lt;AnthropicProvider&gt;();
+        services.AddTransient&lt;OpenAIProvider&gt;();
+        services.AddTransient&lt;GeminiProvider&gt;();
 
         // ViewModels
-        services.AddSingleton<MainViewModel>();
-        services.AddTransient<ProjectDashboardViewModel>();
-        services.AddTransient<ChapterEditorViewModel>();
-        services.AddTransient<AIGenerationViewModel>();
-        services.AddTransient<SettingsViewModel>();
-        services.AddTransient<CharacterListViewModel>();
-        services.AddTransient<CharacterEditorViewModel>();
-        services.AddTransient<LocationListViewModel>();
-        services.AddTransient<LocationEditorViewModel>();
-        services.AddTransient<OutlineEditorViewModel>();
-        services.AddTransient<ExportViewModel>();
+        services.AddSingleton&lt;MainViewModel&gt;();
+        services.AddTransient&lt;ProjectDashboardViewModel&gt;();
+        services.AddTransient&lt;ChapterEditorViewModel&gt;();
+        services.AddTransient&lt;AIGenerationViewModel&gt;();
+        services.AddTransient&lt;SettingsViewModel&gt;();
+        services.AddTransient&lt;CharacterListViewModel&gt;();
+        services.AddTransient&lt;CharacterEditorViewModel&gt;();
+        services.AddTransient&lt;LocationListViewModel&gt;();
+        services.AddTransient&lt;LocationEditorViewModel&gt;();
+        services.AddTransient&lt;OutlineEditorViewModel&gt;();
+        services.AddTransient&lt;ExportViewModel&gt;();
 
         // Views
-        services.AddTransient<MainWindow>();
-        services.AddTransient<ProjectDashboardView>();
-        services.AddTransient<ChapterEditorView>();
-        services.AddTransient<AIGenerationDialog>();
-        services.AddTransient<SettingsView>();
-        services.AddTransient<CharacterListView>();
-        services.AddTransient<CharacterEditorView>();
-        services.AddTransient<LocationListView>();
-        services.AddTransient<LocationEditorView>();
-        services.AddTransient<OutlineEditorView>();
-        services.AddTransient<ExportDialogView>();
+        services.AddTransient&lt;MainWindow&gt;();
+        services.AddTransient&lt;ProjectDashboardView&gt;();
+        services.AddTransient&lt;ChapterEditorView&gt;();
+        services.AddTransient&lt;AIGenerationDialog&gt;();
+        services.AddTransient&lt;SettingsView&gt;();
+        services.AddTransient&lt;CharacterListView&gt;();
+        services.AddTransient&lt;CharacterEditorView&gt;();
+        services.AddTransient&lt;LocationListView&gt;();
+        services.AddTransient&lt;LocationEditorView&gt;();
+        services.AddTransient&lt;OutlineEditorView&gt;();
+        services.AddTransient&lt;ExportDialogView&gt;();
     }
 
     private void SetupExceptionHandling()
     {
         // Handle unhandled exceptions on the UI thread
-        DispatcherUnhandledException += (sender, args) =>
+        DispatcherUnhandledException += (sender, args) =&gt;
         {
             _logger?.LogError(args.Exception, "Unhandled UI exception");
 
-            var errorHandler = _serviceProvider.GetService<IErrorHandler>();
+            var errorHandler = _serviceProvider.GetService&lt;IErrorHandler&gt;();
             errorHandler?.Handle(args.Exception, "Unhandled UI Exception");
 
             args.Handled = true;
         };
 
         // Handle unhandled exceptions on background threads
-        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        AppDomain.CurrentDomain.UnhandledException += (sender, args) =&gt;
         {
             var exception = args.ExceptionObject as Exception;
             _logger?.LogCritical(exception, "Unhandled domain exception");
         };
 
         // Handle task exceptions
-        TaskScheduler.UnobservedTaskException += (sender, args) =>
+        TaskScheduler.UnobservedTaskException += (sender, args) =&gt;
         {
             _logger?.LogError(args.Exception, "Unobserved task exception");
             args.SetObserved();
         };
     }
 
-    /// <inheritdoc />
+    /// &lt;inheritdoc /&gt;
     protected override void OnExit(ExitEventArgs e)
     {
         _logger?.LogInformation("AI Book Author Pro shutting down...");
