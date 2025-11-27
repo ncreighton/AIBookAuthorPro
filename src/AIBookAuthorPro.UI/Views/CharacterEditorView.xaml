@@ -1,0 +1,445 @@
+<UserControl
+    x:Class="AIBookAuthorPro.UI.Views.CharacterEditorView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:converters="clr-namespace:AIBookAuthorPro.UI.Converters"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:CharacterEditorViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <converters:InitialsConverter x:Key="InitialsConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border
+            Grid.Row="0"
+            Background="{DynamicResource PrimaryHueMidBrush}"
+            Padding="24,16">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Character Avatar -->
+                <Ellipse
+                    Width="64"
+                    Height="64"
+                    Fill="{DynamicResource PrimaryHueDarkBrush}">
+                </Ellipse>
+                <TextBlock
+                    Text="{Binding Name, Converter={StaticResource InitialsConverter}}"
+                    FontSize="24"
+                    FontWeight="Bold"
+                    Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Width="64"
+                    TextAlignment="Center" />
+
+                <StackPanel Grid.Column="1" Margin="16,0">
+                    <TextBlock
+                        Text="{Binding Name, TargetNullValue='New Character'}"
+                        Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}" />
+                    <TextBlock
+                        Text="{Binding StatusMessage}"
+                        Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                        Opacity="0.8" />
+                </StackPanel>
+
+                <Button
+                    Grid.Column="2"
+                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                    Command="{Binding CancelCommand}"
+                    Foreground="{DynamicResource PrimaryHueMidForegroundBrush}">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <ScrollViewer
+            Grid.Row="1"
+            VerticalScrollBarVisibility="Auto"
+            Padding="24">
+
+            <StackPanel MaxWidth="700">
+                <!-- Basic Info Section -->
+                <TextBlock
+                    Text="Basic Information"
+                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                    Margin="0,0,0,16" />
+
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBox
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        materialDesign:HintAssist.Hint="Name *"
+                        Margin="0,0,8,16" />
+
+                    <ComboBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        ItemsSource="{Binding AvailableRoles}"
+                        SelectedItem="{Binding Role}"
+                        Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                        materialDesign:HintAssist.Hint="Role"
+                        Margin="8,0,0,16" />
+
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="{Binding Age, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        materialDesign:HintAssist.Hint="Age"
+                        Margin="0,0,8,16" />
+
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Text="{Binding Gender, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        materialDesign:HintAssist.Hint="Gender"
+                        Margin="8,0,0,16" />
+
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.ColumnSpan="2"
+                        Text="{Binding Occupation, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        materialDesign:HintAssist.Hint="Occupation"
+                        Margin="0,0,0,0" />
+                </Grid>
+
+                <!-- Physical Description -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock
+                        Text="Physical Description"
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        VerticalAlignment="Center" />
+
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding GenerateDescriptionCommand}"
+                        CommandParameter="physical"
+                        IsEnabled="{Binding IsGenerating, Converter={StaticResource InvertedBoolConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AutoFix" Margin="0,0,8,0" />
+                            <TextBlock Text="AI Generate" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <TextBox
+                    Text="{Binding PhysicalDescription, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Describe appearance, height, build, distinguishing features..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="100"
+                    Margin="0,0,0,24" />
+
+                <!-- Personality -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock
+                        Text="Personality"
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        VerticalAlignment="Center" />
+
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding GenerateDescriptionCommand}"
+                        CommandParameter="personality">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AutoFix" Margin="0,0,8,0" />
+                            <TextBlock Text="AI Generate" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <TextBox
+                    Text="{Binding Personality, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Describe personality traits, temperament, behavior patterns..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="100"
+                    Margin="0,0,0,24" />
+
+                <!-- Backstory -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock
+                        Text="Backstory"
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        VerticalAlignment="Center" />
+
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding GenerateDescriptionCommand}"
+                        CommandParameter="backstory">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AutoFix" Margin="0,0,8,0" />
+                            <TextBlock Text="AI Generate" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <TextBox
+                    Text="{Binding Backstory, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Character history, formative experiences, key life events..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="120"
+                    Margin="0,0,0,24" />
+
+                <!-- Goals & Fears -->
+                <TextBlock
+                    Text="Motivations"
+                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                    Margin="0,0,0,16" />
+
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox
+                        Text="{Binding Goals, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        materialDesign:HintAssist.Hint="Goals & Desires"
+                        TextWrapping="Wrap"
+                        AcceptsReturn="True"
+                        MinHeight="80"
+                        Margin="0,0,8,0" />
+
+                    <TextBox
+                        Grid.Column="1"
+                        Text="{Binding Fears, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        materialDesign:HintAssist.Hint="Fears & Weaknesses"
+                        TextWrapping="Wrap"
+                        AcceptsReturn="True"
+                        MinHeight="80"
+                        Margin="8,0,0,0" />
+                </Grid>
+
+                <!-- Quirks -->
+                <TextBlock
+                    Text="Quirks & Mannerisms"
+                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                    Margin="0,0,0,16" />
+
+                <TextBox
+                    Text="{Binding Quirks, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Speech patterns, habits, distinctive behaviors..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="80"
+                    Margin="0,0,0,24" />
+
+                <!-- Relationships -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock
+                        Text="Relationships"
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        VerticalAlignment="Center" />
+
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Command="{Binding AddRelationshipCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Margin="0,0,8,0" />
+                            <TextBlock Text="Add Relationship" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <ItemsControl ItemsSource="{Binding Relationships}" Margin="0,0,0,24">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <materialDesign:Card Margin="0,0,0,8" Padding="12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <ComboBox
+                                        ItemsSource="{Binding DataContext.AvailableCharacters, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        SelectedValue="{Binding CharacterId}"
+                                        SelectedValuePath="Id"
+                                        DisplayMemberPath="Name"
+                                        Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                        materialDesign:HintAssist.Hint="Character"
+                                        Margin="0,0,8,0" />
+
+                                    <TextBox
+                                        Grid.Column="1"
+                                        Text="{Binding RelationshipType, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                        materialDesign:HintAssist.Hint="Relationship (e.g., Friend, Enemy, Sibling)"
+                                        Margin="8,0,8,0" />
+
+                                    <Button
+                                        Grid.Column="2"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        Command="{Binding DataContext.RemoveRelationshipCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Foreground="{DynamicResource MaterialDesignValidationErrorBrush}">
+                                        <materialDesign:PackIcon Kind="Delete" />
+                                    </Button>
+                                </Grid>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Notes -->
+                <TextBlock
+                    Text="Additional Notes"
+                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                    Margin="0,0,0,16" />
+
+                <TextBox
+                    Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Any other notes about this character..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="100" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border
+            Grid.Row="2"
+            Background="{DynamicResource MaterialDesignCardBackground}"
+            Padding="24,16"
+            BorderThickness="0,1,0,0"
+            BorderBrush="{DynamicResource MaterialDesignDivider}">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:PackIcon
+                        Kind="Circle"
+                        Width="12"
+                        Height="12"
+                        Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                        Visibility="{Binding IsModified, Converter={StaticResource BoolToVisibility}}"
+                        Margin="0,0,8,0" />
+                    <TextBlock
+                        Text="Unsaved changes"
+                        Visibility="{Binding IsModified, Converter={StaticResource BoolToVisibility}}"
+                        Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Content="Cancel"
+                        Command="{Binding CancelCommand}"
+                        Margin="0,0,8,0" />
+
+                    <Button
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Command="{Binding SaveAndCloseCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0" />
+                            <TextBlock Text="Save" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Generating Overlay -->
+        <Border
+            Grid.RowSpan="3"
+            Background="#80000000"
+            Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVisibility}}">
+
+            <materialDesign:Card
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Padding="32">
+
+                <StackPanel HorizontalAlignment="Center">
+                    <ProgressBar
+                        Style="{StaticResource MaterialDesignCircularProgressBar}"
+                        IsIndeterminate="True"
+                        Width="48"
+                        Height="48"
+                        Margin="0,0,0,16" />
+
+                    <TextBlock
+                        Text="Generating..."
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        HorizontalAlignment="Center" />
+                </StackPanel>
+            </materialDesign:Card>
+        </Border>
+    </Grid>
+</UserControl>

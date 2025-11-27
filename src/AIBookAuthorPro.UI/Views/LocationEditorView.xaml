@@ -1,0 +1,301 @@
+<UserControl
+    x:Class="AIBookAuthorPro.UI.Views.LocationEditorView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:converters="clr-namespace:AIBookAuthorPro.UI.Converters"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:LocationEditorViewModel}"
+    d:DesignHeight="600"
+    d:DesignWidth="700">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border
+            Grid.Row="0"
+            Background="{DynamicResource PrimaryHueMidBrush}"
+            Padding="24,16">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Location Icon -->
+                <Border
+                    Width="64"
+                    Height="64"
+                    CornerRadius="32"
+                    Background="{DynamicResource PrimaryHueDarkBrush}">
+                    <materialDesign:PackIcon
+                        Kind="MapMarker"
+                        Width="32"
+                        Height="32"
+                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </Border>
+
+                <StackPanel Grid.Column="1" Margin="16,0">
+                    <TextBlock
+                        Text="{Binding Name, TargetNullValue='New Location'}"
+                        Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}" />
+                    <TextBlock
+                        Text="{Binding StatusMessage}"
+                        Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                        Opacity="0.8" />
+                </StackPanel>
+
+                <Button
+                    Grid.Column="2"
+                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                    Command="{Binding CancelCommand}"
+                    Foreground="{DynamicResource PrimaryHueMidForegroundBrush}">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Content -->
+        <ScrollViewer
+            Grid.Row="1"
+            VerticalScrollBarVisibility="Auto"
+            Padding="24">
+
+            <StackPanel MaxWidth="600">
+                <!-- Basic Info -->
+                <TextBlock
+                    Text="Basic Information"
+                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                    Margin="0,0,0,16" />
+
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox
+                        Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        materialDesign:HintAssist.Hint="Name *"
+                        Margin="0,0,8,0" />
+
+                    <ComboBox
+                        Grid.Column="1"
+                        ItemsSource="{Binding CommonTypes}"
+                        Text="{Binding Type, UpdateSourceTrigger=PropertyChanged}"
+                        IsEditable="True"
+                        Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                        materialDesign:HintAssist.Hint="Type"
+                        Margin="8,0,0,0" />
+                </Grid>
+
+                <!-- Description -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock
+                        Text="Description"
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        VerticalAlignment="Center" />
+
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding GenerateDescriptionCommand}"
+                        CommandParameter="description"
+                        IsEnabled="{Binding IsGenerating, Converter={StaticResource InvertedBoolConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AutoFix" Margin="0,0,8,0" />
+                            <TextBlock Text="AI Generate" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <TextBox
+                    Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Describe the location's appearance, layout, atmosphere..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="120"
+                    Margin="0,0,0,24" />
+
+                <!-- Sensory Details -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock
+                        Text="Sensory Details"
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        VerticalAlignment="Center" />
+
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding GenerateDescriptionCommand}"
+                        CommandParameter="sensory">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AutoFix" Margin="0,0,8,0" />
+                            <TextBlock Text="AI Generate" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <TextBox
+                    Text="{Binding SensoryDetails, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Sights, sounds, smells, textures that define this place..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="100"
+                    Margin="0,0,0,24" />
+
+                <!-- Significance -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock
+                        Text="Story Significance"
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        VerticalAlignment="Center" />
+
+                    <Button
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Command="{Binding GenerateDescriptionCommand}"
+                        CommandParameter="significance">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AutoFix" Margin="0,0,8,0" />
+                            <TextBlock Text="AI Generate" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <TextBox
+                    Text="{Binding Significance, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Why is this location important to the story? What happens here?"
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="80"
+                    Margin="0,0,0,24" />
+
+                <!-- Notes -->
+                <TextBlock
+                    Text="Additional Notes"
+                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                    Margin="0,0,0,16" />
+
+                <TextBox
+                    Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    materialDesign:HintAssist.Hint="Any other notes about this location..."
+                    TextWrapping="Wrap"
+                    AcceptsReturn="True"
+                    MinHeight="80" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border
+            Grid.Row="2"
+            Background="{DynamicResource MaterialDesignCardBackground}"
+            Padding="24,16"
+            BorderThickness="0,1,0,0"
+            BorderBrush="{DynamicResource MaterialDesignDivider}">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:PackIcon
+                        Kind="Circle"
+                        Width="12"
+                        Height="12"
+                        Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                        Visibility="{Binding IsModified, Converter={StaticResource BoolToVisibility}}"
+                        Margin="0,0,8,0" />
+                    <TextBlock
+                        Text="Unsaved changes"
+                        Visibility="{Binding IsModified, Converter={StaticResource BoolToVisibility}}"
+                        Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Content="Cancel"
+                        Command="{Binding CancelCommand}"
+                        Margin="0,0,8,0" />
+
+                    <Button
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Command="{Binding SaveAndCloseCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ContentSave" Margin="0,0,8,0" />
+                            <TextBlock Text="Save" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Generating Overlay -->
+        <Border
+            Grid.RowSpan="3"
+            Background="#80000000"
+            Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVisibility}}">
+
+            <materialDesign:Card
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Padding="32">
+
+                <StackPanel HorizontalAlignment="Center">
+                    <ProgressBar
+                        Style="{StaticResource MaterialDesignCircularProgressBar}"
+                        IsIndeterminate="True"
+                        Width="48"
+                        Height="48"
+                        Margin="0,0,0,16" />
+
+                    <TextBlock
+                        Text="Generating..."
+                        Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                        HorizontalAlignment="Center" />
+                </StackPanel>
+            </materialDesign:Card>
+        </Border>
+    </Grid>
+</UserControl>
