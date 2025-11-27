@@ -2,11 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <UseWPF>true</UseWPF>
     <RootNamespace>AIBookAuthorPro.Core</RootNamespace>
     <AssemblyName>AIBookAuthorPro.Core</AssemblyName>
     <Description>Core domain models and interfaces for AI Book Author Pro</Description>
   </PropertyGroup>
 
-  <!-- Core has NO external dependencies - pure domain layer -->
+  <!-- Note: Core has WPF reference only for FlowDocument interface definitions -->
+  <!-- No external NuGet dependencies - pure domain layer -->
 
 </Project>

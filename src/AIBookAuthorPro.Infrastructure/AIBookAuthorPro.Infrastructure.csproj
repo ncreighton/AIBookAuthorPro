@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <UseWPF>true</UseWPF>
     <RootNamespace>AIBookAuthorPro.Infrastructure</RootNamespace>
     <AssemblyName>AIBookAuthorPro.Infrastructure</AssemblyName>
     <Description>Infrastructure implementations for AI Book Author Pro</Description>
