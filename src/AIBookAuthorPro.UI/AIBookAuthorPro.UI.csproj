@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>AIBookAuthorPro.UI</RootNamespace>
+    <AssemblyName>AIBookAuthorPro.UI</AssemblyName>
+    <Description>UI components, ViewModels, and Views for AI Book Author Pro</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AIBookAuthorPro.Core\AIBookAuthorPro.Core.csproj" />
+    <ProjectReference Include="..\AIBookAuthorPro.Application\AIBookAuthorPro.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- MVVM -->
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    
+    <!-- Material Design UI -->
+    <PackageReference Include="MaterialDesignThemes" />
+    <PackageReference Include="MaterialDesignColors" />
+    
+    <!-- Logging -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+</Project>
