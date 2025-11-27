@@ -3,9 +3,11 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using AIBookAuthorPro.Core.Common;
+using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models.AI;
 using Microsoft.Extensions.Logging;
@@ -21,14 +23,25 @@ public abstract class BaseAIProvider : IAIProvider
     protected readonly ILogger Logger;
     protected readonly JsonSerializerOptions JsonOptions;
     
-    public abstract string Name { get; }
-    public abstract AIProviderType ProviderType { get; }
+    /// <inheritdoc />
+    public abstract string ProviderName { get; }
+    
+    /// <inheritdoc />
+    public abstract bool SupportsStreaming { get; }
+    
+    /// <inheritdoc />
+    public abstract int MaxContextTokens { get; }
+    
+    /// <inheritdoc />
+    public abstract bool IsConfigured { get; }
+    
+    /// <inheritdoc />
     public abstract IReadOnlyList<AIModelInfo> AvailableModels { get; }
 
     protected BaseAIProvider(HttpClient httpClient, ILogger logger)
     {
-        HttpClient = httpClient;
-        Logger = logger;
+        HttpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         JsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -37,49 +50,42 @@ public abstract class BaseAIProvider : IAIProvider
     }
 
     /// <inheritdoc />
-    public abstract Task<Result<AIGenerationResponse>> GenerateAsync(
-        AIGenerationRequest request,
+    public abstract Task<Result<GenerationResult>> GenerateAsync(
+        GenerationRequest request,
         CancellationToken cancellationToken = default);
 
     /// <inheritdoc />
-    public abstract IAsyncEnumerable<Result<AIStreamChunk>> GenerateStreamAsync(
-        AIGenerationRequest request,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default);
+    public abstract IAsyncEnumerable<string> StreamGenerateAsync(
+        GenerationRequest request,
+        CancellationToken cancellationToken = default);
 
     /// <inheritdoc />
-    public virtual Task<Result<bool>> ValidateApiKeyAsync(
-        string apiKey,
-        CancellationToken cancellationToken = default)
+    public virtual int EstimateTokenCount(string text)
     {
-        // Default implementation - providers should override for actual validation
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            return Task.FromResult(Result<bool>.Failure("API key is required"));
-        }
-        return Task.FromResult(Result<bool>.Success(true));
+        if (string.IsNullOrEmpty(text))
+            return 0;
+            
+        // Rough estimation: ~4 characters per token on average for English
+        return (int)Math.Ceiling(text.Length / 4.0);
     }
 
     /// <inheritdoc />
-    public virtual Task<Result<TokenUsage>> CountTokensAsync(
-        string text,
-        string model,
-        CancellationToken cancellationToken = default)
+    public virtual IReadOnlyList<string> GetAvailableModels()
     {
-        // Rough estimation: ~4 characters per token on average
-        var estimatedTokens = (int)Math.Ceiling(text.Length / 4.0);
-        return Task.FromResult(Result<TokenUsage>.Success(new TokenUsage
-        {
-            PromptTokens = estimatedTokens,
-            CompletionTokens = 0,
-            TotalTokens = estimatedTokens
-        }));
+        return AvailableModels.Select(m => m.ModelId).ToList();
     }
 
     /// <summary>
     /// Builds the system prompt for book generation based on context.
     /// </summary>
-    protected string BuildSystemPrompt(GenerationContext context)
+    protected string BuildSystemPrompt(GenerationContext? context)
     {
+        if (context == null)
+        {
+            return "You are an expert author and creative writing assistant specializing in book creation. " +
+                   "Your writing is engaging, vivid, and maintains consistent quality throughout.";
+        }
+
         var parts = new List<string>
         {
             "You are an expert author and creative writing assistant specializing in book creation.",
@@ -133,16 +139,11 @@ public abstract class BaseAIProvider : IAIProvider
     /// <summary>
     /// Validates the request before processing.
     /// </summary>
-    protected Result ValidateRequest(AIGenerationRequest request)
+    protected Result ValidateRequest(GenerationRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Prompt))
+        if (string.IsNullOrWhiteSpace(request.UserPrompt))
         {
-            return Result.Failure("Prompt is required");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Model))
-        {
-            return Result.Failure("Model is required");
+            return Result.Failure("User prompt is required");
         }
 
         if (request.MaxTokens <= 0)
@@ -156,35 +157,24 @@ public abstract class BaseAIProvider : IAIProvider
     /// <summary>
     /// Logs the generation request for debugging.
     /// </summary>
-    protected void LogRequest(AIGenerationRequest request)
+    protected void LogRequest(GenerationRequest request)
     {
         Logger.LogDebug(
-            "AI Generation Request - Model: {Model}, MaxTokens: {MaxTokens}, Temperature: {Temperature}, Streaming: {Streaming}",
-            request.Model,
+            "AI Generation Request - Provider: {Provider}, Mode: {Mode}, MaxTokens: {MaxTokens}, Temperature: {Temperature}",
+            ProviderName,
+            request.Mode,
             request.MaxTokens,
-            request.Temperature,
-            request.Stream);
+            request.Temperature);
     }
 
     /// <summary>
     /// Logs the generation response for debugging.
     /// </summary>
-    protected void LogResponse(AIGenerationResponse response)
+    protected void LogResponse(GenerationResult response)
     {
         Logger.LogDebug(
             "AI Generation Response - Tokens: {TotalTokens}, FinishReason: {FinishReason}",
             response.Usage?.TotalTokens,
             response.FinishReason);
     }
-}
-
-/// <summary>
-/// Stream chunk for incremental AI responses.
-/// </summary>
-public sealed class AIStreamChunk
-{
-    public string? Content { get; init; }
-    public bool IsComplete { get; init; }
-    public string? FinishReason { get; init; }
-    public TokenUsage? Usage { get; init; }
 }
