@@ -25,7 +25,7 @@ public sealed class GenerationRequest
     /// <summary>
     /// Gets or sets the AI provider to use.
     /// </summary>
-    public AIProviderType Provider { get; set; } = AIProviderType.Claude;
+    public AIProviderType Provider { get; set; } = AIProviderType.Anthropic;
 
     /// <summary>
     /// Gets or sets the specific model to use.
@@ -56,87 +56,6 @@ public sealed class GenerationRequest
     /// Gets or sets metadata for tracking/caching.
     /// </summary>
     public Dictionary<string, string> Metadata { get; set; } = [];
-}
-
-/// <summary>
-/// Represents context information for content generation.
-/// </summary>
-public sealed class GenerationContext
-{
-    /// <summary>
-    /// Gets or sets the project ID.
-    /// </summary>
-    public Guid ProjectId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the chapter ID being generated.
-    /// </summary>
-    public Guid? ChapterId { get; set; }
-
-    /// <summary>
-    /// Gets or sets the chapter number.
-    /// </summary>
-    public int ChapterNumber { get; set; }
-
-    /// <summary>
-    /// Gets or sets the book title.
-    /// </summary>
-    public string BookTitle { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the genre.
-    /// </summary>
-    public string Genre { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the target audience.
-    /// </summary>
-    public string? TargetAudience { get; set; }
-
-    /// <summary>
-    /// Gets or sets the writing style description.
-    /// </summary>
-    public string? Style { get; set; }
-
-    /// <summary>
-    /// Gets or sets the point of view.
-    /// </summary>
-    public PointOfView PointOfView { get; set; }
-
-    /// <summary>
-    /// Gets or sets the tense.
-    /// </summary>
-    public Tense Tense { get; set; }
-
-    /// <summary>
-    /// Gets or sets the summary of previous chapters.
-    /// </summary>
-    public string? PreviousSummary { get; set; }
-
-    /// <summary>
-    /// Gets or sets the current chapter outline.
-    /// </summary>
-    public string? ChapterOutline { get; set; }
-
-    /// <summary>
-    /// Gets or sets relevant character information.
-    /// </summary>
-    public List<string> CharacterContexts { get; set; } = [];
-
-    /// <summary>
-    /// Gets or sets relevant location information.
-    /// </summary>
-    public List<string> LocationContexts { get; set; } = [];
-
-    /// <summary>
-    /// Gets or sets custom notes/instructions.
-    /// </summary>
-    public string? CustomNotes { get; set; }
-
-    /// <summary>
-    /// Gets or sets the target word count.
-    /// </summary>
-    public int TargetWordCount { get; set; } = 3000;
 }
 
 /// <summary>
@@ -226,27 +145,70 @@ public sealed class TokenUsage
 }
 
 /// <summary>
-/// Represents a streaming chunk of generated content.
+/// Information about an AI model.
 /// </summary>
-public sealed class StreamingChunk
+public sealed class AIModelInfo
 {
     /// <summary>
-    /// Gets or sets the text content of this chunk.
+    /// Gets or sets the model ID.
     /// </summary>
-    public string Text { get; set; } = string.Empty;
+    public string ModelId { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets whether this is the final chunk.
+    /// Gets or sets the display name.
     /// </summary>
-    public bool IsFinal { get; set; }
+    public string DisplayName { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the finish reason (if final).
+    /// Gets or sets the provider type.
     /// </summary>
-    public string? FinishReason { get; set; }
+    public AIProviderType Provider { get; init; }
 
     /// <summary>
-    /// Gets or sets usage information (if final).
+    /// Gets or sets the maximum context window in tokens.
     /// </summary>
-    public TokenUsage? Usage { get; set; }
+    public int MaxContextTokens { get; init; }
+
+    /// <summary>
+    /// Gets or sets the maximum output tokens.
+    /// </summary>
+    public int MaxOutputTokens { get; init; }
+
+    /// <summary>
+    /// Gets or sets the cost per 1K input tokens in USD.
+    /// </summary>
+    public decimal InputCostPer1K { get; init; }
+
+    /// <summary>
+    /// Gets or sets the cost per 1K output tokens in USD.
+    /// </summary>
+    public decimal OutputCostPer1K { get; init; }
+
+    /// <summary>
+    /// Gets or sets whether this model supports streaming.
+    /// </summary>
+    public bool SupportsStreaming { get; init; } = true;
+
+    /// <summary>
+    /// Gets or sets the recommended use case.
+    /// </summary>
+    public string? RecommendedFor { get; init; }
+
+    /// <summary>
+    /// Gets or sets the model tier (fast, balanced, premium).
+    /// </summary>
+    public ModelTier Tier { get; init; } = ModelTier.Standard;
+}
+
+/// <summary>
+/// Model tier classification.
+/// </summary>
+public enum ModelTier
+{
+    /// <summary>Fast, economical models.</summary>
+    Fast = 0,
+    /// <summary>Balanced quality and speed.</summary>
+    Standard = 1,
+    /// <summary>Highest quality models.</summary>
+    Premium = 2
 }

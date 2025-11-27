@@ -13,6 +13,16 @@ namespace AIBookAuthorPro.Core.Models.AI;
 public sealed class GenerationContext
 {
     /// <summary>
+    /// Gets or sets the project ID.
+    /// </summary>
+    public Guid ProjectId { get; init; }
+
+    /// <summary>
+    /// Gets or sets the chapter ID.
+    /// </summary>
+    public Guid? ChapterId { get; init; }
+
+    /// <summary>
     /// Gets or sets the book title.
     /// </summary>
     public string BookTitle { get; init; } = string.Empty;
@@ -86,4 +96,9 @@ public sealed class GenerationContext
     /// Gets or sets any additional context.
     /// </summary>
     public string? AdditionalContext { get; init; }
+
+    /// <summary>
+    /// Gets or sets custom notes/instructions.
+    /// </summary>
+    public string? CustomNotes { get; init; }
 }
