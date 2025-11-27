@@ -82,9 +82,25 @@ public partial class App : Application
 
         // ViewModels
         services.AddTransient<MainViewModel>();
+        services.AddTransient<ChapterEditorViewModel>();
+        services.AddTransient<AIGenerationViewModel>();
+        services.AddTransient<ProjectDashboardViewModel>();
+        services.AddTransient<SettingsViewModel>();
+        services.AddTransient<CharacterListViewModel>();
+        services.AddTransient<CharacterEditorViewModel>();
+        services.AddTransient<LocationListViewModel>();
+        services.AddTransient<LocationEditorViewModel>();
+        services.AddTransient<ExportViewModel>();
 
         // Views
         services.AddTransient<MainWindow>();
+        services.AddTransient<ChapterEditorView>();
+        services.AddTransient<AIGenerationDialog>();
+        services.AddTransient<ProjectDashboardView>();
+        services.AddTransient<SettingsView>();
+        services.AddTransient<CharacterListView>();
+        services.AddTransient<LocationListView>();
+        services.AddTransient<ExportDialogView>();
     }
 
     /// <summary>

@@ -34,6 +34,7 @@ public static class DependencyInjection
 
         // Core services
         services.AddSingleton<IProjectService, ProjectService>();
+        services.AddSingleton<ISettingsService, SettingsService>();
 
         // FlowDocument service (WPF-specific, but lives in Infrastructure)
         services.AddSingleton<IFlowDocumentService, FlowDocumentService>();
@@ -44,8 +45,14 @@ public static class DependencyInjection
         // Generation pipeline service
         services.AddSingleton<IGenerationPipelineService, GenerationPipelineService>();
 
-        // Exporters
-        services.AddSingleton<IDocumentExporter, DocxExporter>();
+        // Export services
+        services.AddSingleton<IDocxExporter, DocxExporter>();
+        services.AddSingleton<IMarkdownExporter, MarkdownExporter>();
+        services.AddSingleton<IHtmlExporter, HtmlExporter>();
+        services.AddSingleton<IExportService, ExportService>();
+
+        // Legacy exporters (for backward compatibility)
+        services.AddSingleton<IDocumentExporter, Export.DocxExporter>();
         services.AddSingleton<DocumentExporterFactory>();
 
         return services;
