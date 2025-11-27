@@ -1,0 +1,513 @@
+<UserControl
+    x:Class="AIBookAuthorPro.UI.Views.AIGenerationDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:converters="clr-namespace:AIBookAuthorPro.UI.Converters"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:AIGenerationViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="900"
+    MinWidth="800"
+    MinHeight="600">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+        <converters:BoolToVisibilityConverter x:Key="InverseBoolToVisibility" Invert="True" />
+        <converters:CostDisplayConverter x:Key="CostDisplay" />
+        <converters:GenerationModeToIconConverter x:Key="ModeToIcon" />
+
+        <!-- Mode card style -->
+        <Style x:Key="ModeCardStyle" TargetType="materialDesign:Card">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Margin" Value="4" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp4" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border
+            Grid.Row="0"
+            Background="{DynamicResource PrimaryHueMidBrush}"
+            Padding="24,16">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel>
+                    <TextBlock
+                        Text="AI Chapter Generation"
+                        Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}" />
+                    <TextBlock
+                        Text="{Binding Chapter.Title, StringFormat='Generating: {0}'}"
+                        Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                        Foreground="{DynamicResource PrimaryHueMidForegroundBrush}"
+                        Opacity="0.8" />
+                </StackPanel>
+
+                <Button
+                    Grid.Column="1"
+                    Style="{StaticResource MaterialDesignIconForegroundButton}"
+                    Command="{Binding CloseCommand}"
+                    Foreground="{DynamicResource PrimaryHueMidForegroundBrush}">
+                    <materialDesign:PackIcon Kind="Close" Width="24" Height="24" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel: Configuration -->
+            <ScrollViewer
+                Grid.Column="0"
+                VerticalScrollBarVisibility="Auto"
+                Padding="16">
+
+                <StackPanel
+                    Visibility="{Binding IsGenerating, Converter={StaticResource InverseBoolToVisibility}}">
+
+                    <!-- Generation Mode Selection -->
+                    <TextBlock
+                        Text="GENERATION MODE"
+                        Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                        Foreground="{DynamicResource MaterialDesignBodyLight}"
+                        Margin="0,0,0,12" />
+
+                    <ItemsControl ItemsSource="{Binding AvailableModes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <RadioButton
+                                    GroupName="GenerationMode"
+                                    IsChecked="{Binding Mode, Mode=OneWay}"
+                                    Margin="0,0,0,8"
+                                    Style="{StaticResource MaterialDesignChoiceChipOutlineRadioButton}">
+                                    <RadioButton.Content>
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon
+                                                Kind="{Binding Name, Converter={StaticResource ModeToIcon}}"
+                                                Margin="0,0,8,0" />
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" FontWeight="Medium" />
+                                                <TextBlock
+                                                    Text="{Binding Description}"
+                                                    Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                    TextWrapping="Wrap"
+                                                    MaxWidth="200" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </RadioButton.Content>
+                                </RadioButton>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Separator Margin="0,16" />
+
+                    <!-- Provider Selection -->
+                    <TextBlock
+                        Text="AI PROVIDER"
+                        Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                        Foreground="{DynamicResource MaterialDesignBodyLight}"
+                        Margin="0,0,0,12" />
+
+                    <ComboBox
+                        ItemsSource="{Binding AvailableProviders}"
+                        SelectedValue="{Binding SelectedProvider}"
+                        SelectedValuePath="Type"
+                        DisplayMemberPath="Name"
+                        Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                        materialDesign:HintAssist.Hint="Provider"
+                        Margin="0,0,0,12">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon
+                                        Kind="{Binding IsConfigured, Converter={StaticResource BoolToVisibility}}"
+                                        Foreground="Green"
+                                        Visibility="{Binding IsConfigured, Converter={StaticResource BoolToVisibility}}"
+                                        Margin="0,0,8,0" />
+                                    <TextBlock Text="{Binding Name}" />
+                                    <TextBlock
+                                        Text=" (Not configured)"
+                                        Foreground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                                        Visibility="{Binding IsConfigured, Converter={StaticResource InverseBoolToVisibility}}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <!-- Model Selection -->
+                    <ComboBox
+                        ItemsSource="{Binding AvailableModels}"
+                        SelectedItem="{Binding SelectedModel}"
+                        Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                        materialDesign:HintAssist.Hint="Model"
+                        Margin="0,0,0,12" />
+
+                    <Separator Margin="0,16" />
+
+                    <!-- Advanced Options -->
+                    <Expander
+                        Header="Advanced Options"
+                        materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+
+                        <StackPanel Margin="0,12,0,0">
+                            <!-- Temperature -->
+                            <TextBlock
+                                Text="Creativity (Temperature)"
+                                Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                Margin="0,0,0,4" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="40" />
+                                </Grid.ColumnDefinitions>
+
+                                <Slider
+                                    Value="{Binding Temperature}"
+                                    Minimum="0"
+                                    Maximum="1"
+                                    TickFrequency="0.1"
+                                    IsSnapToTickEnabled="True" />
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="{Binding Temperature, StringFormat='{}{0:F1}'}"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right" />
+                            </Grid>
+
+                            <!-- Context Options -->
+                            <CheckBox
+                                Content="Include character context"
+                                IsChecked="{Binding IncludeCharacterContext}"
+                                Margin="0,12,0,0" />
+
+                            <CheckBox
+                                Content="Include location context"
+                                IsChecked="{Binding IncludeLocationContext}"
+                                Margin="0,4,0,0" />
+
+                            <CheckBox
+                                Content="Include previous chapter summary"
+                                IsChecked="{Binding IncludePreviousSummary}"
+                                Margin="0,4,0,0" />
+
+                            <!-- Custom Instructions -->
+                            <TextBox
+                                Text="{Binding CustomInstructions, UpdateSourceTrigger=PropertyChanged}"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                materialDesign:HintAssist.Hint="Custom instructions (optional)"
+                                TextWrapping="Wrap"
+                                AcceptsReturn="True"
+                                MinHeight="60"
+                                MaxHeight="100"
+                                Margin="0,12,0,0" />
+                        </StackPanel>
+                    </Expander>
+
+                    <Separator Margin="0,16" />
+
+                    <!-- Cost Estimate -->
+                    <materialDesign:Card
+                        Background="{DynamicResource MaterialDesignCardBackground}"
+                        Padding="12">
+
+                        <StackPanel>
+                            <TextBlock
+                                Text="COST ESTIMATE"
+                                Style="{StaticResource MaterialDesignOverlineTextBlock}"
+                                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                Margin="0,0,0,8" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="Context tokens:" Style="{StaticResource MaterialDesignCaptionTextBlock}" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="{Binding EstimatedContextTokens, StringFormat='{}{0:N0}'}"
+                                    Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                    HorizontalAlignment="Right" />
+
+                                <TextBlock Grid.Row="1" Text="Output tokens (est):" Style="{StaticResource MaterialDesignCaptionTextBlock}" />
+                                <TextBlock
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Text="{Binding CostEstimate.EstimatedOutputTokens, StringFormat='{}{0:N0}'}"
+                                    Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                    HorizontalAlignment="Right" />
+
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Text="Estimated cost:"
+                                    FontWeight="Medium"
+                                    Margin="0,8,0,0" />
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Grid.Column="1"
+                                    Text="{Binding EstimatedCost, Converter={StaticResource CostDisplay}}"
+                                    FontWeight="Medium"
+                                    Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                    HorizontalAlignment="Right"
+                                    Margin="0,8,0,0" />
+                            </Grid>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Right Panel: Output -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Generation Progress -->
+                <materialDesign:Card
+                    Grid.Row="0"
+                    Margin="16,16,16,8"
+                    Padding="16"
+                    Visibility="{Binding IsGenerating, Converter={StaticResource BoolToVisibility}}">
+
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <TextBlock
+                                    Text="{Binding CurrentPhase}"
+                                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}" />
+                                <TextBlock
+                                    Text="{Binding ElapsedTime, StringFormat='Elapsed: {0:mm\\:ss}'}"
+                                    Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                    Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            </StackPanel>
+
+                            <Button
+                                Grid.Column="1"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Content="Cancel"
+                                Command="{Binding CancelGenerationCommand}" />
+                        </Grid>
+
+                        <ProgressBar
+                            Value="{Binding Progress}"
+                            Maximum="100"
+                            Height="4"
+                            Margin="0,12,0,0" />
+
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Style="{StaticResource MaterialDesignCaptionTextBlock}">
+                                <Run Text="Words: " />
+                                <Run Text="{Binding GeneratedWordCount, StringFormat='{}{0:N0}'}" FontWeight="Medium" />
+                            </TextBlock>
+
+                            <TextBlock Grid.Column="1" Style="{StaticResource MaterialDesignCaptionTextBlock}" HorizontalAlignment="Center">
+                                <Run Text="Tokens: " />
+                                <Run Text="{Binding TokensUsed, StringFormat='{}{0:N0}'}" FontWeight="Medium" />
+                            </TextBlock>
+
+                            <TextBlock Grid.Column="2" Style="{StaticResource MaterialDesignCaptionTextBlock}" HorizontalAlignment="Right">
+                                <Run Text="Cost: " />
+                                <Run Text="{Binding EstimatedCost, Converter={StaticResource CostDisplay}}" FontWeight="Medium" />
+                            </TextBlock>
+                        </Grid>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Error Message -->
+                <materialDesign:Card
+                    Grid.Row="0"
+                    Margin="16,16,16,8"
+                    Padding="16"
+                    Background="{DynamicResource MaterialDesignValidationErrorBrush}"
+                    Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon
+                            Kind="AlertCircle"
+                            Foreground="White"
+                            Width="24"
+                            Height="24"
+                            Margin="0,0,12,0" />
+                        <TextBlock
+                            Text="{Binding ErrorMessage}"
+                            Foreground="White"
+                            VerticalAlignment="Center"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Output Preview -->
+                <materialDesign:Card
+                    Grid.Row="1"
+                    Margin="16,8,16,16"
+                    Padding="0">
+
+                    <Grid>
+                        <!-- Placeholder when empty -->
+                        <StackPanel
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Visibility="{Binding IsGenerating, Converter={StaticResource InverseBoolToVisibility}}">
+
+                            <materialDesign:PackIcon
+                                Kind="RobotOutline"
+                                Width="64"
+                                Height="64"
+                                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                HorizontalAlignment="Center"
+                                Visibility="{Binding IsComplete, Converter={StaticResource InverseBoolToVisibility}}" />
+
+                            <TextBlock
+                                Text="Configure settings and click Generate"
+                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                HorizontalAlignment="Center"
+                                Margin="0,16,0,0"
+                                Visibility="{Binding IsComplete, Converter={StaticResource InverseBoolToVisibility}}" />
+                        </StackPanel>
+
+                        <!-- Streaming Output -->
+                        <ScrollViewer
+                            VerticalScrollBarVisibility="Auto"
+                            Padding="24">
+
+                            <TextBlock
+                                Text="{Binding StreamingContent}"
+                                TextWrapping="Wrap"
+                                FontFamily="Georgia, Cambria, serif"
+                                FontSize="14"
+                                LineHeight="24" />
+                        </ScrollViewer>
+                    </Grid>
+                </materialDesign:Card>
+            </Grid>
+        </Grid>
+
+        <!-- Footer Actions -->
+        <Border
+            Grid.Row="2"
+            Background="{DynamicResource MaterialDesignCardBackground}"
+            Padding="16"
+            BorderThickness="0,1,0,0"
+            BorderBrush="{DynamicResource MaterialDesignDivider}">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Generation Stats (when complete) -->
+                <StackPanel
+                    Orientation="Horizontal"
+                    Visibility="{Binding IsComplete, Converter={StaticResource BoolToVisibility}}">
+
+                    <materialDesign:PackIcon
+                        Kind="CheckCircle"
+                        Foreground="{DynamicResource PrimaryHueMidBrush}"
+                        VerticalAlignment="Center"
+                        Margin="0,0,8,0" />
+
+                    <TextBlock VerticalAlignment="Center">
+                        <Run Text="Generated" />
+                        <Run Text="{Binding GeneratedWordCount, StringFormat='{}{0:N0}'}" FontWeight="Medium" />
+                        <Run Text="words in" />
+                        <Run Text="{Binding ElapsedTime, StringFormat='{0:mm\\:ss}'}" FontWeight="Medium" />
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <StackPanel
+                    Grid.Column="2"
+                    Orientation="Horizontal">
+
+                    <!-- Generate Button -->
+                    <Button
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Command="{Binding StartGenerationCommand}"
+                        Margin="0,0,8,0"
+                        Visibility="{Binding IsGenerating, Converter={StaticResource InverseBoolToVisibility}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Creation" Margin="0,0,8,0" />
+                            <TextBlock Text="GENERATE" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Regenerate Button -->
+                    <Button
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Content="REGENERATE"
+                        Command="{Binding RegenerateCommand}"
+                        Visibility="{Binding IsComplete, Converter={StaticResource BoolToVisibility}}"
+                        Margin="0,0,8,0" />
+
+                    <!-- Accept Button -->
+                    <Button
+                        Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                        Command="{Binding AcceptCommand}"
+                        IsEnabled="{Binding CanAccept}"
+                        Visibility="{Binding IsComplete, Converter={StaticResource BoolToVisibility}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Check" Margin="0,0,8,0" />
+                            <TextBlock Text="ACCEPT" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Cancel/Close Button -->
+                    <Button
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Content="CLOSE"
+                        Command="{Binding CloseCommand}"
+                        Margin="8,0,0,0" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
