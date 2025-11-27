@@ -25,9 +25,9 @@ public sealed class Character : Entity
     public string? Nickname { get; set; }
 
     /// <summary>
-    /// Gets or sets the character's role (protagonist, antagonist, supporting, etc.).
+    /// Gets or sets the character's role type.
     /// </summary>
-    public string Role { get; set; } = "Supporting";
+    public CharacterRole Role { get; set; } = CharacterRole.Supporting;
 
     /// <summary>
     /// Gets or sets whether this is a main character.
@@ -47,12 +47,12 @@ public sealed class Character : Entity
     /// <summary>
     /// Gets or sets the character's physical description.
     /// </summary>
-    public string? PhysicalDescription { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the character's personality traits.
     /// </summary>
-    public List<string> PersonalityTraits { get; set; } = [];
+    public List<string> Traits { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the character's backstory.
@@ -77,7 +77,7 @@ public sealed class Character : Entity
     /// <summary>
     /// Gets or sets the character's speaking style/voice notes.
     /// </summary>
-    public string? VoiceNotes { get; set; }
+    public string? Voice { get; set; }
 
     /// <summary>
     /// Gets or sets the character's occupation.
@@ -93,6 +93,16 @@ public sealed class Character : Entity
     /// Gets or sets a brief summary for quick reference.
     /// </summary>
     public string? QuickSummary { get; set; }
+
+    /// <summary>
+    /// Gets or sets an image path for the character.
+    /// </summary>
+    public string? ImagePath { get; set; }
+
+    /// <summary>
+    /// Gets or sets tags for categorization.
+    /// </summary>
+    public List<string> Tags { get; set; } = [];
 
     /// <summary>
     /// Gets the character's relationships with other characters.
@@ -136,8 +146,7 @@ public sealed class Character : Entity
             $"Name: {Name}"
         };
 
-        if (!string.IsNullOrWhiteSpace(Role))
-            parts.Add($"Role: {Role}");
+        parts.Add($"Role: {Role}");
         
         if (Age.HasValue)
             parts.Add($"Age: {Age}");
@@ -145,17 +154,17 @@ public sealed class Character : Entity
         if (!string.IsNullOrWhiteSpace(Gender))
             parts.Add($"Gender: {Gender}");
         
-        if (!string.IsNullOrWhiteSpace(PhysicalDescription))
-            parts.Add($"Appearance: {PhysicalDescription}");
+        if (!string.IsNullOrWhiteSpace(Description))
+            parts.Add($"Appearance: {Description}");
         
-        if (PersonalityTraits.Count > 0)
-            parts.Add($"Personality: {string.Join(", ", PersonalityTraits)}");
+        if (Traits.Count > 0)
+            parts.Add($"Personality: {string.Join(", ", Traits)}");
         
         if (!string.IsNullOrWhiteSpace(Goals))
             parts.Add($"Goals: {Goals}");
         
-        if (!string.IsNullOrWhiteSpace(VoiceNotes))
-            parts.Add($"Voice/Speech: {VoiceNotes}");
+        if (!string.IsNullOrWhiteSpace(Voice))
+            parts.Add($"Voice/Speech: {Voice}");
         
         if (!string.IsNullOrWhiteSpace(QuickSummary))
             parts.Add($"Summary: {QuickSummary}");
@@ -191,117 +200,26 @@ public sealed class CharacterRelationship
 }
 
 /// <summary>
-/// Represents a location or setting in the book.
+/// Character role types in a story.
 /// </summary>
-public sealed class Location : Entity
+public enum CharacterRole
 {
-    /// <summary>
-    /// Gets or sets the location name.
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the location type (city, room, forest, etc.).
-    /// </summary>
-    public string? LocationType { get; set; }
-
-    /// <summary>
-    /// Gets or sets the detailed description.
-    /// </summary>
-    public string? Description { get; set; }
-
-    /// <summary>
-    /// Gets or sets sensory details (sights, sounds, smells).
-    /// </summary>
-    public string? SensoryDetails { get; set; }
-
-    /// <summary>
-    /// Gets or sets the atmosphere/mood of this location.
-    /// </summary>
-    public string? Atmosphere { get; set; }
-
-    /// <summary>
-    /// Gets or sets historical or background information.
-    /// </summary>
-    public string? History { get; set; }
-
-    /// <summary>
-    /// Gets or sets significant features of this location.
-    /// </summary>
-    public List<string> Features { get; set; } = [];
-
-    /// <summary>
-    /// Gets or sets the parent location ID (for hierarchical locations).
-    /// </summary>
-    public Guid? ParentLocationId { get; set; }
-
-    /// <summary>
-    /// Gets or sets additional notes.
-    /// </summary>
-    public string? Notes { get; set; }
-
-    /// <summary>
-    /// Generates a context string for AI prompts.
-    /// </summary>
-    /// <returns>A formatted string describing the location for AI context.</returns>
-    public string ToContextString()
-    {
-        var parts = new List<string>
-        {
-            $"Location: {Name}"
-        };
-
-        if (!string.IsNullOrWhiteSpace(LocationType))
-            parts.Add($"Type: {LocationType}");
-        
-        if (!string.IsNullOrWhiteSpace(Description))
-            parts.Add($"Description: {Description}");
-        
-        if (!string.IsNullOrWhiteSpace(SensoryDetails))
-            parts.Add($"Sensory Details: {SensoryDetails}");
-        
-        if (!string.IsNullOrWhiteSpace(Atmosphere))
-            parts.Add($"Atmosphere: {Atmosphere}");
-        
-        if (Features.Count > 0)
-            parts.Add($"Features: {string.Join(", ", Features)}");
-
-        return string.Join("\n", parts);
-    }
-}
-
-/// <summary>
-/// Represents a research note for the project.
-/// </summary>
-public sealed class ResearchNote : Entity
-{
-    /// <summary>
-    /// Gets or sets the note title.
-    /// </summary>
-    public string Title { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the note content.
-    /// </summary>
-    public string Content { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the source/citation.
-    /// </summary>
-    public string? Source { get; set; }
-
-    /// <summary>
-    /// Gets or sets the source URL.
-    /// </summary>
-    public string? SourceUrl { get; set; }
-
-    /// <summary>
-    /// Gets or sets tags for categorization.
-    /// </summary>
-    public List<string> Tags { get; set; } = [];
-
-    /// <summary>
-    /// Gets or sets related chapter IDs.
-    /// </summary>
-    public List<Guid> RelatedChapterIds { get; set; } = [];
+    /// <summary>Main protagonist of the story.</summary>
+    Protagonist,
+    /// <summary>Main antagonist of the story.</summary>
+    Antagonist,
+    /// <summary>Major supporting character.</summary>
+    Supporting,
+    /// <summary>Minor character with limited role.</summary>
+    Minor,
+    /// <summary>Mentor figure.</summary>
+    Mentor,
+    /// <summary>Love interest.</summary>
+    LoveInterest,
+    /// <summary>Comic relief character.</summary>
+    ComicRelief,
+    /// <summary>Sidekick character.</summary>
+    Sidekick,
+    /// <summary>Background/extra character.</summary>
+    Background
 }
