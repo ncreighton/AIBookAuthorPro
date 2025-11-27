@@ -15,6 +15,7 @@
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
         <converters:InitialsConverter x:Key="InitialsConverter" />
+        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
     </UserControl.Resources>
 
     <Grid>
@@ -241,7 +242,7 @@
                     MinHeight="120"
                     Margin="0,0,0,24" />
 
-                <!-- Goals & Fears -->
+                <!-- Goals and Fears -->
                 <TextBlock
                     Text="Motivations"
                     Style="{StaticResource MaterialDesignHeadline6TextBlock}"
@@ -256,7 +257,7 @@
                     <TextBox
                         Text="{Binding Goals, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                        materialDesign:HintAssist.Hint="Goals & Desires"
+                        materialDesign:HintAssist.Hint="Goals and Desires"
                         TextWrapping="Wrap"
                         AcceptsReturn="True"
                         MinHeight="80"
@@ -266,7 +267,7 @@
                         Grid.Column="1"
                         Text="{Binding Fears, UpdateSourceTrigger=PropertyChanged}"
                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                        materialDesign:HintAssist.Hint="Fears & Weaknesses"
+                        materialDesign:HintAssist.Hint="Fears and Weaknesses"
                         TextWrapping="Wrap"
                         AcceptsReturn="True"
                         MinHeight="80"
@@ -275,7 +276,7 @@
 
                 <!-- Quirks -->
                 <TextBlock
-                    Text="Quirks & Mannerisms"
+                    Text="Quirks and Mannerisms"
                     Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                     Margin="0,0,0,16" />
 
@@ -335,7 +336,7 @@
                                         Grid.Column="1"
                                         Text="{Binding RelationshipType, UpdateSourceTrigger=PropertyChanged}"
                                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                        materialDesign:HintAssist.Hint="Relationship (e.g., Friend, Enemy, Sibling)"
+                                        materialDesign:HintAssist.Hint="Type (Friend, Enemy, Sibling)"
                                         Margin="8,0,8,0" />
 
                                     <Button
