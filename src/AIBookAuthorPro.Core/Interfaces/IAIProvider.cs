@@ -34,6 +34,11 @@ public interface IAIProvider
     bool IsConfigured { get; }
 
     /// <summary>
+    /// Gets the available models for this provider.
+    /// </summary>
+    IReadOnlyList<AIModelInfo> AvailableModels { get; }
+
+    /// <summary>
     /// Generates content based on the provided request.
     /// </summary>
     /// <param name="request">The generation request.</param>
@@ -48,8 +53,8 @@ public interface IAIProvider
     /// </summary>
     /// <param name="request">The generation request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An async enumerable of streaming chunks.</returns>
-    IAsyncEnumerable<StreamingChunk> GenerateStreamingAsync(
+    /// <returns>An async enumerable of content chunks.</returns>
+    IAsyncEnumerable<string> StreamGenerateAsync(
         GenerationRequest request,
         CancellationToken cancellationToken = default);
 
@@ -78,6 +83,19 @@ public interface IAIProviderFactory
     /// <param name="providerType">The provider type.</param>
     /// <returns>The AI provider instance.</returns>
     IAIProvider GetProvider(Enums.AIProviderType providerType);
+
+    /// <summary>
+    /// Gets an AI provider by model ID string.
+    /// </summary>
+    /// <param name="modelId">The model identifier.</param>
+    /// <returns>The AI provider instance.</returns>
+    IAIProvider GetProvider(string modelId);
+
+    /// <summary>
+    /// Gets the default AI provider.
+    /// </summary>
+    /// <returns>The default provider.</returns>
+    IAIProvider GetDefaultProvider();
 
     /// <summary>
     /// Gets all available providers.
