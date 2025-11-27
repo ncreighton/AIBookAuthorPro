@@ -3,92 +3,77 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
-using System.IO;
 using System.Windows;
-using System.Windows.Threading;
 using AIBookAuthorPro.Core.Interfaces;
-using AIBookAuthorPro.Infrastructure;
-using AIBookAuthorPro.Infrastructure.AI;
+using AIBookAuthorPro.Infrastructure.Services;
 using AIBookAuthorPro.UI.ViewModels;
 using AIBookAuthorPro.UI.Views;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Serilog;
 
 namespace AIBookAuthorPro.App;
 
 /// <summary>
-/// Application entry point with dependency injection and configuration setup.
+/// Application entry point.
 /// </summary>
 public partial class App : Application
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IConfiguration _configuration;
+    private IServiceProvider _serviceProvider = null!;
+    private ILogger<App>? _logger;
 
-    public App()
+    /// <inheritdoc />
+    protected override void OnStartup(StartupEventArgs e)
     {
-        // Build configuration
-        _configuration = BuildConfiguration();
+        base.OnStartup(e);
 
-        // Configure Serilog
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(_configuration)
-            .Enrich.FromLogContext()
-            .WriteTo.Debug()
-            .WriteTo.File(
-                Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "AIBookAuthorPro",
-                    "logs",
-                    "app-.log"),
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 7)
-            .CreateLogger();
-
-        Log.Information("AI Book Author Pro starting...");
-
-        // Build service provider
+        // Configure services
         var services = new ServiceCollection();
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
+
+        _logger = _serviceProvider.GetRequiredService<ILogger<App>>();
+        _logger.LogInformation("AI Book Author Pro starting up...");
+
+        // Set up global exception handling
+        SetupExceptionHandling();
+
+        // Show main window
+        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+
+        _logger.LogInformation("Application started successfully");
     }
 
-    /// <summary>
-    /// Configures application services.
-    /// </summary>
     private void ConfigureServices(IServiceCollection services)
     {
-        // Configuration
-        services.AddSingleton(_configuration);
-
         // Logging
         services.AddLogging(builder =>
         {
-            builder.ClearProviders();
-            builder.AddSerilog(dispose: true);
+            builder.SetMinimumLevel(LogLevel.Debug);
+            builder.AddDebug();
         });
 
-        // AI Provider settings
-        services.Configure<AnthropicSettings>(
-            _configuration.GetSection("AIProviders:Anthropic"));
-        services.Configure<OpenAISettings>(
-            _configuration.GetSection("AIProviders:OpenAI"));
-        services.Configure<GeminiSettings>(
-            _configuration.GetSection("AIProviders:Gemini"));
+        // Core Services
+        services.AddSingleton<IFileSystemService, FileSystemService>();
+        services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IProjectService, ProjectService>();
+        services.AddSingleton<IExportService, ExportService>();
+        services.AddSingleton<INotificationService, NotificationService>();
+        services.AddSingleton<NotificationService>();
+        services.AddSingleton<IErrorHandler, ErrorHandler>();
 
-        // Infrastructure services
-        services.AddInfrastructure();
+        // AI Services
+        services.AddSingleton<ITokenCounter, TokenCounter>();
+        services.AddTransient<IAIProvider, ClaudeProvider>();
+        services.AddTransient<IAIProviderFactory, AIProviderFactory>();
+        services.AddTransient<IChapterGeneratorService, ChapterGeneratorService>();
+        services.AddTransient<IContextBuilder, ContextBuilder>();
 
-        // ViewModels - Core
-        services.AddTransient<MainViewModel>();
-        
-        // ViewModels - Editor
+        // ViewModels
+        services.AddSingleton<MainViewModel>();
+        services.AddTransient<ProjectDashboardViewModel>();
         services.AddTransient<ChapterEditorViewModel>();
         services.AddTransient<AIGenerationViewModel>();
-        
-        // ViewModels - Project Management (Phase 4)
-        services.AddTransient<ProjectDashboardViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<CharacterListViewModel>();
         services.AddTransient<CharacterEditorViewModel>();
@@ -97,15 +82,11 @@ public partial class App : Application
         services.AddTransient<OutlineEditorViewModel>();
         services.AddTransient<ExportViewModel>();
 
-        // Views - Core
+        // Views
         services.AddTransient<MainWindow>();
-        
-        // Views - Editor
+        services.AddTransient<ProjectDashboardView>();
         services.AddTransient<ChapterEditorView>();
         services.AddTransient<AIGenerationDialog>();
-        
-        // Views - Project Management (Phase 4)
-        services.AddTransient<ProjectDashboardView>();
         services.AddTransient<SettingsView>();
         services.AddTransient<CharacterListView>();
         services.AddTransient<CharacterEditorView>();
@@ -115,106 +96,45 @@ public partial class App : Application
         services.AddTransient<ExportDialogView>();
     }
 
-    /// <summary>
-    /// Builds the configuration from appsettings files and environment variables.
-    /// </summary>
-    private static IConfiguration BuildConfiguration()
+    private void SetupExceptionHandling()
     {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile(
-                $"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json",
-                optional: true,
-                reloadOnChange: true)
-            .AddEnvironmentVariables("AIBOOKAUTHOR_");
-
-        // Check for user secrets in development
-        var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-        if (env == "Development")
+        // Handle unhandled exceptions on the UI thread
+        DispatcherUnhandledException += (sender, args) =>
         {
-            // User secrets would be added here for development
-        }
+            _logger?.LogError(args.Exception, "Unhandled UI exception");
 
-        return builder.Build();
+            var errorHandler = _serviceProvider.GetService<IErrorHandler>();
+            errorHandler?.Handle(args.Exception, "Unhandled UI Exception");
+
+            args.Handled = true;
+        };
+
+        // Handle unhandled exceptions on background threads
+        AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+        {
+            var exception = args.ExceptionObject as Exception;
+            _logger?.LogCritical(exception, "Unhandled domain exception");
+        };
+
+        // Handle task exceptions
+        TaskScheduler.UnobservedTaskException += (sender, args) =>
+        {
+            _logger?.LogError(args.Exception, "Unobserved task exception");
+            args.SetObserved();
+        };
     }
 
-    /// <summary>
-    /// Handles application startup.
-    /// </summary>
-    protected override void OnStartup(StartupEventArgs e)
-    {
-        base.OnStartup(e);
-
-        // Set up global exception handling
-        DispatcherUnhandledException += App_DispatcherUnhandledException;
-        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-        TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
-
-        try
-        {
-            // Create and show main window
-            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-            mainWindow.Show();
-
-            Log.Information("AI Book Author Pro started successfully");
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "Application failed to start");
-            MessageBox.Show(
-                $"Failed to start application:\n\n{ex.Message}",
-                "Startup Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-            Shutdown(1);
-        }
-    }
-
-    /// <summary>
-    /// Handles application exit.
-    /// </summary>
+    /// <inheritdoc />
     protected override void OnExit(ExitEventArgs e)
     {
-        Log.Information("AI Book Author Pro shutting down...");
-        Log.CloseAndFlush();
-        base.OnExit(e);
-    }
+        _logger?.LogInformation("AI Book Author Pro shutting down...");
 
-    /// <summary>
-    /// Handles unhandled exceptions on the dispatcher thread.
-    /// </summary>
-    private void App_DispatcherUnhandledException(object sender,
-        DispatcherUnhandledExceptionEventArgs e)
-    {
-        Log.Error(e.Exception, "Unhandled exception on dispatcher thread");
-
-        MessageBox.Show(
-            $"An unexpected error occurred:\n\n{e.Exception.Message}\n\nThe application will attempt to continue.",
-            "Error",
-            MessageBoxButton.OK,
-            MessageBoxImage.Error);
-
-        e.Handled = true;
-    }
-
-    /// <summary>
-    /// Handles unhandled exceptions from non-UI threads.
-    /// </summary>
-    private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-        if (e.ExceptionObject is Exception ex)
+        // Dispose service provider if it implements IDisposable
+        if (_serviceProvider is IDisposable disposable)
         {
-            Log.Fatal(ex, "Fatal unhandled exception");
+            disposable.Dispose();
         }
-    }
 
-    /// <summary>
-    /// Handles unobserved task exceptions.
-    /// </summary>
-    private void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
-    {
-        Log.Error(e.Exception, "Unobserved task exception");
-        e.SetObserved();
+        base.OnExit(e);
     }
 }
