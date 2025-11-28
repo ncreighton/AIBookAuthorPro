@@ -32,7 +32,8 @@ public class TokenCounterTests
     public void EstimateTokens_NullString_ShouldReturnZero()
     {
         // Act
-        var result = _tokenCounter.EstimateTokens(null!);
+        string? nullText = null;
+        var result = _tokenCounter.EstimateTokens(nullText);
 
         // Assert
         result.Should().Be(0);
@@ -117,7 +118,7 @@ public class TokenCounterTests
         var model = "claude-sonnet-4-20250514";
 
         // Act
-        var cost = _tokenCounter.EstimateCost(inputTokens, outputTokens, model);
+        var cost = _tokenCounter.EstimateCost(model, inputTokens, outputTokens);
 
         // Assert
         cost.Should().BeGreaterThan(0);
