@@ -9,26 +9,26 @@ using Microsoft.Extensions.DependencyInjection;
 namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
 
 /// <summary>
-/// Extension methods for registering guided creation services.
+/// Extension methods for registering Guided Creation services.
 /// </summary>
 public static class GuidedCreationServiceExtensions
 {
     /// <summary>
-    /// Adds all guided creation services to the service collection.
+    /// Adds all Guided Creation services to the service collection.
     /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddGuidedCreationServices(this IServiceCollection services)
     {
-        // Core services
-        services.AddScoped<IPromptAnalysisService, PromptAnalysisService>();
-        services.AddScoped<IBlueprintGeneratorService, BlueprintGeneratorService>();
-        services.AddScoped<IQualityEvaluationService, QualityEvaluationService>();
-        services.AddScoped<IContinuityVerificationService, ContinuityVerificationService>();
-        services.AddScoped<IGenerationContextBuilder, GenerationContextBuilder>();
-        services.AddScoped<IBookGenerationOrchestrator, BookGenerationOrchestrator>();
-        services.AddScoped<IGuidedCreationWizardService, GuidedCreationWizardService>();
-        
-        // Pipeline
-        services.AddScoped<IChapterGenerationPipeline, ChapterGenerationPipeline>();
+        // Core Guided Creation Services
+        services.AddTransient<IPromptAnalysisService, PromptAnalysisService>();
+        services.AddTransient<IBlueprintGeneratorService, BlueprintGeneratorService>();
+        services.AddTransient<IBookGenerationOrchestrator, BookGenerationOrchestrator>();
+        services.AddTransient<IQualityEvaluationService, QualityEvaluationService>();
+        services.AddTransient<IContinuityVerificationService, ContinuityVerificationService>();
+        services.AddTransient<IGenerationContextBuilder, GenerationContextBuilder>();
+        services.AddTransient<IGuidedCreationWizardService, GuidedCreationWizardService>();
+        services.AddTransient<IChapterGenerationPipeline, ChapterGenerationPipeline>();
 
         return services;
     }

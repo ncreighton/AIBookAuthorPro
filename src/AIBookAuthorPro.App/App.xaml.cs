@@ -7,8 +7,13 @@ using System.Windows;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Infrastructure.AI;
 using AIBookAuthorPro.Infrastructure.Services;
+using AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
+using AIBookAuthorPro.Application.Services.GuidedCreation;
 using AIBookAuthorPro.UI.ViewModels;
+using AIBookAuthorPro.UI.ViewModels.GuidedCreation;
 using AIBookAuthorPro.UI.Views;
+using AIBookAuthorPro.UI.Views.GuidedCreation;
+using AIBookAuthorPro.UI.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Application = System.Windows.Application;
@@ -116,9 +121,14 @@ public partial class App : Application
         services.AddTransient<OpenAIProvider>();
         services.AddTransient<GeminiProvider>();
 
+        Console.WriteLine("APP: Registering Guided Creation services");
+        
+        // Guided Creation Services
+        services.AddGuidedCreationServices();
+
         Console.WriteLine("APP: Registering ViewModels");
         
-        // ViewModels
+        // Core ViewModels
         services.AddSingleton<MainViewModel>();
         services.AddTransient<ProjectDashboardViewModel>();
         services.AddTransient<ChapterEditorViewModel>();
@@ -130,11 +140,19 @@ public partial class App : Application
         services.AddTransient<LocationEditorViewModel>();
         services.AddTransient<OutlineEditorViewModel>();
         services.AddTransient<ExportViewModel>();
+        
+        // Guided Creation ViewModels
+        services.AddTransient<GuidedCreationWizardViewModel>();
+        services.AddTransient<PromptEntryViewModel>();
+        services.AddTransient<PromptAnalysisViewModel>();
+        services.AddTransient<BlueprintReviewViewModel>();
+        services.AddTransient<GenerationDashboardViewModel>();
 
         Console.WriteLine("APP: Registering Views");
         
-        // Views
+        // Core Views
         services.AddTransient<MainWindow>();
+        services.AddTransient<QuickStartView>();
         services.AddTransient<ProjectDashboardView>();
         services.AddTransient<ChapterEditorView>();
         services.AddTransient<AIGenerationDialog>();
@@ -145,6 +163,13 @@ public partial class App : Application
         services.AddTransient<LocationEditorView>();
         services.AddTransient<OutlineEditorView>();
         services.AddTransient<ExportDialogView>();
+        
+        // Guided Creation Views
+        services.AddTransient<GuidedCreationWizardView>();
+        services.AddTransient<PromptEntryView>();
+        services.AddTransient<PromptAnalysisView>();
+        services.AddTransient<BlueprintReviewView>();
+        services.AddTransient<GenerationDashboardView>();
         
         Console.WriteLine("APP: ConfigureServices complete");
     }
