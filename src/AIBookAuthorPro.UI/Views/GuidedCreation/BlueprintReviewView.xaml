@@ -1,0 +1,333 @@
+<UserControl
+    x:Class="AIBookAuthorPro.UI.Views.GuidedCreation.BlueprintReviewView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels.GuidedCreation"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:BlueprintReviewViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="1000">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Section Navigation -->
+        <Border Grid.Column="0" 
+                Background="{DynamicResource MaterialDesignCardBackground}"
+                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                BorderThickness="0,0,1,0">
+            <StackPanel Margin="16">
+                <TextBlock Text="Blueprint Sections"
+                           Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                           Margin="0,0,0,16"/>
+
+                <ItemsControl ItemsSource="{Binding SectionItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding DataContext.SelectSectionCommand, 
+                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding Section}"
+                                    HorizontalContentAlignment="Stretch"
+                                    Padding="12" Margin="0,4">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <materialDesign:PackIcon Kind="{Binding Icon}" 
+                                                             Width="20" Height="20"
+                                                             VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                        <TextBlock Text="{Binding DisplayName}"/>
+                                        <TextBlock Text="{Binding Description}" 
+                                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                   Opacity="0.7"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Validation Status -->
+                <Border Margin="0,24,0,0" Padding="12" CornerRadius="8"
+                        Background="{DynamicResource MaterialDesignDivider}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="{Binding HasValidationIssues, 
+                                Converter={StaticResource BoolToIconConverter}, 
+                                ConverterParameter='AlertCircle|CheckCircle'}"
+                                Foreground="{Binding HasValidationIssues, 
+                                    Converter={StaticResource BoolToColorConverter}}"
+                                Width="20" Height="20"/>
+                            <TextBlock Text="{Binding HasValidationIssues, 
+                                Converter={StaticResource BoolToStringConverter}, 
+                                ConverterParameter='Issues Found|Valid'}"
+                                Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <Button Content="Validate Blueprint" 
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Command="{Binding ValidateBlueprintCommand}"
+                                Margin="0,12,0,0" HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Approve Button -->
+                <Button Content="Approve Blueprint" 
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Command="{Binding ApproveBlueprintCommand}"
+                        Margin="0,16,0,0"
+                        IsEnabled="{Binding CanApprove}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsApproved}" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+                                    <Setter Property="Content" Value="✓ Approved"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Section Content -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="24">
+            <ContentControl>
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Style.Triggers>
+                            <!-- Identity Section -->
+                            <DataTrigger Binding="{Binding SelectedSection}" Value="Identity">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <StackPanel>
+                                            <TextBlock Text="Book Identity" 
+                                                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                                       Margin="0,0,0,24"/>
+
+                                            <materialDesign:Card Padding="24" Margin="0,0,0,16">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock Text="Title" Style="{StaticResource MaterialDesignOverlineTextBlock}"/>
+                                                            <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}"
+                                                                    Command="{Binding EditTitleCommand}" ToolTip="Edit">
+                                                                <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
+                                                            </Button>
+                                                        </Grid>
+                                                        <TextBlock Text="{Binding Title}" 
+                                                                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                                                        <TextBlock Text="Premise" Style="{StaticResource MaterialDesignOverlineTextBlock}"/>
+                                                        <TextBlock Text="{Binding Premise}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Row="2" Margin="0,0,0,16">
+                                                        <TextBlock Text="Logline" Style="{StaticResource MaterialDesignOverlineTextBlock}"/>
+                                                        <TextBlock Text="{Binding Logline}" TextWrapping="Wrap" 
+                                                                   FontStyle="Italic" Margin="0,4,0,0"/>
+                                                    </StackPanel>
+
+                                                    <Grid Grid.Row="3">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel>
+                                                            <TextBlock Text="Genre" Style="{StaticResource MaterialDesignOverlineTextBlock}"/>
+                                                            <TextBlock Text="{Binding Genre}" Margin="0,4,0,0"/>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="1">
+                                                            <TextBlock Text="Target Word Count" Style="{StaticResource MaterialDesignOverlineTextBlock}"/>
+                                                            <TextBlock Text="{Binding TargetWordCount, StringFormat={}{0:N0} words}" Margin="0,4,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Grid>
+                                            </materialDesign:Card>
+                                        </StackPanel>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+
+                            <!-- Structure Section -->
+                            <DataTrigger Binding="{Binding SelectedSection}" Value="Structure">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <StackPanel>
+                                            <TextBlock Text="Book Structure" 
+                                                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                                       Margin="0,0,0,24"/>
+
+                                            <!-- Summary Stats -->
+                                            <Grid Margin="0,0,0,24">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <materialDesign:Card Padding="16" Margin="0,0,8,0">
+                                                    <StackPanel HorizontalAlignment="Center">
+                                                        <TextBlock Text="{Binding Acts.Count}" 
+                                                                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                                                                   HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="Acts" Opacity="0.7" HorizontalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </materialDesign:Card>
+
+                                                <materialDesign:Card Grid.Column="1" Padding="16" Margin="8,0">
+                                                    <StackPanel HorizontalAlignment="Center">
+                                                        <TextBlock Text="{Binding TotalChapters}" 
+                                                                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                                                                   HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="Chapters" Opacity="0.7" HorizontalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </materialDesign:Card>
+
+                                                <materialDesign:Card Grid.Column="2" Padding="16" Margin="8,0,0,0">
+                                                    <StackPanel HorizontalAlignment="Center">
+                                                        <TextBlock Text="{Binding TargetWordCount, StringFormat={}{0:N0}}" 
+                                                                   Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                                                                   HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="Words" Opacity="0.7" HorizontalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </materialDesign:Card>
+                                            </Grid>
+
+                                            <!-- Acts -->
+                                            <ItemsControl ItemsSource="{Binding Acts}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <materialDesign:Card Padding="20" Margin="0,0,0,16">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{Binding Name}" 
+                                                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"/>
+                                                                    <TextBlock Text="{Binding Purpose}" 
+                                                                               Opacity="0.7" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                                        <materialDesign:Chip Content="{Binding ChapterCount, StringFormat={}{0} chapters}"/>
+                                                                        <materialDesign:Chip Content="{Binding PercentageOfBook, StringFormat={}{0}% of book}" Margin="8,0,0,0"/>
+                                                                    </StackPanel>
+                                                                </StackPanel>
+
+                                                                <TextBlock Grid.Column="1" 
+                                                                           Text="{Binding PercentageOfBook, StringFormat={}{0}%}"
+                                                                           Style="{StaticResource MaterialDesignHeadline4TextBlock}"
+                                                                           Opacity="0.3" VerticalAlignment="Center"/>
+                                                            </Grid>
+                                                        </materialDesign:Card>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <!-- Pacing -->
+                                            <materialDesign:Card Padding="20">
+                                                <StackPanel>
+                                                    <TextBlock Text="Pacing Strategy" 
+                                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"/>
+                                                    <TextBlock Text="{Binding PacingStrategy}" 
+                                                               TextWrapping="Wrap" Margin="0,8,0,0"/>
+                                                </StackPanel>
+                                            </materialDesign:Card>
+                                        </StackPanel>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+
+                            <!-- Characters Section -->
+                            <DataTrigger Binding="{Binding SelectedSection}" Value="Characters">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <StackPanel>
+                                            <TextBlock Text="Characters" 
+                                                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                                       Margin="0,0,0,24"/>
+
+                                            <ItemsControl ItemsSource="{Binding Characters}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <materialDesign:Card Padding="20" Margin="0,0,0,16">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <Border Width="60" Height="60" CornerRadius="30"
+                                                                        Background="{DynamicResource PrimaryHueLightBrush}">
+                                                                    <materialDesign:PackIcon Kind="Person" 
+                                                                                             Width="32" Height="32"
+                                                                                             HorizontalAlignment="Center"
+                                                                                             VerticalAlignment="Center"/>
+                                                                </Border>
+
+                                                                <StackPanel Grid.Column="1" Margin="16,0">
+                                                                    <TextBlock Text="{Binding Name}" 
+                                                                               Style="{StaticResource MaterialDesignSubtitle1TextBlock}"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                                        <materialDesign:Chip Content="{Binding Role}" 
+                                                                                             IconBackground="{DynamicResource PrimaryHueMidBrush}"/>
+                                                                        <materialDesign:Chip Content="{Binding Archetype}" Margin="8,0,0,0"
+                                                                                             Visibility="{Binding Archetype, Converter={StaticResource StringToVisibilityConverter}}"/>
+                                                                    </StackPanel>
+                                                                    <TextBlock Text="{Binding Concept}" 
+                                                                               Opacity="0.7" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                                                                    <TextBlock Text="{Binding ArcType, StringFormat=Arc: {0}}" 
+                                                                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                                                               Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                                                               Margin="0,4,0,0"
+                                                                               Visibility="{Binding ArcType, Converter={StaticResource StringToVisibilityConverter}}"/>
+                                                                </StackPanel>
+
+                                                                <Button Grid.Column="2" 
+                                                                        Style="{StaticResource MaterialDesignIconButton}"
+                                                                        ToolTip="Edit Character">
+                                                                    <materialDesign:PackIcon Kind="Pencil"/>
+                                                                </Button>
+                                                            </Grid>
+                                                        </materialDesign:Card>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
