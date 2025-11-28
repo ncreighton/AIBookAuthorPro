@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AIBookAuthorPro.Core\AIBookAuthorPro.Core.csproj" />
     <ProjectReference Include="..\AIBookAuthorPro.Application\AIBookAuthorPro.Application.csproj" />
+    <ProjectReference Include="..\AIBookAuthorPro.Infrastructure\AIBookAuthorPro.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
