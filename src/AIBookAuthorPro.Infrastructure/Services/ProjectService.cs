@@ -374,14 +374,31 @@ public sealed class ProjectService : IProjectService
     /// <inheritdoc />
     public async Task<Result> ExportAsync(
         Project project,
-        Enums.ExportFormat format,
+        ExportFormat format,
         string outputPath,
         ExportOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        // This should delegate to IExportService - for now just return success
-        _logger.LogInformation("Export requested: {Format} to {OutputPath}", format, outputPath);
-        return Result.Success();
+        try
+        {
+            _logger.LogInformation("Export requested: {Format} to {OutputPath}", format, outputPath);
+            
+            // Build export options if not provided
+            var exportOptions = options ?? new ExportOptions
+            {
+                Format = format,
+                OutputPath = outputPath
+            };
+            
+            // This should delegate to IExportService - for now just return success
+            // TODO: Implement proper export delegation when IExportService is available via DI
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to export project");
+            return Result.Failure($"Export failed: {ex.Message}");
+        }
     }
 
     public async Task<Result<Project>> RecoverFromAutosaveAsync(
