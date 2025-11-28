@@ -130,10 +130,10 @@ public class ModelTests
     }
 
     [Theory]
-    [InlineData(ChapterStatus.Outline, false)]
-    [InlineData(ChapterStatus.Draft, true)]
-    [InlineData(ChapterStatus.Revision, true)]
-    [InlineData(ChapterStatus.Final, true)]
+    [InlineData(ChapterStatus.Outlined, false)]
+    [InlineData(ChapterStatus.FirstDraft, true)]
+    [InlineData(ChapterStatus.Revising, true)]
+    [InlineData(ChapterStatus.Complete, true)]
     public void ChapterStatus_ShouldIndicateExportability(ChapterStatus status, bool shouldExport)
     {
         // Arrange
@@ -144,7 +144,7 @@ public class ModelTests
         };
 
         // Act & Assert
-        var isExportable = chapter.Status != ChapterStatus.Outline;
+        var isExportable = chapter.Status != ChapterStatus.Outlined;
         isExportable.Should().Be(shouldExport);
     }
 }
