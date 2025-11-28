@@ -4,6 +4,7 @@
 // =============================================================================
 
 using System.Windows.Controls;
+using AIBookAuthorPro.UI.ViewModels;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace AIBookAuthorPro.UI.Views;
@@ -13,11 +14,16 @@ namespace AIBookAuthorPro.UI.Views;
 /// </summary>
 public partial class SettingsView : UserControl
 {
+    private readonly SettingsViewModel _viewModel;
+
     /// <summary>
     /// Initializes a new instance of SettingsView.
     /// </summary>
-    public SettingsView()
+    public SettingsView(SettingsViewModel viewModel)
     {
+        _viewModel = viewModel;
+        DataContext = _viewModel;
+        
         InitializeComponent();
     }
 }
