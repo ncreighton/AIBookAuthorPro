@@ -5,7 +5,6 @@
 
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
-using AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
 
 namespace AIBookAuthorPro.Application.Services.GuidedCreation;
 
@@ -18,7 +17,7 @@ public interface IChapterGenerationPipeline
     /// Executes the full pipeline to generate a chapter.
     /// </summary>
     Task<Result<GeneratedChapter>> ExecuteAsync(
-        ChapterGenerationContext context,
+        PipelineContext context,
         IProgress<PipelineProgress>? progress = null,
         CancellationToken cancellationToken = default);
 
@@ -39,32 +38,9 @@ public interface IChapterGenerationPipeline
 }
 
 /// <summary>
-/// Context for chapter generation containing all necessary data.
-/// </summary>
-public class ChapterGenerationContext
-{
-    public int ChapterNumber { get; set; }
-    public ChapterBlueprint? ChapterBlueprint { get; set; }
-    public BookBlueprint? Blueprint { get; set; }
-    public string SystemPrompt { get; set; } = string.Empty;
-    public string NarrativeContext { get; set; } = string.Empty;
-    public string CharacterContext { get; set; } = string.Empty;
-    public string WorldContext { get; set; } = string.Empty;
-    public string PlotContext { get; set; } = string.Empty;
-    public string StyleContext { get; set; } = string.Empty;
-    public string ChapterInstructions { get; set; } = string.Empty;
-    public List<ChapterSummary>? PreviousChapterSummaries { get; set; }
-    public List<CharacterStateSnapshot>? CharacterStates { get; set; }
-    public List<SetupPayoff>? ActiveSetups { get; set; }
-    public List<SetupPayoff>? DuePayoffs { get; set; }
-    public TokenBudget? TokenBudget { get; set; }
-    public GenerationConfiguration? GenerationConfig { get; set; }
-}
-
-/// <summary>
 /// Token budget allocation for context.
 /// </summary>
-public class TokenBudget
+public sealed class TokenBudget
 {
     public int TotalAvailable { get; set; }
     public int SystemPrompt { get; set; }
