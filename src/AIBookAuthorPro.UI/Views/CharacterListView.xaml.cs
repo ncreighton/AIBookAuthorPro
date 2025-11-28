@@ -9,6 +9,7 @@ using System.Windows.Input;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Models;
 using AIBookAuthorPro.UI.ViewModels;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace AIBookAuthorPro.UI.Views;
 

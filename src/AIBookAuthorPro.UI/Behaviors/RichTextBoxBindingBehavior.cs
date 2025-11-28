@@ -9,6 +9,7 @@ using System.Windows.Documents;
 using System.Windows.Threading;
 using AIBookAuthorPro.Core.Interfaces;
 using Microsoft.Xaml.Behaviors;
+using RichTextBox = System.Windows.Controls.RichTextBox;
 
 namespace AIBookAuthorPro.UI.Behaviors;
 

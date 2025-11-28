@@ -5,6 +5,7 @@
 
 using System.Windows.Controls;
 using AIBookAuthorPro.UI.ViewModels;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace AIBookAuthorPro.UI.Views;
 

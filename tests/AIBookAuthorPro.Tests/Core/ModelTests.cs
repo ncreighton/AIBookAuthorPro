@@ -4,6 +4,7 @@
 // =============================================================================
 
 using AIBookAuthorPro.Core.Enums;
+using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
 using FluentAssertions;
 using Xunit;
@@ -47,7 +48,7 @@ public class ModelTests
         var character = new Character { Name = "Test" };
 
         // Assert
-        character.Role.Should().Be(Core.Models.CharacterRole.Supporting);
+        character.Role.Should().Be(CharacterRole.Supporting);
     }
 
     [Fact]
@@ -69,13 +70,13 @@ public class ModelTests
         var parent = new OutlineItem
         {
             Title = "Act I",
-            ItemType = Core.Models.OutlineItemType.Act
+            ItemType = OutlineItemType.Act
         };
 
         var child = new OutlineItem
         {
             Title = "Chapter 1",
-            ItemType = Core.Models.OutlineItemType.Chapter
+            ItemType = OutlineItemType.Chapter
         };
 
         // Act
@@ -90,8 +91,8 @@ public class ModelTests
     public void CharacterRelationship_ShouldStoreRelationshipType()
     {
         // Arrange
-        var character1 = new Character { Id = Guid.NewGuid(), Name = "Alice" };
-        var character2 = new Character { Id = Guid.NewGuid(), Name = "Bob" };
+        var character1 = new Character { Name = "Alice" };
+        var character2 = new Character { Name = "Bob" };
 
         var relationship = new CharacterRelationship
         {

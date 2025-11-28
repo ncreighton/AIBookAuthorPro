@@ -83,7 +83,7 @@ public class ExportServiceTests
         };
 
         _markdownExporterMock
-            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<IReadOnlyList<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<List<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<string>.Success(options.OutputPath));
 
         // Act
@@ -162,7 +162,7 @@ public class ExportServiceTests
         };
 
         _markdownExporterMock
-            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<IReadOnlyList<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<List<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<string>.Success(options.OutputPath));
 
         // Act
@@ -172,7 +172,7 @@ public class ExportServiceTests
         result.IsSuccess.Should().BeTrue();
         _markdownExporterMock.Verify(x => x.ExportAsync(
             project,
-            It.Is<List<Chapter>>(chapters => chapters.Count == 1 && chapters.First().Title.Contains("Chapter 1")),
+            It.Is<IReadOnlyList<Chapter>>(chapters => chapters.Count == 1 && chapters.First().Title.Contains("Chapter 1")),
             options,
             It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -189,7 +189,7 @@ public class ExportServiceTests
         };
 
         _markdownExporterMock
-            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<IReadOnlyList<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<List<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<string>.Success(options.OutputPath));
 
         // Act

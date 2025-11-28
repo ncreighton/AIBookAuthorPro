@@ -6,6 +6,7 @@
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Xaml.Behaviors;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace AIBookAuthorPro.UI.Behaviors;
 

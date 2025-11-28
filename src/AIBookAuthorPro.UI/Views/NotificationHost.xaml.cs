@@ -6,6 +6,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using AIBookAuthorPro.Infrastructure.Services;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace AIBookAuthorPro.UI.Views;
 

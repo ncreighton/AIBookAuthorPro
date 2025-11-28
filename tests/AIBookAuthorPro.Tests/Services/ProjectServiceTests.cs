@@ -120,9 +120,6 @@ public class ProjectServiceTests
     {
         // Arrange
         var filePath = "C:\\nonexistent\\project.abpro";
-        _fileSystemServiceMock
-            .Setup(x => x.FileExists(filePath))
-            .Returns(false);
 
         // Act
         var result = await _projectService.LoadAsync(filePath);

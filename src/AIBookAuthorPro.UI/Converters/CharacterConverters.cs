@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 using AIBookAuthorPro.Core.Enums;
+using Brush = System.Windows.Media.Brush;
 
 namespace AIBookAuthorPro.UI.Converters;
 

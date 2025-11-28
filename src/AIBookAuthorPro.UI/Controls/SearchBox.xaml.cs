@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using UserControl = System.Windows.Controls.UserControl;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 namespace AIBookAuthorPro.UI.Controls;
 
