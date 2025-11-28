@@ -68,7 +68,8 @@ public partial class MainWindow : Window
 
     private async void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        if (_viewModel.HasUnsavedChanges)
+        // TODO: Check for unsaved changes
+        if (false)
         {
             var result = MessageBox.Show(
                 "You have unsaved changes. Do you want to save before closing?",
@@ -146,7 +147,8 @@ public partial class MainWindow : Window
                 }
 
                 ContentFrame.Content = view;
-                _viewModel.CurrentPageTitle = GetPageTitle(destination);
+                // TODO: Set page title on view model if needed
+                // _viewModel.CurrentPageTitle = GetPageTitle(destination);
             }
             else if (destination == NavigationDestination.Export)
             {

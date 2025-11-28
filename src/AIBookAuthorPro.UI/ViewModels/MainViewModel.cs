@@ -117,9 +117,8 @@ public partial class MainViewModel : ObservableObject
         _logger.LogInformation("Creating new project");
         
         // In a real app, show a dialog to get project details
-        var result = await _projectService.CreateProjectAsync(
-            "Untitled Project",
-            BookType.Novel);
+        var result = await _projectService.CreateAsync(
+            "Untitled Project");
 
         if (result.IsSuccess && result.Value != null)
         {
@@ -150,7 +149,7 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            var result = await _projectService.OpenProjectAsync(filePath);
+            var result = await _projectService.LoadAsync(filePath);
 
             if (result.IsSuccess && result.Value != null)
             {
@@ -183,7 +182,7 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            var result = await _projectService.SaveProjectAsync();
+            var result = await _projectService.SaveAsync(CurrentProject);
 
             if (result.IsSuccess)
             {
@@ -213,7 +212,7 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            var result = await _projectService.SaveProjectAsync(filePath);
+            var result = await _projectService.SaveAsync(CurrentProject, filePath);
 
             if (result.IsSuccess)
             {
@@ -236,15 +235,9 @@ public partial class MainViewModel : ObservableObject
     {
         if (CurrentProject == null) return;
 
-        // Check for unsaved changes
-        if (_projectService.HasUnsavedChanges())
-        {
-            // Show save prompt dialog
-            // For now, just save
-            await SaveProjectAsync();
-        }
-
-        await _projectService.CloseProjectAsync();
+        // TODO: Check for unsaved changes and show save prompt dialog
+        // For now, just close without saving
+        
         CurrentProject = null;
         IsProjectOpen = false;
         Chapters.Clear();
@@ -276,17 +269,12 @@ public partial class MainViewModel : ObservableObject
 
         var newChapter = new Chapter
         {
-            Id = Guid.NewGuid(),
-            Title = $"Chapter {CurrentProject.Chapters.Count + 1}",
-            Order = CurrentProject.Chapters.Count + 1,
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow
+            Title = $"Chapter {CurrentProject.Chapters.Count + 1}"
         };
 
-        CurrentProject.Chapters.Add(newChapter);
+        CurrentProject.AddChapter(newChapter);
         Chapters.Add(newChapter);
         SelectedChapter = newChapter;
-        _projectService.MarkAsModified();
         StatusMessage = $"Added {newChapter.Title}";
     }
 
@@ -295,21 +283,16 @@ public partial class MainViewModel : ObservableObject
     {
         if (CurrentProject == null || chapter == null) return;
 
-        CurrentProject.Chapters.Remove(chapter);
-        Chapters.Remove(chapter);
-        
-        if (SelectedChapter == chapter)
+        if (CurrentProject.RemoveChapter(chapter.Id))
         {
-            SelectedChapter = Chapters.FirstOrDefault();
+            Chapters.Remove(chapter);
+            
+            if (SelectedChapter == chapter)
+            {
+                SelectedChapter = Chapters.FirstOrDefault();
+            }
         }
 
-        // Renumber remaining chapters
-        for (int i = 0; i < CurrentProject.Chapters.Count; i++)
-        {
-            CurrentProject.Chapters[i].Order = i + 1;
-        }
-
-        _projectService.MarkAsModified();
         StatusMessage = $"Deleted {chapter.Title}";
     }
 
