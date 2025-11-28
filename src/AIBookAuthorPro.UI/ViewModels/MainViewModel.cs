@@ -72,6 +72,12 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isNavigationExpanded = true;
 
+    [ObservableProperty]
+    private bool _hasUnsavedChanges;
+
+    [ObservableProperty]
+    private string _currentPageTitle = "Dashboard";
+
     /// <summary>
     /// Gets the recent projects list.
     /// </summary>

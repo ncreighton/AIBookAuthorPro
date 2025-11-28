@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AIBookAuthorPro.Core.Enums;

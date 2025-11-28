@@ -196,17 +196,13 @@ public partial class ProjectDashboardViewModel : ObservableObject
 
         var newChapter = new Chapter
         {
-            Id = Guid.NewGuid(),
             Title = $"Chapter {newOrder}",
             Order = newOrder,
             TargetWordCount = _settingsService.CurrentSettings.Generation.DefaultChapterWordCount,
-            Status = ChapterStatus.NotStarted,
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow
+            Status = ChapterStatus.NotStarted
         };
 
-        Project.Chapters.Add(newChapter);
-        _projectService.MarkAsModified();
+        Project.AddChapter(newChapter);
 
         RefreshChapterList();
         RefreshStatistics();
@@ -225,17 +221,10 @@ public partial class ProjectDashboardViewModel : ObservableObject
         // In a real app, show confirmation dialog
         _logger.LogDebug("Deleting chapter {ChapterNumber}: {Title}", chapter.Order, chapter.Title);
 
-        Project.Chapters.Remove(chapter);
-
-        // Reorder remaining chapters
-        var order = 1;
-        foreach (var c in Project.Chapters.OrderBy(c => c.Order))
+        if (Project.RemoveChapter(chapter.Id))
         {
-            c.Order = order++;
+            await _projectService.SaveAsync(Project);
         }
-
-        _projectService.MarkAsModified();
-        await _projectService.SaveProjectAsync();
 
         RefreshChapterList();
         RefreshStatistics();
@@ -250,7 +239,6 @@ public partial class ProjectDashboardViewModel : ObservableObject
 
         var duplicate = new Chapter
         {
-            Id = Guid.NewGuid(),
             Title = $"{chapter.Title} (Copy)",
             Order = Project.Chapters.Max(c => c.Order) + 1,
             Content = chapter.Content,
@@ -258,13 +246,10 @@ public partial class ProjectDashboardViewModel : ObservableObject
             Outline = chapter.Outline,
             Notes = chapter.Notes,
             TargetWordCount = chapter.TargetWordCount,
-            Status = ChapterStatus.NotStarted,
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow
+            Status = ChapterStatus.NotStarted
         };
 
-        Project.Chapters.Add(duplicate);
-        _projectService.MarkAsModified();
+        Project.AddChapter(duplicate);
 
         RefreshChapterList();
         RefreshStatistics();
@@ -283,7 +268,7 @@ public partial class ProjectDashboardViewModel : ObservableObject
             previousChapter.Order++;
             chapter.Order--;
 
-            _projectService.MarkAsModified();
+            // Chapter modifications are handled internally by the Chapter entity
             RefreshChapterList();
         }
     }
@@ -299,7 +284,7 @@ public partial class ProjectDashboardViewModel : ObservableObject
             nextChapter.Order--;
             chapter.Order++;
 
-            _projectService.MarkAsModified();
+            // Chapter modifications are handled internally by the Chapter entity
             RefreshChapterList();
         }
     }
@@ -344,7 +329,7 @@ public partial class ProjectDashboardViewModel : ObservableObject
 
         try
         {
-            var result = await _projectService.SaveProjectAsync();
+            var result = await _projectService.SaveAsync(Project);
 
             if (result.IsSuccess)
             {
