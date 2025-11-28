@@ -35,6 +35,7 @@ public static class DependencyInjection
         // Core services
         services.AddSingleton<IProjectService, ProjectService>();
         services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<IFileSystemService, FileSystemService>();
 
         // FlowDocument service (WPF-specific, but lives in Infrastructure)
         services.AddSingleton<IFlowDocumentService, FlowDocumentService>();
@@ -44,6 +45,22 @@ public static class DependencyInjection
 
         // Generation pipeline service
         services.AddSingleton<IGenerationPipelineService, GenerationPipelineService>();
+
+        // ============================================================
+        // Feature 3: Research Assistant
+        // ============================================================
+        services.AddSingleton<IResearchService, ResearchService>();
+
+        // ============================================================
+        // Feature 4: KDP Publishing
+        // ============================================================
+        services.AddSingleton<IKDPService, KDPService>();
+
+        // ============================================================
+        // Feature 5: Book Cover Generation
+        // ============================================================
+        services.AddSingleton<ICoverService, CoverService>();
+        services.AddSingleton<IImageGenerationProvider, DallEImageProvider>();
 
         // Export services
         services.AddSingleton<IDocxExporter, Services.DocxExporter>();
