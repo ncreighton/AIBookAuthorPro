@@ -1,0 +1,889 @@
+<UserControl 
+    x:Class="AIBookAuthorPro.UI.Views.KDPView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:KDPViewModel}"
+    d:DesignHeight="900"
+    d:DesignWidth="1400">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        </Style>
+        
+        <Style x:Key="CardStyle" TargetType="materialDesign:Card">
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="UniformCornerRadius" Value="8"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Margin" Value="0,8,8,0"/>
+            <Setter Property="Height" Value="36"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="16,16,16,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock 
+                    Text="KDP Publishing"
+                    Style="{StaticResource MaterialDesignHeadline4TextBlock}"/>
+                <TextBlock 
+                    Text="Prepare your book for Amazon Kindle Direct Publishing"
+                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                    Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button 
+                    Content="Save All"
+                    Command="{Binding SaveMetadataCommand}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    materialDesign:ButtonAssist.CornerRadius="4"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Messages -->
+        <StackPanel Grid.Row="0" VerticalAlignment="Bottom" Margin="16,0">
+            <!-- Error Message -->
+            <materialDesign:Card 
+                Padding="12"
+                Background="{DynamicResource MaterialDesignErrorBrush}"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisConverter}}"
+                Margin="0,4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="White" TextWrapping="Wrap"/>
+                    <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}" 
+                            Command="{Binding ClearMessagesCommand}" Foreground="White">
+                        <materialDesign:PackIcon Kind="Close"/>
+                    </Button>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- Success Message -->
+            <materialDesign:Card 
+                Padding="12"
+                Background="{DynamicResource MaterialDesignPrimaryHueMidBrush}"
+                Visibility="{Binding SuccessMessage, Converter={StaticResource BoolToVisConverter}}"
+                Margin="0,4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding SuccessMessage}" Foreground="White"/>
+                    <Button Grid.Column="1" Style="{StaticResource MaterialDesignIconButton}"
+                            Command="{Binding ClearMessagesCommand}" Foreground="White">
+                        <materialDesign:PackIcon Kind="Close"/>
+                    </Button>
+                </Grid>
+            </materialDesign:Card>
+        </StackPanel>
+
+        <!-- Main Content -->
+        <TabControl Grid.Row="1" Margin="8" Style="{StaticResource MaterialDesignFilledTabControl}">
+            
+            <!-- Categories Tab -->
+            <TabItem Header="Categories">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Category Search -->
+                    <materialDesign:Card Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Search Categories" Style="{StaticResource SectionHeaderStyle}"/>
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBox
+                                    materialDesign:HintAssist.Hint="Search BISAC categories..."
+                                    Text="{Binding CategorySearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,8,0"/>
+                                    
+                                <Button 
+                                    Grid.Column="1"
+                                    Content="Search"
+                                    Command="{Binding SearchCategoriesCommand}"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"/>
+                            </Grid>
+
+                            <Button 
+                                Content="Get AI Suggestions"
+                                Command="{Binding SuggestCategoriesCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Margin="0,16,0,16"/>
+
+                            <TextBlock Text="Search Results" Style="{StaticResource SectionHeaderStyle}" Margin="0,8,0,8"/>
+                            
+                            <ListBox 
+                                ItemsSource="{Binding CategorySearchResults}"
+                                MaxHeight="300">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}" FontWeight="Medium"/>
+                                                <TextBlock Text="{Binding BISACCode}" 
+                                                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+
+                                            <Button Grid.Column="1"
+                                                    Content="Primary"
+                                                    Command="{Binding DataContext.SetPrimaryCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Margin="8,0"/>
+
+                                            <Button Grid.Column="2"
+                                                    Content="Secondary"
+                                                    Command="{Binding DataContext.SetSecondaryCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </materialDesign:Card>
+
+                    <!-- Selected Categories -->
+                    <materialDesign:Card Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Selected Categories" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <materialDesign:Card Padding="16" Margin="0,0,0,16" Background="{DynamicResource MaterialDesignCardBackground}">
+                                <StackPanel>
+                                    <TextBlock Text="Primary Category" FontWeight="Medium" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding SelectedPrimaryCategory.Name, FallbackValue='Not selected'}"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                    <TextBlock Text="{Binding SelectedPrimaryCategory.BISACCode}"
+                                               FontSize="11" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <materialDesign:Card Padding="16" Background="{DynamicResource MaterialDesignCardBackground}">
+                                <StackPanel>
+                                    <TextBlock Text="Secondary Category" FontWeight="Medium" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding SelectedSecondaryCategory.Name, FallbackValue='Not selected'}"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                    <TextBlock Text="{Binding SelectedSecondaryCategory.BISACCode}"
+                                               FontSize="11" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <TextBlock Text="AI Suggested Categories" Style="{StaticResource SectionHeaderStyle}" Margin="0,24,0,8"/>
+                            
+                            <ItemsControl ItemsSource="{Binding SuggestedCategories}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{DynamicResource MaterialDesignDivider}" 
+                                                BorderThickness="0,0,0,1" Padding="8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}"/>
+                                                    <TextBlock Text="{Binding BISACCode}" FontSize="11"
+                                                               Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                                </StackPanel>
+
+                                                <Button Grid.Column="1" Content="Use"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Command="{Binding DataContext.SetPrimaryCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </Grid>
+            </TabItem>
+
+            <!-- Keywords Tab -->
+            <TabItem Header="Keywords">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Keyword Generation -->
+                    <materialDesign:Card Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="AI Keyword Suggestions" Style="{StaticResource SectionHeaderStyle}"/>
+                            
+                            <Button 
+                                Content="Generate Keywords"
+                                Command="{Binding GenerateKeywordsCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Margin="0,0,0,16"/>
+
+                            <ListBox ItemsSource="{Binding KeywordSuggestions}" MaxHeight="400">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Keyword}" FontWeight="Medium"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Relevance: " FontSize="11"/>
+                                                    <TextBlock Text="{Binding RelevanceScore, StringFormat=P0}" FontSize="11"/>
+                                                    <TextBlock Text=" | Competition: " FontSize="11" Margin="8,0,0,0"/>
+                                                    <TextBlock Text="{Binding Competition}" FontSize="11"/>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <Button Grid.Column="2"
+                                                    Content="Add"
+                                                    Command="{Binding DataContext.AddKeywordCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </materialDesign:Card>
+
+                    <!-- Selected Keywords -->
+                    <materialDesign:Card Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Text="Selected Keywords" Style="{StaticResource SectionHeaderStyle}"/>
+                                <TextBlock Grid.Column="1" VerticalAlignment="Center">
+                                    <Run Text="{Binding SelectedKeywords.Count, Mode=OneWay}"/>
+                                    <Run Text="/7"/>
+                                </TextBlock>
+                            </Grid>
+
+                            <ProgressBar 
+                                Value="{Binding SelectedKeywords.Count}"
+                                Maximum="7"
+                                Height="4"
+                                Margin="0,0,0,16"/>
+
+                            <ItemsControl ItemsSource="{Binding SelectedKeywords}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <materialDesign:Chip
+                                            Content="{Binding}"
+                                            IsDeletable="True"
+                                            DeleteCommand="{Binding DataContext.RemoveKeywordCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            DeleteCommandParameter="{Binding}"
+                                            Margin="0,0,8,8"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+
+                            <Separator Margin="0,16"/>
+
+                            <TextBlock Text="Add Custom Keyword" Style="{StaticResource SectionHeaderStyle}"/>
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox
+                                    materialDesign:HintAssist.Hint="Enter keyword..."
+                                    Text="{Binding NewKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,8,0"/>
+
+                                <Button 
+                                    Grid.Column="1"
+                                    Content="Add"
+                                    Command="{Binding AddCustomKeywordCommand}"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    IsEnabled="{Binding RemainingKeywords}"/>
+                            </Grid>
+
+                            <TextBlock 
+                                Text="{Binding RemainingKeywords, StringFormat='You can add {0} more keywords'}"
+                                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                FontSize="12"
+                                Margin="0,8,0,0"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </Grid>
+            </TabItem>
+
+            <!-- Description Tab -->
+            <TabItem Header="Description">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="400"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Description Editor -->
+                    <materialDesign:Card Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                                <TextBlock Text="Book Description" Style="{StaticResource SectionHeaderStyle}" 
+                                           VerticalAlignment="Center" Margin="0,0,16,0"/>
+                                
+                                <ComboBox
+                                    materialDesign:HintAssist.Hint="Style"
+                                    SelectedItem="{Binding DescriptionStyle}"
+                                    Width="150"
+                                    Margin="0,0,8,0">
+                                    <ComboBoxItem Content="Hook"/>
+                                    <ComboBoxItem Content="Emotional"/>
+                                    <ComboBoxItem Content="Mystery"/>
+                                    <ComboBoxItem Content="Literary"/>
+                                </ComboBox>
+
+                                <Button 
+                                    Content="Generate Variations"
+                                    Command="{Binding GenerateDescriptionCommand}"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                            </StackPanel>
+
+                            <TextBox
+                                Grid.Row="1"
+                                Text="{Binding CurrentDescription, UpdateSourceTrigger=PropertyChanged}"
+                                AcceptsReturn="True"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto"
+                                materialDesign:HintAssist.Hint="Enter your book description (supports basic HTML: &lt;b&gt;, &lt;i&gt;, &lt;br&gt;)"/>
+
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBlock VerticalAlignment="Center">
+                                    <Run Text="{Binding DescriptionCharacterCount, Mode=OneWay}"/>
+                                    <Run Text="/ 4000 characters"/>
+                                </TextBlock>
+                                
+                                <ProgressBar 
+                                    Value="{Binding DescriptionCharacterCount}"
+                                    Maximum="4000"
+                                    Width="200"
+                                    Height="4"
+                                    Margin="16,0,0,0"
+                                    VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </materialDesign:Card>
+
+                    <!-- Generated Variations -->
+                    <materialDesign:Card Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="AI Generated Variations" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <ListBox Grid.Row="1" ItemsSource="{Binding DescriptionSuggestions}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <materialDesign:Card Padding="12" Margin="0,0,0,8">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Style}" FontWeight="Medium" Margin="0,0,0,8"/>
+                                                <TextBlock 
+                                                    Text="{Binding Description}"
+                                                    TextWrapping="Wrap"
+                                                    MaxHeight="120"
+                                                    TextTrimming="CharacterEllipsis"/>
+                                                
+                                                <Button 
+                                                    Content="Use This"
+                                                    Command="{Binding DataContext.SelectDescriptionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                                    HorizontalAlignment="Right"
+                                                    Margin="0,8,0,0"/>
+                                            </StackPanel>
+                                        </materialDesign:Card>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </materialDesign:Card>
+                </Grid>
+            </TabItem>
+
+            <!-- Print Specs Tab -->
+            <TabItem Header="Print Specs">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="400"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Input -->
+                    <materialDesign:Card Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Print Specifications" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Page Count"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding PageCount, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,16"/>
+
+                            <ComboBox
+                                materialDesign:HintAssist.Hint="Trim Size"
+                                materialDesign:HintAssist.IsFloating="True"
+                                ItemsSource="{Binding AvailableTrimSizes}"
+                                SelectedItem="{Binding SelectedTrimSize}"
+                                Margin="0,0,0,16"/>
+
+                            <ComboBox
+                                materialDesign:HintAssist.Hint="Paper Type"
+                                materialDesign:HintAssist.IsFloating="True"
+                                ItemsSource="{Binding AvailablePaperTypes}"
+                                SelectedItem="{Binding SelectedPaperType}"
+                                Margin="0,0,0,16"/>
+
+                            <CheckBox
+                                Content="Has Bleed (for images that extend to edge)"
+                                IsChecked="{Binding HasBleed}"
+                                Margin="0,0,0,24"/>
+
+                            <Button 
+                                Content="Calculate Specifications"
+                                Command="{Binding CalculatePrintSpecsCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+
+                    <!-- Results -->
+                    <materialDesign:Card Grid.Column="1" Style="{StaticResource CardStyle}" DataContext="{Binding PrintSpecifications}">
+                        <StackPanel>
+                            <TextBlock Text="Calculated Specifications" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <materialDesign:Card Grid.Row="0" Grid.Column="0" Padding="16" Margin="0,0,8,8">
+                                    <StackPanel>
+                                        <TextBlock Text="Spine Width" FontWeight="Medium"/>
+                                        <TextBlock Text="{Binding SpineWidth, StringFormat='{}{0:F3} inches'}" FontSize="24"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Grid.Row="0" Grid.Column="1" Padding="16" Margin="8,0,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="Cover Dimensions" FontWeight="Medium"/>
+                                        <TextBlock FontSize="18">
+                                            <Run Text="{Binding CoverWidthInches, StringFormat='{}{0:F2}'}"/>
+                                            <Run Text=" × "/>
+                                            <Run Text="{Binding CoverHeightInches, StringFormat='{}{0:F2}'} inches"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Grid.Row="1" Grid.Column="0" Padding="16" Margin="0,8,8,8">
+                                    <StackPanel>
+                                        <TextBlock Text="Printing Cost" FontWeight="Medium"/>
+                                        <TextBlock Text="{Binding PrintingCost, StringFormat=C2}" FontSize="24"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Grid.Row="1" Grid.Column="1" Padding="16" Margin="8,8,0,8">
+                                    <StackPanel>
+                                        <TextBlock Text="Minimum List Price" FontWeight="Medium"/>
+                                        <TextBlock Text="{Binding MinimumListPrice, StringFormat=C2}" FontSize="24"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+                            </Grid>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </Grid>
+            </TabItem>
+
+            <!-- Pricing Tab -->
+            <TabItem Header="Pricing &amp; Royalties">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="400"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Input -->
+                    <materialDesign:Card Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Calculate Royalties" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="List Price"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding ListPrice, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,16"/>
+
+                            <ComboBox
+                                materialDesign:HintAssist.Hint="Marketplace"
+                                materialDesign:HintAssist.IsFloating="True"
+                                ItemsSource="{Binding AvailableMarketplaces}"
+                                SelectedItem="{Binding SelectedMarketplace}"
+                                Margin="0,0,0,16"/>
+
+                            <ComboBox
+                                materialDesign:HintAssist.Hint="Format"
+                                materialDesign:HintAssist.IsFloating="True"
+                                ItemsSource="{Binding AvailableFormatTypes}"
+                                SelectedItem="{Binding SelectedFormatType}"
+                                Margin="0,0,0,24"/>
+
+                            <Button 
+                                Content="Calculate Royalties"
+                                Command="{Binding CalculateRoyaltiesCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+
+                    <!-- Results -->
+                    <materialDesign:Card Grid.Column="1" Style="{StaticResource CardStyle}" DataContext="{Binding PricingInfo}">
+                        <StackPanel>
+                            <TextBlock Text="Royalty Calculation" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <materialDesign:Card Grid.Column="0" Padding="20" Margin="0,0,8,0" Background="{DynamicResource MaterialDesignPrimaryHueMidBrush}">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="Your Royalty" Foreground="White" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding EstimatedRoyalty, StringFormat=C2}" 
+                                                   FontSize="32" FontWeight="Bold" Foreground="White"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="per sale" Foreground="White" HorizontalAlignment="Center" Opacity="0.8"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Grid.Column="1" Padding="20" Margin="8,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Royalty Rate" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding RoyaltyRate, StringFormat=P0}" 
+                                                   FontSize="28" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Grid.Column="2" Padding="20" Margin="8,0,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Currency" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Currency}" 
+                                                   FontSize="28" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+                            </Grid>
+
+                            <Separator Margin="0,24"/>
+
+                            <TextBlock Text="Breakdown" Style="{StaticResource SectionHeaderStyle}"/>
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="List Price"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ListPrice, StringFormat=C2}"/>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Printing Cost (if applicable)" Margin="0,8,0,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PrintingCost, StringFormat=C2}" Margin="0,8,0,0"/>
+
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Delivery Cost (eBook)" Margin="0,8,0,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DeliveryCost, StringFormat=C2}" Margin="0,8,0,0"/>
+                            </Grid>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </Grid>
+            </TabItem>
+
+            <!-- Series Tab -->
+            <TabItem Header="Series">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="400"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Create/Select Series -->
+                    <materialDesign:Card Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Book Series" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Series Name"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding NewSeriesName, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,16"/>
+
+                            <Button 
+                                Content="Create/Find Series"
+                                Command="{Binding CreateSeriesCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Margin="0,0,0,24"/>
+
+                            <TextBlock Text="Existing Series" Style="{StaticResource SectionHeaderStyle}"/>
+                            
+                            <ListBox 
+                                ItemsSource="{Binding AllSeries}"
+                                SelectedItem="{Binding SelectedSeries}"
+                                MaxHeight="300">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Medium"/>
+                                            <TextBlock Text="{Binding BookCount, StringFormat='{}{0} books'}" 
+                                                       FontSize="12"
+                                                       Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </materialDesign:Card>
+
+                    <!-- Series Details -->
+                    <materialDesign:Card Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <StackPanel DataContext="{Binding SelectedSeries}">
+                            <TextBlock Text="Series Details" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="Medium" Margin="0,0,0,16"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Position in Series"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding DataContext.SeriesPosition, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                Width="150"
+                                HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </Grid>
+            </TabItem>
+
+            <!-- A+ Content Tab -->
+            <TabItem Header="A+ Content">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Module Selection -->
+                    <materialDesign:Card Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="A+ Content Modules" Style="{StaticResource SectionHeaderStyle}"/>
+                            
+                            <TextBlock 
+                                Text="Select the types of modules to generate for your Amazon Enhanced Brand Content."
+                                TextWrapping="Wrap"
+                                Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                Margin="0,0,0,16"/>
+
+                            <CheckBox Content="Standard Text" IsChecked="True" Margin="0,0,0,8"/>
+                            <CheckBox Content="Standard Image + Text" IsChecked="True" Margin="0,0,0,8"/>
+                            <CheckBox Content="Four Image Module" Margin="0,0,0,8"/>
+                            <CheckBox Content="Comparison Chart" Margin="0,0,0,8"/>
+                            <CheckBox Content="Single Image" Margin="0,0,0,24"/>
+
+                            <Button 
+                                Content="Generate A+ Content"
+                                Command="{Binding GenerateAPlusContentCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+
+                    <!-- Generated Content -->
+                    <materialDesign:Card Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="Generated A+ Content" Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <ScrollViewer Grid.Row="1" DataContext="{Binding AplusContent}">
+                                <ItemsControl ItemsSource="{Binding Modules}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <materialDesign:Card Padding="16" Margin="0,0,0,16">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Type}" FontWeight="Medium" FontSize="14"/>
+                                                    <TextBlock Text="{Binding Headline}" FontSize="18" Margin="0,8,0,8"/>
+                                                    <TextBlock Text="{Binding Body}" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </materialDesign:Card>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </materialDesign:Card>
+                </Grid>
+            </TabItem>
+
+            <!-- Validation Tab -->
+            <TabItem Header="Validation">
+                <Grid Margin="16">
+                    <materialDesign:Card Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="Metadata Validation" Style="{StaticResource SectionHeaderStyle}"/>
+                                
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <materialDesign:PackIcon 
+                                        Kind="CheckCircle" 
+                                        Foreground="Green"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding HasNoValidationErrors, Converter={StaticResource BoolToVisConverter}}"/>
+                                    <TextBlock 
+                                        Text="All checks passed" 
+                                        Foreground="Green"
+                                        VerticalAlignment="Center"
+                                        Margin="8,0,0,0"
+                                        Visibility="{Binding HasNoValidationErrors, Converter={StaticResource BoolToVisConverter}}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <DataGrid 
+                                ItemsSource="{Binding ValidationIssues}"
+                                AutoGenerateColumns="False"
+                                IsReadOnly="True"
+                                CanUserAddRows="False"
+                                MaxHeight="400">
+                                
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="Severity" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <materialDesign:PackIcon>
+                                                    <materialDesign:PackIcon.Style>
+                                                        <Style TargetType="materialDesign:PackIcon">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Severity}" Value="Error">
+                                                                    <Setter Property="Kind" Value="AlertCircle"/>
+                                                                    <Setter Property="Foreground" Value="Red"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Severity}" Value="Warning">
+                                                                    <Setter Property="Kind" Value="Alert"/>
+                                                                    <Setter Property="Foreground" Value="Orange"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Severity}" Value="Info">
+                                                                    <Setter Property="Kind" Value="Information"/>
+                                                                    <Setter Property="Foreground" Value="Blue"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </materialDesign:PackIcon.Style>
+                                                </materialDesign:PackIcon>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Field" Binding="{Binding Field}" Width="120"/>
+                                    <DataGridTextColumn Header="Message" Binding="{Binding Message}" Width="*"/>
+                                    <DataGridTextColumn Header="Suggestion" Binding="{Binding Suggestion}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </materialDesign:Card>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Loading Overlay -->
+        <Grid Grid.RowSpan="2" 
+              Background="#80000000"
+              Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200"/>
+                <TextBlock Text="Processing..." Foreground="White" HorizontalAlignment="Center" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
