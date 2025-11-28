@@ -63,6 +63,12 @@ public partial class MainWindow : Window
     {
         _logger.LogDebug("MainWindow loaded");
 
+        // Load recent projects asynchronously now that the UI is ready
+        if (_viewModel.LoadRecentProjectsCommand.CanExecute(null))
+        {
+            await _viewModel.LoadRecentProjectsCommand.ExecuteAsync(null);
+        }
+
         // Show welcome screen or last project
         await NavigateToViewAsync(NavigationDestination.Dashboard);
     }
