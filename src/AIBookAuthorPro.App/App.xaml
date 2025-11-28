@@ -19,8 +19,6 @@
                 <ResourceDictionary Source="pack://application:,,,/AIBookAuthorPro.UI;component/Resources/Converters.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Additional Converters -->
-            <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
 
             <!-- Global Styles -->
             <Style x:Key="MaterialDesignWindow" TargetType="Window">
