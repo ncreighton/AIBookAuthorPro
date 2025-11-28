@@ -34,7 +34,7 @@ public sealed class OpenAIProvider : BaseAIProvider
         {
             ModelId = "gpt-4o",
             DisplayName = "GPT-4o",
-            Provider = Enums.AIProviderType.OpenAI,
+            Provider = AIProviderType.OpenAI,
             MaxContextTokens = 128000,
             MaxOutputTokens = 16384,
             InputCostPer1K = 0.005m,
@@ -46,7 +46,7 @@ public sealed class OpenAIProvider : BaseAIProvider
         {
             ModelId = "gpt-4o-mini",
             DisplayName = "GPT-4o Mini",
-            Provider = Enums.AIProviderType.OpenAI,
+            Provider = AIProviderType.OpenAI,
             MaxContextTokens = 128000,
             MaxOutputTokens = 16384,
             InputCostPer1K = 0.00015m,
@@ -58,7 +58,7 @@ public sealed class OpenAIProvider : BaseAIProvider
         {
             ModelId = "o1-preview",
             DisplayName = "o1 Preview",
-            Provider = Enums.AIProviderType.OpenAI,
+            Provider = AIProviderType.OpenAI,
             MaxContextTokens = 128000,
             MaxOutputTokens = 32768,
             InputCostPer1K = 0.015m,
@@ -70,7 +70,7 @@ public sealed class OpenAIProvider : BaseAIProvider
         {
             ModelId = "o1-mini",
             DisplayName = "o1 Mini",
-            Provider = Enums.AIProviderType.OpenAI,
+            Provider = AIProviderType.OpenAI,
             MaxContextTokens = 128000,
             MaxOutputTokens = 65536,
             InputCostPer1K = 0.003m,

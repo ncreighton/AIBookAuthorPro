@@ -106,7 +106,7 @@ public sealed partial class DocxExporter : IDocumentExporter
 
                 // Chapters
                 var sortedChapters = project.Chapters
-                    .OrderBy(c => c.Number)
+                    .OrderBy(c => c.Order)
                     .ToList();
 
                 foreach (var chapter in sortedChapters)
@@ -327,13 +327,14 @@ public sealed partial class DocxExporter : IDocumentExporter
             body.AppendChild(publisherPara);
         }
 
-        if (!string.IsNullOrEmpty(project.Metadata.Isbn))
+        var isbn = project.Metadata.Isbn13 ?? project.Metadata.Isbn10;
+        if (!string.IsNullOrEmpty(isbn))
         {
             var isbnPara = new Paragraph(
                 new ParagraphProperties(
                     new Justification { Val = JustificationValues.Center },
                     new SpacingBetweenLines { Before = "480" }),
-                new Run(new Text($"ISBN: {project.Metadata.Isbn}")));
+                new Run(new Text($"ISBN: {isbn}")));
             body.AppendChild(isbnPara);
         }
 
@@ -378,7 +379,7 @@ public sealed partial class DocxExporter : IDocumentExporter
 
         // Chapter title
         var titleText = options.IncludeChapterNumbers
-            ? $"Chapter {chapter.Number}: {chapter.Title}"
+            ? $"Chapter {chapter.Order}: {chapter.Title}"
             : chapter.Title;
 
         var chapterTitle = new Paragraph(

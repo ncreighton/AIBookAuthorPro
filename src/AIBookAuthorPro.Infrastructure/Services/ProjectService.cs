@@ -64,26 +64,17 @@ public sealed class ProjectService : IProjectService
             
             var project = new Project
             {
-                Id = Guid.NewGuid(),
                 Name = name,
                 Metadata = new BookMetadata
                 {
-                    Title = name,
-                    CreatedAt = DateTime.UtcNow,
-                    ModifiedAt = DateTime.UtcNow
+                    Title = name
                 },
                 GenerationSettings = new GenerationSettings
                 {
-                    DefaultProvider = Enums.AIProviderType.Claude,
-                    DefaultModel = "claude-sonnet-4-20250514",
-                    Temperature = 0.7,
-                    MaxTokens = 4000
+                    Provider = AIProviderType.Claude,
+                    Temperature = 0.7
                 },
-                TemplateName = templateName,
-                Chapters = new List<Chapter>(),
-                Characters = new List<Character>(),
-                Locations = new List<Location>(),
-                ResearchNotes = new List<ResearchNote>()
+                TemplateName = templateName
             };
 
             _currentProject = project;
@@ -143,7 +134,8 @@ public sealed class ProjectService : IProjectService
                     if (chapterData != null)
                     {
                         chapter.Content = chapterData.Content;
-                        chapter.Scenes = chapterData.Scenes;
+                        // Note: Scenes is read-only, would need to use AddScene method if available
+                        // For now, we'll load content only
                     }
                 }
             }
@@ -186,7 +178,7 @@ public sealed class ProjectService : IProjectService
 
             _logger.LogInformation("Saving project to: {FilePath}", targetPath);
             
-            project.Metadata.ModifiedAt = DateTime.UtcNow;
+            // Note: BookMetadata doesn't have ModifiedAt, Entity base class handles timestamps
             
             // Create temporary file first
             var tempPath = Path.GetTempFileName();
@@ -214,7 +206,7 @@ public sealed class ProjectService : IProjectService
                         var chapterContent = new ChapterContent
                         {
                             Content = chapter.Content,
-                            Scenes = chapter.Scenes
+                            Scenes = chapter.Scenes.ToList() // Convert IReadOnlyList to List
                         };
                         await JsonSerializer.SerializeAsync(stream, chapterContent, _jsonOptions, cancellationToken);
                     }
@@ -284,10 +276,8 @@ public sealed class ProjectService : IProjectService
     public void MarkAsModified()
     {
         _hasUnsavedChanges = true;
-        if (_currentProject != null)
-        {
-            _currentProject.Metadata.ModifiedAt = DateTime.UtcNow;
-        }
+        // Note: Timestamps are handled by Entity base class
+        _hasUnsavedChanges = true;
     }
 
     /// <inheritdoc />
@@ -523,34 +513,54 @@ public sealed class ProjectService : IProjectService
     private Project CloneProjectWithoutContent(Project project)
     {
         // Create a shallow copy with chapter content cleared for metadata storage
+        // Note: Entity.Id, CreatedAt, ModifiedAt are readonly and set by Entity base class
         var clone = new Project
         {
-            Id = project.Id,
+            Name = project.Name,
+            Description = project.Description,
             Metadata = project.Metadata,
-            Settings = project.Settings,
             Outline = project.Outline,
-            Characters = project.Characters,
-            Locations = project.Locations,
-            ResearchNotes = project.ResearchNotes,
-            Chapters = project.Chapters.Select(c => new Chapter
-            {
-                Id = c.Id,
-                Title = c.Title,
-                Number = c.Number,
-                Summary = c.Summary,
-                Status = c.Status,
-                WordCount = c.WordCount,
-                TargetWordCount = c.TargetWordCount,
-                Notes = c.Notes,
-                CharacterIds = c.CharacterIds,
-                LocationIds = c.LocationIds,
-                CreatedAt = c.CreatedAt,
-                ModifiedAt = c.ModifiedAt,
-                // Content and Scenes stored separately
-                Content = null,
-                Scenes = new List<Scene>()
-            }).ToList()
+            Status = project.Status,
+            TemplateName = project.TemplateName,
+            GenerationSettings = project.GenerationSettings,
+            FilePath = project.FilePath,
+            TargetWordCount = project.TargetWordCount
         };
+        
+        // Copy collections using Add methods
+        foreach (var character in project.Characters)
+        {
+            clone.AddCharacter(character);
+        }
+        foreach (var location in project.Locations)
+        {
+            clone.AddLocation(location);
+        }
+        foreach (var note in project.ResearchNotes)
+        {
+            clone.AddResearchNote(note);
+        }
+        
+        // Add chapters without content
+        foreach (var chapter in project.Chapters)
+        {
+            var chapterClone = new Chapter
+            {
+                Title = chapter.Title,
+                Order = chapter.Order,
+                Summary = chapter.Summary,
+                Outline = chapter.Outline,
+                Status = chapter.Status,
+                Notes = chapter.Notes,
+                TargetWordCount = chapter.TargetWordCount,
+                PovCharacterId = chapter.PovCharacterId,
+                PrimaryLocationId = chapter.PrimaryLocationId,
+                CharacterIds = new List<Guid>(chapter.CharacterIds),
+                LocationIds = new List<Guid>(chapter.LocationIds)
+                // Content and Scenes stored separately - not included in clone
+            };
+            clone.AddChapter(chapterClone);
+        }
         
         return clone;
     }

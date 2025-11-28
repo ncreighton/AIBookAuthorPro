@@ -35,7 +35,7 @@ public sealed class AnthropicProvider : BaseAIProvider
         {
             ModelId = "claude-sonnet-4-20250514",
             DisplayName = "Claude Sonnet 4",
-            Provider = Enums.AIProviderType.Claude,
+            Provider = AIProviderType.Claude,
             MaxContextTokens = 200000,
             MaxOutputTokens = 64000,
             InputCostPer1K = 0.003m,
@@ -47,7 +47,7 @@ public sealed class AnthropicProvider : BaseAIProvider
         {
             ModelId = "claude-sonnet-4-20250514",
             DisplayName = "Claude Sonnet 4",
-            Provider = Enums.AIProviderType.Claude,
+            Provider = AIProviderType.Claude,
             MaxContextTokens = 200000,
             MaxOutputTokens = 64000,
             InputCostPer1K = 0.003m,
@@ -59,7 +59,7 @@ public sealed class AnthropicProvider : BaseAIProvider
         {
             ModelId = "claude-haiku-3-5-20241022",
             DisplayName = "Claude 3.5 Haiku",
-            Provider = Enums.AIProviderType.Claude,
+            Provider = AIProviderType.Claude,
             MaxContextTokens = 200000,
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.00025m,

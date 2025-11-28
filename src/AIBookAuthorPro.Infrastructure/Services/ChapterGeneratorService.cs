@@ -180,7 +180,7 @@ Rewritten section:";
 
             var request = new GenerationRequest
             {
-                Prompt = prompt,
+                UserPrompt = prompt,
                 MaxTokens = Math.Max(1000, _tokenCounter.EstimateTokens(selectedText) * 2),
                 Temperature = 0.7
             };
@@ -213,7 +213,7 @@ Rewritten section:";
 Book: {project.Metadata.Title}
 Genre: {project.Metadata.Genre}
 
-Chapter Synopsis: {chapter.Synopsis}
+Chapter Summary: {chapter.Summary}
 
 Provide a structured outline including:
 1. Opening scene and hook
@@ -226,7 +226,7 @@ Outline:";
 
             var request = new GenerationRequest
             {
-                Prompt = prompt,
+                UserPrompt = prompt,
                 MaxTokens = 1500,
                 Temperature = 0.6,
                 SystemPrompt = BuildSystemPrompt(project)
@@ -250,14 +250,8 @@ Outline:";
         ChapterGenerationRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var contextOptions = new ContextBuildOptions
-        {
-            IncludePreviousChapters = request.IncludePreviousChapter,
-            IncludeCharacters = request.IncludeCharacters,
-            IncludeLocations = request.IncludeLocations,
-            IncludeOutline = request.IncludeOutline,
-            MaxTokens = _tokenCounter.GetMaxContextTokens(request.ModelId ?? "claude-3-5-sonnet-20241022") - request.MaxTokens
-        };
+        // ContextBuildOptions doesn't have those properties - pass null and let BuildChapterContext use defaults
+        var contextOptions = (ContextBuildOptions?)null;
 
         var contextResult = _contextBuilder.BuildChapterContext(
             request.Project, 

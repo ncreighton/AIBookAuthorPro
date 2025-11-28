@@ -34,7 +34,7 @@ public sealed class GeminiProvider : BaseAIProvider
         {
             ModelId = "gemini-2.0-flash-exp",
             DisplayName = "Gemini 2.0 Flash",
-            Provider = Enums.AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
+            Provider = AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
             MaxContextTokens = 1000000,
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.00015m, // Free tier available
@@ -46,7 +46,7 @@ public sealed class GeminiProvider : BaseAIProvider
         {
             ModelId = "gemini-1.5-pro",
             DisplayName = "Gemini 1.5 Pro",
-            Provider = Enums.AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
+            Provider = AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
             MaxContextTokens = 2000000,
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.00125m,
@@ -58,7 +58,7 @@ public sealed class GeminiProvider : BaseAIProvider
         {
             ModelId = "gemini-1.5-flash",
             DisplayName = "Gemini 1.5 Flash",
-            Provider = Enums.AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
+            Provider = AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
             MaxContextTokens = 1000000,
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.000075m,
@@ -70,7 +70,7 @@ public sealed class GeminiProvider : BaseAIProvider
         {
             ModelId = "gemini-1.5-flash-8b",
             DisplayName = "Gemini 1.5 Flash 8B",
-            Provider = Enums.AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
+            Provider = AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
             MaxContextTokens = 1000000,
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.0000375m,
