@@ -215,12 +215,6 @@ public partial class LocationListViewModel : ObservableObject
         }
     }
 }
-
-/// <summary>
-/// ViewModel for editing a single location.
-/// </summary>
-public partial class LocationEditorViewModel : ObservableObject
-{
     private readonly IProjectService _projectService;
     private readonly IGenerationPipelineService _generationService;
     private readonly ILogger<LocationEditorViewModel> _logger;

@@ -4,6 +4,7 @@
 // =============================================================================
 
 using System.Collections.ObjectModel;
+using CharacterRoleEnum = AIBookAuthorPro.Core.Enums.CharacterRole;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
@@ -36,7 +37,7 @@ public partial class CharacterEditorViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private CharacterRole _role = CharacterRole.Supporting;
+    private CharacterRoleEnum _role = CharacterRoleEnum.Supporting;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
@@ -80,7 +81,7 @@ public partial class CharacterEditorViewModel : ObservableObject
     [ObservableProperty]
     private bool _isNewCharacter;
 
-    public ObservableCollection<CharacterRole> AvailableRoles { get; } = new(Enum.GetValues<CharacterRole>());
+    public ObservableCollection<CharacterRoleEnum> AvailableRoles { get; } = new(Enum.GetValues<CharacterRoleEnum>());
 
     public bool HasUnsavedChanges => _originalCharacter != null && HasChanges();
 
@@ -128,7 +129,7 @@ public partial class CharacterEditorViewModel : ObservableObject
 
         Name = string.Empty;
         Description = string.Empty;
-        Role = CharacterRole.Supporting;
+        Role = CharacterRoleEnum.Supporting;
         Age = null;
         PhysicalDescription = string.Empty;
         Personality = string.Empty;

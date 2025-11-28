@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
+using ProjectSummary = AIBookAuthorPro.Core.Interfaces.ProjectSummary;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -74,7 +75,7 @@ public partial class MainViewModel : ObservableObject
     /// <summary>
     /// Gets the recent projects list.
     /// </summary>
-    public ObservableCollection<ProjectInfo> RecentProjects { get; } = new();
+    public ObservableCollection<ProjectSummary> RecentProjects { get; } = new();
 
     /// <summary>
     /// Gets the chapters list.

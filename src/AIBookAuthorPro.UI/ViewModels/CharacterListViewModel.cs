@@ -4,6 +4,7 @@
 // =============================================================================
 
 using System.Collections.ObjectModel;
+using CharacterRoleEnum = AIBookAuthorPro.Core.Enums.CharacterRole;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
@@ -34,7 +35,7 @@ public partial class CharacterListViewModel : ObservableObject
     private Character? _selectedCharacter;
 
     [ObservableProperty]
-    private CharacterRole? _roleFilter;
+    private CharacterRoleEnum? _roleFilter;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -96,7 +97,7 @@ public partial class CharacterListViewModel : ObservableObject
         ApplyFilters();
     }
 
-    partial void OnRoleFilterChanged(CharacterRole? value)
+    partial void OnRoleFilterChanged(CharacterRoleEnum? value)
     {
         ApplyFilters();
     }
@@ -114,7 +115,7 @@ public partial class CharacterListViewModel : ObservableObject
 
         if (RoleFilter.HasValue)
         {
-            filtered = filtered.Where(c => c.Role == RoleFilter.Value);
+            filtered = filtered.Where(c => c.Role == (Core.Models.CharacterRole)RoleFilter.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(SearchText))
@@ -146,7 +147,7 @@ public partial class CharacterListViewModel : ObservableObject
         {
             Id = Guid.NewGuid(),
             Name = "New Character",
-            Role = CharacterRole.Supporting,
+            Role = (Core.Models.CharacterRole)CharacterRoleEnum.Supporting,
             CreatedAt = DateTime.UtcNow,
             ModifiedAt = DateTime.UtcNow
         };
@@ -224,7 +225,7 @@ public partial class CharacterListViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FilterByRole(CharacterRole role)
+    private void FilterByRole(CharacterRoleEnum role)
     {
         RoleFilter = RoleFilter == role ? null : role;
     }
@@ -250,12 +251,6 @@ public partial class CharacterListViewModel : ObservableObject
         }
     }
 }
-
-/// <summary>
-/// ViewModel for editing a single character.
-/// </summary>
-public partial class CharacterEditorViewModel : ObservableObject
-{
     private readonly IProjectService _projectService;
     private readonly IGenerationPipelineService _generationService;
     private readonly ILogger<CharacterEditorViewModel> _logger;
@@ -270,7 +265,7 @@ public partial class CharacterEditorViewModel : ObservableObject
     private string _name = string.Empty;
 
     [ObservableProperty]
-    private CharacterRole _role = CharacterRole.Supporting;
+    private CharacterRoleEnum _role = CharacterRoleEnum.Supporting;
 
     [ObservableProperty]
     private string? _age;
@@ -320,7 +315,7 @@ public partial class CharacterEditorViewModel : ObservableObject
     /// <summary>
     /// Gets the available character roles.
     /// </summary>
-    public CharacterRole[] AvailableRoles { get; } = Enum.GetValues<CharacterRole>();
+    public CharacterRoleEnum[] AvailableRoles { get; } = Enum.GetValues<CharacterRoleEnum>();
 
     /// <summary>
     /// Event raised when editing is complete.
@@ -350,7 +345,7 @@ public partial class CharacterEditorViewModel : ObservableObject
 
         // Load character data
         Name = character.Name;
-        Role = character.Role;
+        Role = (CharacterRoleEnum)character.Role;
         Age = character.Age;
         Gender = character.Gender;
         Occupation = character.Occupation;
@@ -382,7 +377,7 @@ public partial class CharacterEditorViewModel : ObservableObject
 
     // Track modifications
     partial void OnNameChanged(string value) => IsModified = true;
-    partial void OnRoleChanged(CharacterRole value) => IsModified = true;
+    partial void OnRoleChanged(CharacterRoleEnum value) => IsModified = true;
     partial void OnPhysicalDescriptionChanged(string? value) => IsModified = true;
     partial void OnPersonalityChanged(string? value) => IsModified = true;
     partial void OnBackstoryChanged(string? value) => IsModified = true;

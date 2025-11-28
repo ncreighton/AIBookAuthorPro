@@ -4,6 +4,7 @@
 // =============================================================================
 
 using System.Collections.ObjectModel;
+using OutlineItemTypeEnum = AIBookAuthorPro.Core.Enums.OutlineItemType;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
@@ -46,7 +47,7 @@ public partial class OutlineEditorViewModel : ObservableObject
     /// <summary>
     /// Gets the available outline item types.
     /// </summary>
-    public OutlineItemType[] ItemTypes { get; } = Enum.GetValues<OutlineItemType>();
+    public OutlineItemTypeEnum[] ItemTypes { get; } = Enum.GetValues<OutlineItemTypeEnum>();
 
     /// <summary>
     /// Event raised when navigation back is requested.
@@ -142,7 +143,7 @@ public partial class OutlineEditorViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void AddItem(OutlineItemType type)
+    private void AddItem(OutlineItemTypeEnum type)
     {
         if (Project?.Outline == null) return;
 
@@ -168,14 +169,14 @@ public partial class OutlineEditorViewModel : ObservableObject
         _logger.LogInformation("Added outline item: {Title} ({Type})", newItem.Title, type);
     }
 
-    private static string GetDefaultTitle(OutlineItemType type) => type switch
+    private static string GetDefaultTitle(OutlineItemTypeEnum type) => type switch
     {
-        OutlineItemType.Act => "New Act",
-        OutlineItemType.Part => "New Part",
-        OutlineItemType.Chapter => "New Chapter",
-        OutlineItemType.Scene => "New Scene",
-        OutlineItemType.Beat => "New Beat",
-        OutlineItemType.Note => "New Note",
+        OutlineItemTypeEnum.Act => "New Act",
+        OutlineItemTypeEnum.Part => "New Part",
+        OutlineItemTypeEnum.Chapter => "New Chapter",
+        OutlineItemTypeEnum.Scene => "New Scene",
+        OutlineItemTypeEnum.Beat => "New Beat",
+        OutlineItemTypeEnum.Note => "New Note",
         _ => "New Item"
     };
 
@@ -437,7 +438,7 @@ Format as a hierarchical outline.";
             var act = new OutlineItem
             {
                 Id = Guid.NewGuid(),
-                Type = OutlineItemType.Act,
+                Type = (Core.Models.OutlineItemType)OutlineItemTypeEnum.Act,
                 Title = actTitle,
                 Order = order++,
                 CreatedAt = DateTime.UtcNow,
@@ -451,7 +452,7 @@ Format as a hierarchical outline.";
                 var chapter = new OutlineItem
                 {
                     Id = Guid.NewGuid(),
-                    Type = OutlineItemType.Chapter,
+                    Type = (Core.Models.OutlineItemType)OutlineItemTypeEnum.Chapter,
                     Title = chapterTitle,
                     ParentId = act.Id,
                     Order = chapterOrder++,
@@ -471,7 +472,7 @@ Format as a hierarchical outline.";
     [RelayCommand]
     private async Task CreateChapterFromItemAsync(OutlineItemViewModel? item)
     {
-        if (item?.Item.Type != OutlineItemType.Chapter || Project == null) return;
+        if (item?.Item.Type != (Core.Models.OutlineItemType)OutlineItemTypeEnum.Chapter || Project == null) return;
 
         // Check if chapter already exists
         if (item.Item.LinkedChapterId.HasValue)
@@ -583,7 +584,7 @@ public partial class OutlineItemViewModel : ObservableObject
     /// <summary>
     /// Gets the item type.
     /// </summary>
-    public OutlineItemType Type => Item.Type;
+    public OutlineItemTypeEnum Type => (OutlineItemTypeEnum)Item.Type;
 
     /// <summary>
     /// Gets whether this item has children.
@@ -600,12 +601,12 @@ public partial class OutlineItemViewModel : ObservableObject
     /// </summary>
     public string Icon => Item.Type switch
     {
-        OutlineItemType.Act => "TheaterMasks",
-        OutlineItemType.Part => "BookOpenPageVariant",
-        OutlineItemType.Chapter => "FileDocument",
-        OutlineItemType.Scene => "MovieOpen",
-        OutlineItemType.Beat => "CircleSmall",
-        OutlineItemType.Note => "Note",
+        Core.Models.OutlineItemType.Act => "TheaterMasks",
+        Core.Models.OutlineItemType.Part => "BookOpenPageVariant",
+        Core.Models.OutlineItemType.Chapter => "FileDocument",
+        Core.Models.OutlineItemType.Scene => "MovieOpen",
+        Core.Models.OutlineItemType.Beat => "CircleSmall",
+        Core.Models.OutlineItemType.Note => "Note",
         _ => "Circle"
     };
 

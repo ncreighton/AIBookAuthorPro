@@ -40,9 +40,9 @@ public partial class CharacterListView : UserControl
 /// </summary>
 public static class CharacterRoleValue
 {
-    public static CharacterRole Protagonist => CharacterRole.Protagonist;
-    public static CharacterRole Antagonist => CharacterRole.Antagonist;
-    public static CharacterRole Supporting => CharacterRole.Supporting;
-    public static CharacterRole Minor => CharacterRole.Minor;
-    public static CharacterRole Narrator => CharacterRole.Narrator;
+    public static Core.Enums.CharacterRole Protagonist => Core.Enums.CharacterRole.Protagonist;
+    public static Core.Enums.CharacterRole Antagonist => Core.Enums.CharacterRole.Antagonist;
+    public static Core.Enums.CharacterRole Supporting => Core.Enums.CharacterRole.Supporting;
+    public static Core.Enums.CharacterRole Minor => Core.Enums.CharacterRole.Minor;
+    public static Core.Enums.CharacterRole Narrator => Core.Enums.CharacterRole.Narrator;
 }
