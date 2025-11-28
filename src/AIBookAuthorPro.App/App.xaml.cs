@@ -28,33 +28,65 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        // Configure services
-        var services = new ServiceCollection();
-        ConfigureServices(services);
-        _serviceProvider = services.BuildServiceProvider();
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("APP: Starting OnStartup");
+            Console.WriteLine("APP: Starting OnStartup");
 
-        _logger = _serviceProvider.GetRequiredService<ILogger<App>>();
-        _logger.LogInformation("AI Book Author Pro starting up...");
+            // Configure services
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+            
+            System.Diagnostics.Debug.WriteLine("APP: Building service provider");
+            Console.WriteLine("APP: Building service provider");
+            
+            _serviceProvider = services.BuildServiceProvider();
 
-        // Set up global exception handling
-        SetupExceptionHandling();
+            _logger = _serviceProvider.GetRequiredService<ILogger<App>>();
+            _logger.LogInformation("AI Book Author Pro starting up...");
+            Console.WriteLine("APP: Logger created");
 
-        // Show main window
-        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-        mainWindow.Show();
+            // Set up global exception handling
+            SetupExceptionHandling();
 
-        _logger.LogInformation("Application started successfully");
+            System.Diagnostics.Debug.WriteLine("APP: Creating MainWindow");
+            Console.WriteLine("APP: Creating MainWindow");
+
+            // Show main window
+            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+            
+            System.Diagnostics.Debug.WriteLine("APP: MainWindow created, showing...");
+            Console.WriteLine("APP: MainWindow created, showing...");
+            
+            mainWindow.Show();
+
+            _logger.LogInformation("Application started successfully");
+            Console.WriteLine("APP: Application started successfully");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"APP ERROR: {ex}");
+            Console.WriteLine($"APP ERROR: {ex}");
+            MessageBox.Show($"Failed to start application:\n\n{ex.Message}\n\n{ex.StackTrace}", 
+                "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown(1);
+        }
     }
 
     private void ConfigureServices(IServiceCollection services)
     {
+        Console.WriteLine("APP: ConfigureServices starting");
+        
         // Logging
         services.AddLogging(builder =>
         {
             builder.SetMinimumLevel(LogLevel.Debug);
             builder.AddDebug();
+            builder.AddConsole();
         });
 
+        Console.WriteLine("APP: Registering core services");
+        
         // Core Services
         services.AddSingleton<IFileSystemService, FileSystemService>();
         services.AddSingleton<ISettingsService, SettingsService>();
@@ -65,6 +97,8 @@ public partial class App : Application
         services.AddSingleton<IErrorHandler, ErrorHandler>();
         services.AddSingleton<IFlowDocumentService, FlowDocumentService>();
 
+        Console.WriteLine("APP: Registering AI services");
+        
         // AI Services
         services.AddSingleton<ITokenCounter, TokenCounter>();
         services.AddSingleton<IAIProviderFactory, AIProviderFactory>();
@@ -77,6 +111,8 @@ public partial class App : Application
         services.AddTransient<OpenAIProvider>();
         services.AddTransient<GeminiProvider>();
 
+        Console.WriteLine("APP: Registering ViewModels");
+        
         // ViewModels
         services.AddSingleton<MainViewModel>();
         services.AddTransient<ProjectDashboardViewModel>();
@@ -90,6 +126,8 @@ public partial class App : Application
         services.AddTransient<OutlineEditorViewModel>();
         services.AddTransient<ExportViewModel>();
 
+        Console.WriteLine("APP: Registering Views");
+        
         // Views
         services.AddTransient<MainWindow>();
         services.AddTransient<ProjectDashboardView>();
@@ -102,6 +140,8 @@ public partial class App : Application
         services.AddTransient<LocationEditorView>();
         services.AddTransient<OutlineEditorView>();
         services.AddTransient<ExportDialogView>();
+        
+        Console.WriteLine("APP: ConfigureServices complete");
     }
 
     private void SetupExceptionHandling()
@@ -110,6 +150,7 @@ public partial class App : Application
         DispatcherUnhandledException += (sender, args) =>
         {
             _logger?.LogError(args.Exception, "Unhandled UI exception");
+            Console.WriteLine($"UI EXCEPTION: {args.Exception}");
 
             var errorHandler = _serviceProvider.GetService<IErrorHandler>();
             errorHandler?.Handle(args.Exception, "Unhandled UI Exception");
@@ -122,12 +163,14 @@ public partial class App : Application
         {
             var exception = args.ExceptionObject as Exception;
             _logger?.LogCritical(exception, "Unhandled domain exception");
+            Console.WriteLine($"DOMAIN EXCEPTION: {exception}");
         };
 
         // Handle task exceptions
         TaskScheduler.UnobservedTaskException += (sender, args) =>
         {
             _logger?.LogError(args.Exception, "Unobserved task exception");
+            Console.WriteLine($"TASK EXCEPTION: {args.Exception}");
             args.SetObserved();
         };
     }
@@ -136,6 +179,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _logger?.LogInformation("AI Book Author Pro shutting down...");
+        Console.WriteLine("APP: Shutting down");
 
         // Dispose service provider if it implements IDisposable
         if (_serviceProvider is IDisposable disposable)
