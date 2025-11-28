@@ -63,8 +63,19 @@ public partial class MainWindow : Window
     {
         _logger.LogDebug("MainWindow loaded");
 
-        // Show welcome screen or last project
-        await NavigateToViewAsync(NavigationDestination.Dashboard);
+        try
+        {
+            // Initialize ViewModel asynchronously - this prevents UI deadlock
+            await _viewModel.InitializeAsync();
+
+            // Navigate to dashboard
+            await NavigateToViewAsync(NavigationDestination.Dashboard);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to initialize main window");
+            _notificationService.ShowError($"Failed to initialize: {ex.Message}");
+        }
     }
 
     private async void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
