@@ -3,127 +3,120 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
-using System.IO;
-
 namespace AIBookAuthorPro.Core.Interfaces;
 
 /// <summary>
-/// Service for file system operations with async support.
+/// Interface for file system operations.
 /// </summary>
 public interface IFileSystemService
 {
     /// <summary>
-    /// Checks if a file exists at the specified path.
+    /// Checks if a file exists.
     /// </summary>
-    bool FileExists(string path);
+    Task<bool> FileExistsAsync(string path, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Checks if a directory exists at the specified path.
+    /// Checks if a directory exists.
     /// </summary>
-    bool DirectoryExists(string path);
+    Task<bool> DirectoryExistsAsync(string path, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Creates a directory at the specified path.
+    /// Ensures a directory exists, creating it if necessary.
     /// </summary>
-    void CreateDirectory(string path);
+    Task EnsureDirectoryExistsAsync(string path, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Reads all text from a file asynchronously.
+    /// Reads all text from a file.
     /// </summary>
     Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Writes all text to a file asynchronously.
-    /// </summary>
-    Task WriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Reads all bytes from a file asynchronously.
+    /// Reads all bytes from a file.
     /// </summary>
     Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Writes all bytes to a file asynchronously.
+    /// Writes text to a file.
+    /// </summary>
+    Task WriteAllTextAsync(string path, string content, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes bytes to a file.
     /// </summary>
     Task WriteAllBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a file at the specified path.
+    /// Deletes a file.
     /// </summary>
-    void DeleteFile(string path);
+    Task DeleteFileAsync(string path, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes a directory at the specified path.
+    /// Deletes a directory.
     /// </summary>
-    void DeleteDirectory(string path, bool recursive = false);
+    Task DeleteDirectoryAsync(string path, bool recursive = false, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Copies a file from source to destination.
+    /// Copies a file.
     /// </summary>
-    void CopyFile(string sourcePath, string destinationPath, bool overwrite = false);
+    Task CopyFileAsync(string sourcePath, string destPath, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Moves a file from source to destination.
+    /// Moves a file.
     /// </summary>
-    void MoveFile(string sourcePath, string destinationPath);
+    Task MoveFileAsync(string sourcePath, string destPath, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets all files in a directory matching a pattern.
+    /// Gets files in a directory.
     /// </summary>
-    IEnumerable<string> GetFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly);
+    Task<string[]> GetFilesAsync(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets all directories in a directory.
+    /// Gets directories in a path.
     /// </summary>
-    IEnumerable<string> GetDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly);
+    Task<string[]> GetDirectoriesAsync(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets file information.
+    /// Gets file info.
     /// </summary>
-    FileInfo GetFileInfo(string path);
+    Task<FileInfo> GetFileInfoAsync(string path, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets the application data folder path.
+    /// Opens a file for reading.
+    /// </summary>
+    Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Opens a file for writing.
+    /// </summary>
+    Task<Stream> OpenWriteAsync(string path, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the temp path.
+    /// </summary>
+    string GetTempPath();
+
+    /// <summary>
+    /// Gets a temp file name.
+    /// </summary>
+    string GetTempFileName();
+
+    /// <summary>
+    /// Combines paths.
+    /// </summary>
+    string CombinePaths(params string[] paths);
+
+    /// <summary>
+    /// Gets the application data path.
     /// </summary>
     string GetAppDataPath();
 
     /// <summary>
-    /// Gets the user documents folder path.
+    /// Gets the projects path.
     /// </summary>
-    string GetDocumentsPath();
+    string GetProjectsPath();
 
     /// <summary>
-    /// Combines path segments.
+    /// Gets the cache path.
     /// </summary>
-    string CombinePath(params string[] paths);
-
-    /// <summary>
-    /// Gets the directory name from a path.
-    /// </summary>
-    string? GetDirectoryName(string path);
-
-    /// <summary>
-    /// Gets the file name from a path.
-    /// </summary>
-    string GetFileName(string path);
-
-    /// <summary>
-    /// Gets the file name without extension from a path.
-    /// </summary>
-    string GetFileNameWithoutExtension(string path);
-
-    /// <summary>
-    /// Gets the extension from a path.
-    /// </summary>
-    string GetExtension(string path);
-
-    /// <summary>
-    /// Creates a temporary file and returns its path.
-    /// </summary>
-    string CreateTempFile();
-
-    /// <summary>
-    /// Gets the temp folder path.
-    /// </summary>
-    string GetTempPath();
+    string GetCachePath();
 }
