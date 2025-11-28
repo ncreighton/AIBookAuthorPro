@@ -105,7 +105,7 @@ public partial class LocationListViewModel : ObservableObject
             filtered = filtered.Where(l =>
                 l.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ||
                 (l.Description?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (l.Type?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
+                (l.Type.ToString().Contains(SearchText, StringComparison.OrdinalIgnoreCase)));
         }
 
         foreach (var location in filtered)
@@ -127,15 +127,11 @@ public partial class LocationListViewModel : ObservableObject
 
         var newLocation = new Location
         {
-            Id = Guid.NewGuid(),
             Name = "New Location",
-            Type = "General",
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow
+            Type = LocationType.Other
         };
 
-        Project.Locations.Add(newLocation);
-        _projectService.MarkAsModified();
+        Project.AddLocation(newLocation);
 
         RefreshLocationList();
         SelectedLocation = newLocation;
@@ -161,9 +157,10 @@ public partial class LocationListViewModel : ObservableObject
 
         _logger.LogDebug("Deleting location {LocationName}", location.Name);
 
-        Project.Locations.Remove(location);
-        _projectService.MarkAsModified();
-        await _projectService.SaveProjectAsync();
+        if (Project.RemoveLocation(location.Id))
+        {
+            await _projectService.SaveAsync(Project);
+        }
 
         RefreshLocationList();
         StatusMessage = $"Deleted: {location.Name}";
@@ -176,19 +173,15 @@ public partial class LocationListViewModel : ObservableObject
 
         var duplicate = new Location
         {
-            Id = Guid.NewGuid(),
             Name = $"{location.Name} (Copy)",
             Type = location.Type,
             Description = location.Description,
-            Significance = location.Significance,
+            History = location.History,
             SensoryDetails = location.SensoryDetails,
-            Notes = location.Notes,
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow
+            Notes = location.Notes
         };
 
-        Project.Locations.Add(duplicate);
-        _projectService.MarkAsModified();
+        Project.AddLocation(duplicate);
 
         RefreshLocationList();
         StatusMessage = $"Duplicated: {location.Name}";
@@ -203,7 +196,9 @@ public partial class LocationListViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveAllAsync()
     {
-        var result = await _projectService.SaveProjectAsync();
+        if (Project == null) return;
+
+        var result = await _projectService.SaveAsync(Project);
 
         if (result.IsSuccess)
         {

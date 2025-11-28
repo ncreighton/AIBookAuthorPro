@@ -48,11 +48,7 @@ public partial class LocationEditorViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private string _historicalContext = string.Empty;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private string _significance = string.Empty;
+    private string _history = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
@@ -101,8 +97,7 @@ public partial class LocationEditorViewModel : ObservableObject
         LocationType = location.Type;
         Atmosphere = location.Atmosphere;
         SensoryDetails = location.SensoryDetails;
-        HistoricalContext = location.HistoricalContext;
-        Significance = location.Significance;
+        History = location.History ?? string.Empty;
         Notes = location.Notes;
         ParentLocationId = location.ParentLocationId;
     }
@@ -124,8 +119,7 @@ public partial class LocationEditorViewModel : ObservableObject
         LocationType = LocationType.Other;
         Atmosphere = string.Empty;
         SensoryDetails = string.Empty;
-        HistoricalContext = string.Empty;
-        Significance = string.Empty;
+        History = string.Empty;
         Notes = string.Empty;
         ParentLocationId = null;
     }
@@ -160,19 +154,17 @@ public partial class LocationEditorViewModel : ObservableObject
             _originalLocation.Type = LocationType;
             _originalLocation.Atmosphere = Atmosphere;
             _originalLocation.SensoryDetails = SensoryDetails;
-            _originalLocation.HistoricalContext = HistoricalContext;
-            _originalLocation.Significance = Significance;
+            _originalLocation.History = History;
             _originalLocation.Notes = Notes;
             _originalLocation.ParentLocationId = ParentLocationId;
-            _originalLocation.ModifiedAt = DateTime.UtcNow;
 
             if (IsNewLocation)
             {
-                _project.Locations.Add(_originalLocation);
+                _project.AddLocation(_originalLocation);
                 IsNewLocation = false;
             }
 
-            await _projectService.SaveProjectAsync(_project);
+            await _projectService.SaveAsync(_project);
             
             _notificationService.ShowSuccess($"Location '{Name}' saved successfully.");
             _logger.LogInformation("Location {LocationId} saved", _originalLocation.Id);
@@ -211,8 +203,7 @@ public partial class LocationEditorViewModel : ObservableObject
                LocationType != _originalLocation.Type ||
                Atmosphere != _originalLocation.Atmosphere ||
                SensoryDetails != _originalLocation.SensoryDetails ||
-               HistoricalContext != _originalLocation.HistoricalContext ||
-               Significance != _originalLocation.Significance ||
+               History != (_originalLocation.History ?? string.Empty) ||
                Notes != _originalLocation.Notes ||
                ParentLocationId != _originalLocation.ParentLocationId;
     }
