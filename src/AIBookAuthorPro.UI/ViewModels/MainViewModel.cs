@@ -117,21 +117,6 @@ public partial class MainViewModel : ObservableObject
         _settingsService = settingsService;
         _logger = logger;
 
-<<<<<<< HEAD
-        // Initialize recent projects asynchronously to avoid deadlock
-        // This will be called after the window is loaded
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await LoadRecentProjectsAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to load recent projects during initialization");
-            }
-        });
-=======
         _logger.LogDebug("MainViewModel created");
         
         // DO NOT call any commands here - they will be called after the window loads
@@ -169,7 +154,6 @@ public partial class MainViewModel : ObservableObject
         {
             IsBusy = false;
         }
->>>>>>> 1b9798acd926b365f6d87a1deb8950c293c5732f
     }
 
     [RelayCommand]
