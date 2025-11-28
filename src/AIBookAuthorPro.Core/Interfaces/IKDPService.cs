@@ -29,7 +29,7 @@ public interface IKDPService
     /// <param name="metadata">The metadata to save.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success or failure.</returns>
-    Task<r> SaveMetadataAsync(Guid projectId, KDPMetadata metadata, CancellationToken cancellationToken = default);
+    Task<Result> SaveMetadataAsync(Guid projectId, KDPMetadata metadata, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Searches for KDP categories matching a query.
