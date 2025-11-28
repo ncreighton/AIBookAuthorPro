@@ -37,7 +37,7 @@ public interface ICoverService
     /// <param name="cover">The cover to save.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success or failure.</returns>
-    Task<r> SaveCoverAsync(Guid projectId, BookCover cover, CancellationToken cancellationToken = default);
+    Task<Result> SaveCoverAsync(Guid projectId, BookCover cover, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets a cover as the active cover.
@@ -46,7 +46,7 @@ public interface ICoverService
     /// <param name="coverId">The cover ID to set as active.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success or failure.</returns>
-    Task<r> SetActiveCoverAsync(Guid projectId, Guid coverId, CancellationToken cancellationToken = default);
+    Task<Result> SetActiveCoverAsync(Guid projectId, Guid coverId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a cover.
@@ -55,7 +55,7 @@ public interface ICoverService
     /// <param name="coverId">The cover ID to delete.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success or failure.</returns>
-    Task<r> DeleteCoverAsync(Guid projectId, Guid coverId, CancellationToken cancellationToken = default);
+    Task<Result> DeleteCoverAsync(Guid projectId, Guid coverId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Generates AI-powered cover images.
@@ -153,7 +153,7 @@ public interface ICoverService
     /// <param name="formatType">The book format type.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Success or failure.</returns>
-    Task<r> ExportForKDPAsync(
+    Task<Result> ExportForKDPAsync(
         Guid coverId,
         string outputPath,
         BookFormatType formatType = BookFormatType.Ebook,
