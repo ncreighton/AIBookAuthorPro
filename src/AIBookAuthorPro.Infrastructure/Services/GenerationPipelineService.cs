@@ -42,7 +42,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
     };
 
     // Pricing per 1K tokens (input, output)
-    private static readonly Dictionary<string, (decimal Input, decimal Output)> ModelPricing = new()
+    private static readonly Dictionary<string, (decimal Input, decimal Output)> ModelPricing = new(StringComparer.OrdinalIgnoreCase)
     {
         ["claude-3-5-haiku-20241022"] = (0.00025m, 0.00125m),
         ["claude-sonnet-4-20250514"] = (0.003m, 0.015m),
@@ -386,7 +386,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
         }
 
         // Calculate cost
-        var pricing = ModelPricing.GetValueOrDefault(modelId, (0.003m, 0.015m));
+        var pricing = ModelPricing.GetValueOrDefault(modelId, (Input: 0.003m, Output: 0.015m));
         var inputCost = (inputTokens / 1000m) * pricing.Input;
         var outputCost = (outputTokens / 1000m) * pricing.Output;
 
@@ -510,7 +510,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
             };
 
             // Calculate cost
-            var pricing = ModelPricing.GetValueOrDefault(request.ModelId ?? "", (0.003m, 0.015m));
+            var pricing = ModelPricing.GetValueOrDefault(request.ModelId ?? "", (Input: 0.003m, Output: 0.015m));
             totalUsage.EstimatedCost = (totalUsage.InputTokens / 1000m * pricing.Input) +
                                        (totalUsage.OutputTokens / 1000m * pricing.Output);
 
