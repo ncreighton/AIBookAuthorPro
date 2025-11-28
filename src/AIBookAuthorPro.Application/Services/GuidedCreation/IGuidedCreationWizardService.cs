@@ -5,7 +5,6 @@
 
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
-using AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
 
 namespace AIBookAuthorPro.Application.Services.GuidedCreation;
 
