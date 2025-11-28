@@ -1,0 +1,294 @@
+<UserControl
+    x:Class="AIBookAuthorPro.UI.Views.GuidedCreation.PromptEntryView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels.GuidedCreation"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:PromptEntryViewModel}"
+    d:DesignHeight="600"
+    d:DesignWidth="800">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Source Selection -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+            <TextBlock Text="Start from:" 
+                       Style="{StaticResource MaterialDesignBody1TextBlock}"
+                       VerticalAlignment="Center" Margin="0,0,16,0"/>
+            <ItemsControl ItemsSource="{Binding SourceOptions}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Command="{Binding DataContext.SelectSourceCommand, 
+                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding Source}"
+                                Margin="0,0,8,0" Padding="12,8">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="{Binding Icon}" 
+                                                         Width="18" Height="18"
+                                                         VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding DisplayName}" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <!-- Main Prompt Input -->
+        <materialDesign:Card Grid.Row="1" Padding="24">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Describe your book idea"
+                           Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                           Margin="0,0,0,12"/>
+
+                <TextBox Grid.Row="1"
+                         Text="{Binding PromptText, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         AcceptsReturn="True" TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalContentAlignment="Top"
+                         MinHeight="200"
+                         materialDesign:HintAssist.Hint="Enter your book concept, story idea, or paste a conversation from Claude or ChatGPT...&#x0a;&#x0a;Include details about:&#x0a;• Main characters and their motivations&#x0a;• The central conflict or challenge&#x0a;• The setting and time period&#x0a;• Genre and tone&#x0a;• Any specific themes you want to explore"/>
+
+                <!-- Character Count & Strength -->
+                <Grid Grid.Row="2" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="{Binding ValidationMessage}"
+                                   Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                                   Foreground="{Binding PromptStrengthColor}"/>
+                        <ProgressBar Value="{Binding PromptStrength}" Maximum="100"
+                                     Height="4" Margin="0,8,0,0"
+                                     Foreground="{Binding PromptStrengthColor}"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1" 
+                               Text="{Binding CharacterCount, StringFormat={}{0} characters}"
+                               Style="{StaticResource MaterialDesignCaptionTextBlock}"
+                               Opacity="0.7" VerticalAlignment="Bottom"/>
+                </Grid>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Advanced Options Toggle -->
+        <Button Grid.Row="2" 
+                Style="{StaticResource MaterialDesignFlatButton}"
+                Command="{Binding ToggleAdvancedOptionsCommand}"
+                HorizontalAlignment="Left" Margin="0,16,0,0">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="{Binding ShowAdvancedOptions, 
+                    Converter={StaticResource BoolToIconConverter}, 
+                    ConverterParameter='ChevronUp|ChevronDown'}"
+                    Width="20" Height="20"/>
+                <TextBlock Text="Advanced Options" Margin="8,0,0,0"/>
+            </StackPanel>
+        </Button>
+
+        <!-- Advanced Options Panel -->
+        <materialDesign:Card Grid.Row="3" Padding="24" Margin="0,16,0,0"
+                             Visibility="{Binding ShowAdvancedOptions, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Additional Context -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                    <TextBlock Text="Additional Context" 
+                               Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                               Margin="0,0,0,8"/>
+                    <TextBox Text="{Binding AdditionalContext, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                             AcceptsReturn="True" TextWrapping="Wrap"
+                             MinHeight="80"
+                             materialDesign:HintAssist.Hint="Any additional information or research notes..."/>
+                </StackPanel>
+
+                <!-- Comparable Titles -->
+                <StackPanel Grid.Row="1" Margin="0,0,0,16">
+                    <TextBlock Text="Comparable Titles" 
+                               Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                               Margin="0,0,0,8"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding NewComparableTitle, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="e.g., 'The Hunger Games meets 1984'"/>
+                        <Button Grid.Column="1" 
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Command="{Binding AddComparableTitleCommand}" Margin="8,0,0,0">
+                            <materialDesign:PackIcon Kind="Plus"/>
+                        </Button>
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding ComparableTitles}" Margin="0,8,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <materialDesign:Chip Content="{Binding}" 
+                                                     IsDeletable="True"
+                                                     DeleteCommand="{Binding DataContext.RemoveComparableTitleCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                     DeleteCommandParameter="{Binding}"
+                                                     Margin="0,0,8,8"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Must Include -->
+                <StackPanel Grid.Row="2" Margin="0,0,0,16">
+                    <TextBlock Text="Must Include Elements" 
+                               Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                               Margin="0,0,0,8"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding NewMustInclude, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="Elements that must appear in the story"/>
+                        <Button Grid.Column="1" 
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Command="{Binding AddMustIncludeCommand}" Margin="8,0,0,0">
+                            <materialDesign:PackIcon Kind="Plus"/>
+                        </Button>
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding MustIncludeElements}" Margin="0,8,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <materialDesign:Chip Content="{Binding}" 
+                                                     IsDeletable="True"
+                                                     IconBackground="{DynamicResource PrimaryHueMidBrush}"
+                                                     DeleteCommand="{Binding DataContext.RemoveMustIncludeCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                     DeleteCommandParameter="{Binding}"
+                                                     Margin="0,0,8,8"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <!-- Must Avoid -->
+                <StackPanel Grid.Row="3">
+                    <TextBlock Text="Must Avoid Elements" 
+                               Style="{StaticResource MaterialDesignSubtitle2TextBlock}"
+                               Margin="0,0,0,8"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding NewMustAvoid, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 materialDesign:HintAssist.Hint="Elements to avoid in the story"/>
+                        <Button Grid.Column="1" 
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Command="{Binding AddMustAvoidCommand}" Margin="8,0,0,0">
+                            <materialDesign:PackIcon Kind="Plus"/>
+                        </Button>
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding MustAvoidElements}" Margin="0,8,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <materialDesign:Chip Content="{Binding}" 
+                                                     IsDeletable="True"
+                                                     IconBackground="{DynamicResource MaterialDesignValidationErrorBrush}"
+                                                     DeleteCommand="{Binding DataContext.RemoveMustAvoidCommand, 
+                                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                     DeleteCommandParameter="{Binding}"
+                                                     Margin="0,0,8,8"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Import Dialog -->
+        <materialDesign:DialogHost IsOpen="{Binding ShowImportDialog}" 
+                                   CloseOnClickAway="True">
+            <materialDesign:DialogHost.DialogContent>
+                <Border Padding="24" MinWidth="500" MaxWidth="700">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" 
+                                   Text="Import from AI Conversation"
+                                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                   Margin="0,0,0,16"/>
+
+                        <TextBox Grid.Row="1"
+                                 Text="{Binding ImportText, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                 AcceptsReturn="True" TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto"
+                                 MinHeight="300" MaxHeight="400"
+                                 materialDesign:HintAssist.Hint="Paste your Claude or ChatGPT conversation here..."/>
+
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                                    HorizontalAlignment="Right" Margin="0,16,0,0">
+                            <Button Content="Cancel" 
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding CancelImportCommand}"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="Import" 
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Command="{Binding ImportConversationCommand}"
+                                    IsEnabled="{Binding ImportText.Length}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </materialDesign:DialogHost.DialogContent>
+        </materialDesign:DialogHost>
+    </Grid>
+</UserControl>
