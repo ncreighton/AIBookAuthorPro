@@ -47,7 +47,7 @@ public class ExportServiceTests
                     Title = "Chapter 1: The Beginning",
                     Content = "<Paragraph>This is the first chapter.</Paragraph>",
                     Order = 1,
-                    Status = ChapterStatus.Draft
+                    Status = ChapterStatus.FirstDraft
                 },
                 new()
                 {
@@ -55,7 +55,7 @@ public class ExportServiceTests
                     Title = "Chapter 2: The Middle",
                     Content = "<Paragraph>This is the second chapter.</Paragraph>",
                     Order = 2,
-                    Status = ChapterStatus.Draft
+                    Status = ChapterStatus.FirstDraft
                 }
             }
         };

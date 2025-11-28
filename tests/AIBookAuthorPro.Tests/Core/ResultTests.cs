@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models;
 using FluentAssertions;
 using Xunit;
