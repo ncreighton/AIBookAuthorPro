@@ -17,21 +17,25 @@ namespace AIBookAuthorPro.UI.Views;
 /// </summary>
 public partial class LocationListView : UserControl
 {
+    private readonly LocationListViewModel _viewModel;
+
     /// <summary>
     /// Initializes a new instance of LocationListView.
     /// </summary>
-    public LocationListView()
+    public LocationListView(LocationListViewModel viewModel)
     {
+        _viewModel = viewModel;
+        DataContext = _viewModel;
+        
         InitializeComponent();
     }
 
     private void OnLocationCardClick(object sender, MouseButtonEventArgs e)
     {
         if (sender is FrameworkElement element &&
-            element.DataContext is Location location &&
-            DataContext is LocationListViewModel vm)
+            element.DataContext is Location location)
         {
-            vm.EditLocationCommand.Execute(location);
+            _viewModel.EditLocationCommand.Execute(location);
         }
     }
 }
