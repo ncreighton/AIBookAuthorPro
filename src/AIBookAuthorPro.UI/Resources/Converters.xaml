@@ -6,6 +6,7 @@
     <!-- Boolean Converters -->
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
     <converters:BoolToVisibilityConverter x:Key="InvertedBoolToVisibility" Invert="True" />
+    <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility" />
     <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
     <converters:BoolToWidthConverter x:Key="BoolToWidthConverter" />
     
