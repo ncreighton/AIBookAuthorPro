@@ -5,6 +5,7 @@
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using AIBookAuthorPro.UI.ViewModels;
 using MaterialDesignThemes.Wpf;
 using UserControl = System.Windows.Controls.UserControl;
@@ -50,7 +51,46 @@ public partial class SettingsView : UserControl
 
     private void OnCloseRequested(object? sender, EventArgs e)
     {
-        // Close the MaterialDesign DialogHost
-        DialogHost.Close("MainDialogHost", false);
+        // Find the DialogHost that contains this UserControl and close it
+        var dialogHost = FindParentDialogHost(this);
+        
+        if (dialogHost != null)
+        {
+            // Close the dialog using the instance method
+            dialogHost.IsOpen = false;
+        }
+        else
+        {
+            // Fallback: Try to close using the DialogHost identifier
+            // This works when the dialog was opened with DialogHost.Show()
+            try
+            {
+                DialogHost.CloseDialogCommand.Execute(false, this);
+            }
+            catch
+            {
+                // Last resort: Try the static close method
+                DialogHost.Close("MainDialogHost", false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Traverses the visual tree to find the parent DialogHost.
+    /// </summary>
+    private static DialogHost? FindParentDialogHost(DependencyObject child)
+    {
+        var parent = VisualTreeHelper.GetParent(child);
+        
+        while (parent != null)
+        {
+            if (parent is DialogHost dialogHost)
+            {
+                return dialogHost;
+            }
+            parent = VisualTreeHelper.GetParent(parent);
+        }
+        
+        return null;
     }
 }
