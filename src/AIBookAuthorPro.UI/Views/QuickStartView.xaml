@@ -1,0 +1,324 @@
+<UserControl
+    x:Class="AIBookAuthorPro.UI.Views.QuickStartView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    mc:Ignorable="d"
+    d:DesignHeight="800"
+    d:DesignWidth="1200">
+
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,32">
+            <TextBlock
+                Text="Welcome to AI Book Author Pro"
+                FontSize="32"
+                FontWeight="Light"/>
+            <TextBlock
+                Text="Your AI-powered book creation assistant"
+                FontSize="16"
+                Opacity="0.7"
+                Margin="0,8,0,0"/>
+        </StackPanel>
+
+        <!-- Content Grid -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Main Options -->
+            <StackPanel Grid.Column="0" Margin="0,0,24,0">
+
+                <!-- Quick Start Card -->
+                <materialDesign:Card Margin="0,0,0,16" Padding="24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Grid.Column="0"
+                            Width="80"
+                            Height="80"
+                            CornerRadius="16"
+                            Background="{DynamicResource PrimaryHueMidBrush}"
+                            Margin="0,0,24,0">
+                            <materialDesign:PackIcon
+                                Kind="AutoFix"
+                                Width="40"
+                                Height="40"
+                                Foreground="White"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock
+                                Text="✨ Guided Book Creation"
+                                FontSize="20"
+                                FontWeight="Medium"/>
+                            <TextBlock
+                                Text="Start with a simple prompt and let AI guide you through creating your entire book - from concept to completed chapters."
+                                TextWrapping="Wrap"
+                                Opacity="0.7"
+                                Margin="0,8,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <materialDesign:Chip Content="AI-Powered" IconBackground="{DynamicResource SecondaryHueMidBrush}">
+                                    <materialDesign:Chip.Icon>
+                                        <materialDesign:PackIcon Kind="Brain"/>
+                                    </materialDesign:Chip.Icon>
+                                </materialDesign:Chip>
+                                <materialDesign:Chip Content="Step-by-Step" Margin="8,0,0,0">
+                                    <materialDesign:Chip.Icon>
+                                        <materialDesign:PackIcon Kind="StairsUp"/>
+                                    </materialDesign:Chip.Icon>
+                                </materialDesign:Chip>
+                                <materialDesign:Chip Content="Automatic" Margin="8,0,0,0">
+                                    <materialDesign:Chip.Icon>
+                                        <materialDesign:PackIcon Kind="RocketLaunch"/>
+                                    </materialDesign:Chip.Icon>
+                                </materialDesign:Chip>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="2"
+                            Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                            Content="Start Creating"
+                            FontSize="16"
+                            Padding="24,12"
+                            VerticalAlignment="Center"
+                            Command="{Binding DataContext.StartGuidedCreationCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </Grid>
+                </materialDesign:Card>
+
+                <!-- New Project Card -->
+                <materialDesign:Card Margin="0,0,0,16" Padding="24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Grid.Column="0"
+                            Width="80"
+                            Height="80"
+                            CornerRadius="16"
+                            Background="{DynamicResource MaterialDesignDarkSeparatorBackground}"
+                            Margin="0,0,24,0">
+                            <materialDesign:PackIcon
+                                Kind="FilePlus"
+                                Width="40"
+                                Height="40"
+                                Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock
+                                Text="📝 New Blank Project"
+                                FontSize="20"
+                                FontWeight="Medium"/>
+                            <TextBlock
+                                Text="Start with a clean slate. Manually create your book structure, characters, and write chapters at your own pace."
+                                TextWrapping="Wrap"
+                                Opacity="0.7"
+                                Margin="0,8,0,0"/>
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="2"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Content="New Project"
+                            FontSize="14"
+                            Padding="16,8"
+                            VerticalAlignment="Center"
+                            Command="{Binding DataContext.NewProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </Grid>
+                </materialDesign:Card>
+
+                <!-- Open Project Card -->
+                <materialDesign:Card Margin="0,0,0,16" Padding="24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            Grid.Column="0"
+                            Width="80"
+                            Height="80"
+                            CornerRadius="16"
+                            Background="{DynamicResource MaterialDesignDarkSeparatorBackground}"
+                            Margin="0,0,24,0">
+                            <materialDesign:PackIcon
+                                Kind="FolderOpen"
+                                Width="40"
+                                Height="40"
+                                Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock
+                                Text="📂 Open Existing Project"
+                                FontSize="20"
+                                FontWeight="Medium"/>
+                            <TextBlock
+                                Text="Continue working on a previously saved book project (.abpro file)."
+                                TextWrapping="Wrap"
+                                Opacity="0.7"
+                                Margin="0,8,0,0"/>
+                        </StackPanel>
+
+                        <Button
+                            Grid.Column="2"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Content="Open Project"
+                            FontSize="14"
+                            Padding="16,8"
+                            VerticalAlignment="Center"
+                            Command="{Binding DataContext.OpenProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </Grid>
+                </materialDesign:Card>
+
+                <!-- Features Overview -->
+                <materialDesign:Card Padding="24">
+                    <StackPanel>
+                        <TextBlock
+                            Text="✨ Features"
+                            FontSize="18"
+                            FontWeight="Medium"
+                            Margin="0,0,0,16"/>
+
+                        <UniformGrid Columns="3" Margin="0,0,0,0">
+                            <StackPanel Margin="0,0,16,0">
+                                <materialDesign:PackIcon Kind="Brain" Width="32" Height="32" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="AI-Powered Generation" FontWeight="Medium" Margin="0,8,0,4"/>
+                                <TextBlock Text="Claude, GPT-4, Gemini" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,16,0">
+                                <materialDesign:PackIcon Kind="AccountGroup" Width="32" Height="32" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="Character Management" FontWeight="Medium" Margin="0,8,0,4"/>
+                                <TextBlock Text="Full character bible" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <materialDesign:PackIcon Kind="FileTree" Width="32" Height="32" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="Outline Builder" FontWeight="Medium" Margin="0,8,0,4"/>
+                                <TextBlock Text="Structure your story" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,16,16,0">
+                                <materialDesign:PackIcon Kind="BookOpenPageVariant" Width="32" Height="32" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="KDP Publishing" FontWeight="Medium" Margin="0,8,0,4"/>
+                                <TextBlock Text="Categories, keywords, royalties" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,16,16,0">
+                                <materialDesign:PackIcon Kind="ImageArea" Width="32" Height="32" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="AI Book Covers" FontWeight="Medium" Margin="0,8,0,4"/>
+                                <TextBlock Text="DALL-E &amp; Stability AI" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+
+                            <StackPanel Margin="0,16,0,0">
+                                <materialDesign:PackIcon Kind="Export" Width="32" Height="32" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="Multi-Format Export" FontWeight="Medium" Margin="0,8,0,4"/>
+                                <TextBlock Text="DOCX, PDF, EPUB, MD" Opacity="0.7" FontSize="12"/>
+                            </StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </materialDesign:Card>
+            </StackPanel>
+
+            <!-- Recent Projects -->
+            <materialDesign:Card Grid.Column="1" Padding="24">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Text="Recent Projects"
+                        FontSize="18"
+                        FontWeight="Medium"
+                        Margin="0,0,0,16"/>
+
+                    <ListView
+                        Grid.Row="1"
+                        ItemsSource="{Binding DataContext.RecentProjects, RelativeSource={RelativeSource AncestorType=Window}}"
+                        Style="{StaticResource MaterialDesignListView}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <materialDesign:PackIcon
+                                        Grid.Column="0"
+                                        Kind="Book"
+                                        Width="24"
+                                        Height="24"
+                                        VerticalAlignment="Center"
+                                        Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                        Margin="0,0,12,0"/>
+
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock
+                                            Text="{Binding Name}"
+                                            FontWeight="Medium"/>
+                                        <TextBlock
+                                            Text="{Binding LastModified, StringFormat='Last opened: {0:g}'}"
+                                            FontSize="12"
+                                            Opacity="0.7"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+
+                    <!-- Empty State -->
+                    <StackPanel
+                        Grid.Row="1"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Visibility="{Binding DataContext.RecentProjects.Count, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisibility}, FallbackValue=Visible}">
+                        <materialDesign:PackIcon
+                            Kind="FolderOpen"
+                            Width="48"
+                            Height="48"
+                            HorizontalAlignment="Center"
+                            Opacity="0.3"/>
+                        <TextBlock
+                            Text="No recent projects"
+                            HorizontalAlignment="Center"
+                            Opacity="0.5"
+                            Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</UserControl>

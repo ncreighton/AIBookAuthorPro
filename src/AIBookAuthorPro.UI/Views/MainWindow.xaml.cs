@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Infrastructure.Services;
 using AIBookAuthorPro.UI.ViewModels;
+using AIBookAuthorPro.UI.Views.GuidedCreation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MessageBox = System.Windows.MessageBox;
@@ -49,6 +50,7 @@ public partial class MainWindow : Window
         _viewModel.NavigationRequested += OnNavigationRequested;
         _viewModel.ShowExportDialogRequested += OnShowExportDialogRequested;
         _viewModel.ShowSettingsDialogRequested += OnShowSettingsDialogRequested;
+        _viewModel.ShowGuidedCreationWizardRequested += OnShowGuidedCreationWizardRequested;
 
         // Subscribe to navigation list selection
         NavigationList.SelectionChanged += OnNavigationSelectionChanged;
@@ -131,6 +133,11 @@ public partial class MainWindow : Window
         await ShowSettingsDialogAsync();
     }
 
+    private void OnShowGuidedCreationWizardRequested(object? sender, EventArgs e)
+    {
+        _ = NavigateToViewAsync(NavigationDestination.GuidedWizard);
+    }
+
     private async Task NavigateToViewAsync(NavigationDestination destination, object? parameter = null)
     {
         try
@@ -144,6 +151,9 @@ public partial class MainWindow : Window
                 NavigationDestination.Characters => CreateView<CharacterListView>(),
                 NavigationDestination.Locations => CreateView<LocationListView>(),
                 NavigationDestination.Outline => CreateView<OutlineEditorView>(),
+                NavigationDestination.GuidedCreation => CreateView<QuickStartView>(),
+                NavigationDestination.GuidedWizard => CreateView<GuidedCreationWizardView>(),
+                NavigationDestination.GenerationDashboard => CreateView<GenerationDashboardView>(),
                 NavigationDestination.Export => null, // Handled via dialog
                 NavigationDestination.Settings => null, // Handled via dialog
                 _ => CreateView<ProjectDashboardView>()
@@ -190,6 +200,9 @@ public partial class MainWindow : Window
         NavigationDestination.Outline => "Outline",
         NavigationDestination.Export => "Export",
         NavigationDestination.Settings => "Settings",
+        NavigationDestination.GuidedCreation => "Quick Start",
+        NavigationDestination.GuidedWizard => "Book Creation Wizard",
+        NavigationDestination.GenerationDashboard => "Generation Dashboard",
         _ => "AI Book Author Pro"
     };
 
