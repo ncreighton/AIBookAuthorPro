@@ -18,21 +18,25 @@ namespace AIBookAuthorPro.UI.Views;
 /// </summary>
 public partial class CharacterListView : UserControl
 {
+    private readonly CharacterListViewModel _viewModel;
+
     /// <summary>
     /// Initializes a new instance of CharacterListView.
     /// </summary>
-    public CharacterListView()
+    public CharacterListView(CharacterListViewModel viewModel)
     {
+        _viewModel = viewModel;
+        DataContext = _viewModel;
+        
         InitializeComponent();
     }
 
     private void OnCharacterCardClick(object sender, MouseButtonEventArgs e)
     {
         if (sender is FrameworkElement element &&
-            element.DataContext is Character character &&
-            DataContext is CharacterListViewModel vm)
+            element.DataContext is Character character)
         {
-            vm.EditCharacterCommand.Execute(character);
+            _viewModel.EditCharacterCommand.Execute(character);
         }
     }
 }
