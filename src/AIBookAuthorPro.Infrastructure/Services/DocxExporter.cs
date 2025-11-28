@@ -6,6 +6,7 @@
 using System.IO.Compression;
 using System.Text;
 using System.Xml.Linq;
+using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
 using Microsoft.Extensions.Logging;
