@@ -237,7 +237,7 @@ public class ExportService : IExportService
     private static List<Chapter> GetChaptersToExport(Project project, ExportOptions options)
     {
         var chapters = project.Chapters
-            .Where(c => c.Status != ChapterStatus.Outline) // Skip outline-only chapters
+            .Where(c => c.Status != ChapterStatus.Outlined) // Skip outline-only chapters
             .OrderBy(c => c.Order)
             .ToList();
 

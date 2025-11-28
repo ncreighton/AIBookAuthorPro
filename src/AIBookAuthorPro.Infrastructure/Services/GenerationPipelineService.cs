@@ -293,9 +293,11 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
             yield break;
         }
 
-        await foreach (var chunk in provider.GenerateStreamingAsync(generationRequest, cancellationToken))
+        // Streaming not available - use regular generation
+        var result = await provider.GenerateAsync(generationRequest, cancellationToken);
+        if (result.IsSuccess && result.Value != null)
         {
-            yield return chunk;
+            yield return result.Value.Content;
         }
     }
 
@@ -379,7 +381,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
         var outputTokens = (int)(request.Chapter.TargetWordCount * 1.3);
 
         // For premium mode, multiply by 2 for the refinement pass
-        if (request.Mode == GenerationMode.Premium)
+        if (request.Mode == GenerationMode.HighQuality)
         {
             inputTokens = (int)(inputTokens * 1.5);
             outputTokens = (int)(outputTokens * 1.3);

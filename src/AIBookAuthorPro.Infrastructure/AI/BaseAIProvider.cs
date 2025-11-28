@@ -97,40 +97,34 @@ public abstract class BaseAIProvider : IAIProvider
             parts.Add($"You are writing in the {context.Genre} genre.");
         }
 
-        if (!string.IsNullOrEmpty(context.ToneStyle))
-        {
-            parts.Add($"The tone and style should be: {context.ToneStyle}.");
-        }
-
         if (!string.IsNullOrEmpty(context.TargetAudience))
         {
             parts.Add($"The target audience is: {context.TargetAudience}.");
         }
 
-        if (!string.IsNullOrEmpty(context.WritingStyle))
+        if (!string.IsNullOrEmpty(context.Style))
         {
-            parts.Add($"Follow this writing style: {context.WritingStyle}");
+            parts.Add($"Follow this writing style: {context.Style}");
         }
 
-        if (context.CharacterProfiles?.Any() == true)
+        if (context.CharacterContexts?.Any() == true)
         {
-            parts.Add("\n## Character Profiles\n" + string.Join("\n\n", 
-                context.CharacterProfiles.Select(c => $"**{c.Name}**: {c.Description}")));
+            parts.Add("\n## Character Profiles\n" + string.Join("\n\n", context.CharacterContexts));
         }
 
-        if (context.WorldBuildingNotes?.Any() == true)
+        if (context.LocationContexts?.Any() == true)
         {
-            parts.Add("\n## World Building Notes\n" + string.Join("\n", context.WorldBuildingNotes));
+            parts.Add("\n## Location Context\n" + string.Join("\n\n", context.LocationContexts));
         }
 
-        if (!string.IsNullOrEmpty(context.PreviousChapterSummary))
+        if (!string.IsNullOrEmpty(context.PreviousSummary))
         {
-            parts.Add($"\n## Previous Chapter Summary\n{context.PreviousChapterSummary}");
+            parts.Add($"\n## Previous Chapter Summary\n{context.PreviousSummary}");
         }
 
-        if (!string.IsNullOrEmpty(context.OutlineContext))
+        if (!string.IsNullOrEmpty(context.ChapterOutline))
         {
-            parts.Add($"\n## Chapter Outline\n{context.OutlineContext}");
+            parts.Add($"\n## Chapter Outline\n{context.ChapterOutline}");
         }
 
         return string.Join("\n\n", parts);

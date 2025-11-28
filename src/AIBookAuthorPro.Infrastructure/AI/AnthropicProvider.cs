@@ -237,20 +237,7 @@ public sealed class AnthropicProvider : BaseAIProvider
     {
         var messages = new List<object>();
         
-        // Add context as a user message if present
-        if (!string.IsNullOrEmpty(request.Context?.OutlineContext) ||
-            !string.IsNullOrEmpty(request.Context?.PreviousChapterSummary))
-        {
-            var contextParts = new List<string>();
-            if (!string.IsNullOrEmpty(request.Context.PreviousChapterSummary))
-            {
-                contextParts.Add($"Previous chapter summary: {request.Context.PreviousChapterSummary}");
-            }
-            if (!string.IsNullOrEmpty(request.Context.OutlineContext))
-            {
-                contextParts.Add($"Chapter outline: {request.Context.OutlineContext}");
-            }
-        }
+        // Note: Context is handled in BuildSystemPrompt, so we don't need to add it separately here
 
         messages.Add(new { role = "user", content = request.Prompt });
 
