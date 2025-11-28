@@ -149,7 +149,7 @@ public sealed record ClarificationQuestion
     public required ClarificationCategory Category { get; init; }
 
     /// <summary>Priority level.</summary>
-    public ClarificationPriority Priority { get; init; } = ClarificationPriority.Medium;
+    public ClarificationPriority Priority { get; init; } = ClarificationPriority.Important;
 
     /// <summary>Suggested answer options (if applicable).</summary>
     public List<string>? SuggestedOptions { get; init; }
