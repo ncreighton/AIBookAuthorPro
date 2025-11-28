@@ -255,6 +255,27 @@ public sealed class ProjectService : IProjectService
     /// <inheritdoc />
     public async Task<Result> CloseProjectAsync(CancellationToken cancellationToken = default)
     {
+        try
+        {
+            // Save any pending changes if needed
+            if (_hasUnsavedChanges && _currentProject != null)
+            {
+                // Optionally auto-save before closing
+                // Could be configured as a setting
+            }
+
+            _currentProject = null;
+            _hasUnsavedChanges = false;
+            StopAutosave();
+            
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to close project");
+            return Result.Failure($"Failed to close project: {ex.Message}");
+        }
+    }
 
     public Project? GetCurrentProject() => _currentProject;
 

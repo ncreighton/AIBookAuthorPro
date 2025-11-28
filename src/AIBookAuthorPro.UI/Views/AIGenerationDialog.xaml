@@ -459,7 +459,7 @@
                         <Run Text="Generated" />
                         <Run Text="{Binding GeneratedWordCount, StringFormat='{}{0:N0}'}" FontWeight="Medium" />
                         <Run Text="words in" />
-                        <Run Text="{Binding ElapsedTime, StringFormat='{0:mm\\:ss}'}" FontWeight="Medium" />
+                        <Run Text="{Binding ElapsedTime, StringFormat='{}{0:mm\\:ss}'}" FontWeight="Medium" />
                     </TextBlock>
                 </StackPanel>
 
