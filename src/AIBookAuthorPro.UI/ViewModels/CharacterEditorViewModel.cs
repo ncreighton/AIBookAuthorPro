@@ -45,27 +45,27 @@ public partial class CharacterEditorViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private string _physicalDescription = string.Empty;
+    private ObservableCollection<string> _traits = new();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private string _personality = string.Empty;
+    private string _backstory = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private string _background = string.Empty;
+    private string _goals = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private string _motivation = string.Empty;
+    private string _fears = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private string _internalConflict = string.Empty;
+    private string _voice = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
-    private string _externalConflict = string.Empty;
+    private string _occupation = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasUnsavedChanges))]
@@ -106,16 +106,16 @@ public partial class CharacterEditorViewModel : ObservableObject
 
         Name = character.Name;
         Description = character.Description;
-        Role = character.Role;
+        Role = (CharacterRoleEnum)(int)character.Role;
         Age = character.Age;
-        PhysicalDescription = character.PhysicalDescription;
-        Personality = character.Personality;
-        Background = character.Background;
-        Motivation = character.Motivation;
-        InternalConflict = character.InternalConflict;
-        ExternalConflict = character.ExternalConflict;
-        CharacterArc = character.CharacterArc;
-        Notes = character.Notes;
+        Traits = new ObservableCollection<string>(character.Traits);
+        Backstory = character.Backstory ?? string.Empty;
+        Goals = character.Goals ?? string.Empty;
+        Fears = character.Fears ?? string.Empty;
+        Voice = character.Voice ?? string.Empty;
+        Occupation = character.Occupation ?? string.Empty;
+        CharacterArc = character.CharacterArc ?? string.Empty;
+        Notes = character.Notes ?? string.Empty;
     }
 
     /// <summary>
@@ -131,12 +131,12 @@ public partial class CharacterEditorViewModel : ObservableObject
         Description = string.Empty;
         Role = CharacterRoleEnum.Supporting;
         Age = null;
-        PhysicalDescription = string.Empty;
-        Personality = string.Empty;
-        Background = string.Empty;
-        Motivation = string.Empty;
-        InternalConflict = string.Empty;
-        ExternalConflict = string.Empty;
+        Traits.Clear();
+        Backstory = string.Empty;
+        Goals = string.Empty;
+        Fears = string.Empty;
+        Voice = string.Empty;
+        Occupation = string.Empty;
         CharacterArc = string.Empty;
         Notes = string.Empty;
     }
@@ -153,25 +153,24 @@ public partial class CharacterEditorViewModel : ObservableObject
         {
             _originalCharacter.Name = Name;
             _originalCharacter.Description = Description;
-            _originalCharacter.Role = Role;
+            _originalCharacter.Role = (Core.Models.CharacterRole)(int)Role;
             _originalCharacter.Age = Age;
-            _originalCharacter.PhysicalDescription = PhysicalDescription;
-            _originalCharacter.Personality = Personality;
-            _originalCharacter.Background = Background;
-            _originalCharacter.Motivation = Motivation;
-            _originalCharacter.InternalConflict = InternalConflict;
-            _originalCharacter.ExternalConflict = ExternalConflict;
+            _originalCharacter.Traits = new List<string>(Traits);
+            _originalCharacter.Backstory = Backstory;
+            _originalCharacter.Goals = Goals;
+            _originalCharacter.Fears = Fears;
+            _originalCharacter.Voice = Voice;
+            _originalCharacter.Occupation = Occupation;
             _originalCharacter.CharacterArc = CharacterArc;
             _originalCharacter.Notes = Notes;
-            _originalCharacter.ModifiedAt = DateTime.UtcNow;
 
             if (IsNewCharacter)
             {
-                _project.Characters.Add(_originalCharacter);
+                _project.AddCharacter(_originalCharacter);
                 IsNewCharacter = false;
             }
 
-            await _projectService.SaveProjectAsync(_project);
+            await _projectService.SaveAsync(_project);
             
             _notificationService.ShowSuccess($"Character '{Name}' saved successfully.");
             _logger.LogInformation("Character {CharacterId} saved", _originalCharacter.Id);
@@ -207,15 +206,15 @@ public partial class CharacterEditorViewModel : ObservableObject
 
         return Name != _originalCharacter.Name ||
                Description != _originalCharacter.Description ||
-               Role != _originalCharacter.Role ||
+               (int)Role != (int)_originalCharacter.Role ||
                Age != _originalCharacter.Age ||
-               PhysicalDescription != _originalCharacter.PhysicalDescription ||
-               Personality != _originalCharacter.Personality ||
-               Background != _originalCharacter.Background ||
-               Motivation != _originalCharacter.Motivation ||
-               InternalConflict != _originalCharacter.InternalConflict ||
-               ExternalConflict != _originalCharacter.ExternalConflict ||
-               CharacterArc != _originalCharacter.CharacterArc ||
-               Notes != _originalCharacter.Notes;
+               !Traits.SequenceEqual(_originalCharacter.Traits) ||
+               Backstory != (_originalCharacter.Backstory ?? string.Empty) ||
+               Goals != (_originalCharacter.Goals ?? string.Empty) ||
+               Fears != (_originalCharacter.Fears ?? string.Empty) ||
+               Voice != (_originalCharacter.Voice ?? string.Empty) ||
+               Occupation != (_originalCharacter.Occupation ?? string.Empty) ||
+               CharacterArc != (_originalCharacter.CharacterArc ?? string.Empty) ||
+               Notes != (_originalCharacter.Notes ?? string.Empty);
     }
 }

@@ -145,15 +145,11 @@ public partial class CharacterListViewModel : ObservableObject
 
         var newCharacter = new Character
         {
-            Id = Guid.NewGuid(),
             Name = "New Character",
-            Role = (Core.Models.CharacterRole)CharacterRoleEnum.Supporting,
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow
+            Role = Core.Models.CharacterRole.Supporting
         };
 
-        Project.Characters.Add(newCharacter);
-        _projectService.MarkAsModified();
+        Project.AddCharacter(newCharacter);
 
         RefreshCharacterList();
         SelectedCharacter = newCharacter;
@@ -182,12 +178,13 @@ public partial class CharacterListViewModel : ObservableObject
         // Remove character relationships
         foreach (var c in Project.Characters)
         {
-            c.Relationships.RemoveAll(r => r.CharacterId == character.Id);
+            c.RemoveRelationship(character.Id);
         }
 
-        Project.Characters.Remove(character);
-        _projectService.MarkAsModified();
-        await _projectService.SaveProjectAsync();
+        if (Project.RemoveCharacter(character.Id))
+        {
+            await _projectService.SaveAsync(Project);
+        }
 
         RefreshCharacterList();
         StatusMessage = $"Deleted: {character.Name}";
@@ -200,25 +197,20 @@ public partial class CharacterListViewModel : ObservableObject
 
         var duplicate = new Character
         {
-            Id = Guid.NewGuid(),
             Name = $"{character.Name} (Copy)",
             Role = character.Role,
             Age = character.Age,
             Gender = character.Gender,
             Occupation = character.Occupation,
-            PhysicalDescription = character.PhysicalDescription,
-            Personality = character.Personality,
+            Description = character.Description,
+            Traits = new List<string>(character.Traits),
             Backstory = character.Backstory,
             Goals = character.Goals,
             Fears = character.Fears,
-            Quirks = character.Quirks,
-            Notes = character.Notes,
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow
+            Notes = character.Notes
         };
 
-        Project.Characters.Add(duplicate);
-        _projectService.MarkAsModified();
+        Project.AddCharacter(duplicate);
 
         RefreshCharacterList();
         StatusMessage = $"Duplicated: {character.Name}";
@@ -239,7 +231,9 @@ public partial class CharacterListViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveAllAsync()
     {
-        var result = await _projectService.SaveProjectAsync();
+        if (Project == null) return;
+
+        var result = await _projectService.SaveAsync(Project);
 
         if (result.IsSuccess)
         {
