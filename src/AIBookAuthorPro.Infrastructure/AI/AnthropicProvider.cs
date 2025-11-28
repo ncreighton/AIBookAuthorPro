@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
@@ -30,47 +31,55 @@ public sealed class AnthropicProvider : BaseAIProvider
     {
         new AIModelInfo
         {
-            Id = "claude-sonnet-4-20250514",
-            Name = "Claude Sonnet 4",
-            Provider = AIProviderType.Anthropic,
+            ModelId = "claude-sonnet-4-20250514",
+            DisplayName = "Claude Sonnet 4",
+            Provider = Enums.AIProviderType.Claude,
             MaxContextTokens = 200000,
             MaxOutputTokens = 64000,
-            CostPer1KInputTokens = 0.003m,
-            CostPer1KOutputTokens = 0.015m,
-            SupportsVision = true,
+            InputCostPer1K = 0.003m,
+            OutputCostPer1K = 0.015m,
             SupportsStreaming = true,
-            Description = "Most intelligent model with excellent creative writing capabilities"
+            RecommendedFor = "Most intelligent model with excellent creative writing capabilities"
         },
         new AIModelInfo
         {
-            Id = "claude-sonnet-4-20250514",
-            Name = "Claude Sonnet 4",
-            Provider = AIProviderType.Anthropic,
+            ModelId = "claude-sonnet-4-20250514",
+            DisplayName = "Claude Sonnet 4",
+            Provider = Enums.AIProviderType.Claude,
             MaxContextTokens = 200000,
             MaxOutputTokens = 64000,
-            CostPer1KInputTokens = 0.003m,
-            CostPer1KOutputTokens = 0.015m,
-            SupportsVision = true,
+            InputCostPer1K = 0.003m,
+            OutputCostPer1K = 0.015m,
             SupportsStreaming = true,
-            Description = "Balanced performance and speed for everyday tasks"
+            RecommendedFor = "Balanced performance and speed for everyday tasks"
         },
         new AIModelInfo
         {
-            Id = "claude-haiku-3-5-20241022",
-            Name = "Claude 3.5 Haiku",
-            Provider = AIProviderType.Anthropic,
+            ModelId = "claude-haiku-3-5-20241022",
+            DisplayName = "Claude 3.5 Haiku",
+            Provider = Enums.AIProviderType.Claude,
             MaxContextTokens = 200000,
             MaxOutputTokens = 8192,
-            CostPer1KInputTokens = 0.00025m,
-            CostPer1KOutputTokens = 0.00125m,
-            SupportsVision = true,
+            InputCostPer1K = 0.00025m,
+            OutputCostPer1K = 0.00125m,
             SupportsStreaming = true,
-            Description = "Fastest model for quick iterations"
+            RecommendedFor = "Fastest model for quick iterations"
         }
     };
 
-    public override string Name => "Anthropic Claude";
-    public override AIProviderType ProviderType => AIProviderType.Anthropic;
+    /// <inheritdoc />
+    public override string ProviderName => "Anthropic Claude";
+    
+    /// <inheritdoc />
+    public override bool SupportsStreaming => true;
+    
+    /// <inheritdoc />
+    public override int MaxContextTokens => 200000;
+    
+    /// <inheritdoc />
+    public override bool IsConfigured => !string.IsNullOrEmpty(_settings.ApiKey);
+    
+    /// <inheritdoc />
     public override IReadOnlyList<AIModelInfo> AvailableModels => _models;
 
     public AnthropicProvider(
@@ -92,21 +101,24 @@ public sealed class AnthropicProvider : BaseAIProvider
     }
 
     /// <inheritdoc />
-    public override async Task<Result<AIGenerationResponse>> GenerateAsync(
-        AIGenerationRequest request,
+    public override async Task<Result<GenerationResult>> GenerateAsync(
+        GenerationRequest request,
         CancellationToken cancellationToken = default)
     {
         var validation = ValidateRequest(request);
         if (!validation.IsSuccess)
         {
-            return Result<AIGenerationResponse>.Failure(validation.Error!);
+            return Result<GenerationResult>.Failure(validation.Error!);
         }
 
         LogRequest(request);
+        
+        // Convert to compatibility type for internal processing
+        var compatRequest = AIGenerationRequest.FromGenerationRequest(request);
 
         try
         {
-            var anthropicRequest = BuildRequest(request);
+            var anthropicRequest = BuildRequest(compatRequest);
             
             var response = await HttpClient.PostAsJsonAsync(
                 ApiUrl,
@@ -118,52 +130,54 @@ public sealed class AnthropicProvider : BaseAIProvider
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 Logger.LogError("Anthropic API error: {StatusCode} - {Error}", response.StatusCode, errorContent);
-                return Result<AIGenerationResponse>.Failure($"API error: {response.StatusCode} - {errorContent}");
+                return Result<GenerationResult>.Failure($"API error: {response.StatusCode} - {errorContent}");
             }
 
             var result = await response.Content.ReadFromJsonAsync<AnthropicResponse>(JsonOptions, cancellationToken);
             if (result == null)
             {
-                return Result<AIGenerationResponse>.Failure("Failed to deserialize API response");
+                return Result<GenerationResult>.Failure("Failed to deserialize API response");
             }
 
-            var generationResponse = MapResponse(result, request.Model);
-            LogResponse(generationResponse);
+            var compatResponse = MapResponse(result, compatRequest.Model);
+            var generationResult = compatResponse.ToGenerationResult();
+            LogResponse(generationResult);
             
-            return Result<AIGenerationResponse>.Success(generationResponse);
+            return Result<GenerationResult>.Success(generationResult);
         }
         catch (HttpRequestException ex)
         {
             Logger.LogError(ex, "HTTP request failed for Anthropic API");
-            return Result<AIGenerationResponse>.Failure($"Network error: {ex.Message}");
+            return Result<GenerationResult>.Failure($"Network error: {ex.Message}");
         }
         catch (TaskCanceledException ex) when (ex.CancellationToken == cancellationToken)
         {
             Logger.LogInformation("Request cancelled by user");
-            return Result<AIGenerationResponse>.Failure("Request cancelled");
+            return Result<GenerationResult>.Failure("Request cancelled");
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Unexpected error in Anthropic generation");
-            return Result<AIGenerationResponse>.Failure($"Unexpected error: {ex.Message}");
+            return Result<GenerationResult>.Failure($"Unexpected error: {ex.Message}");
         }
     }
 
     /// <inheritdoc />
-    public override async IAsyncEnumerable<Result<AIStreamChunk>> GenerateStreamAsync(
-        AIGenerationRequest request,
+    public override async IAsyncEnumerable<string> StreamGenerateAsync(
+        GenerationRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var validation = ValidateRequest(request);
         if (!validation.IsSuccess)
         {
-            yield return Result<AIStreamChunk>.Failure(validation.Error!);
             yield break;
         }
 
         LogRequest(request);
-
-        var anthropicRequest = BuildRequest(request, stream: true);
+        
+        // Convert to compatibility type for internal processing
+        var compatRequest = AIGenerationRequest.FromGenerationRequest(request);
+        var anthropicRequest = BuildRequest(compatRequest, stream: true);
         var json = JsonSerializer.Serialize(anthropicRequest, JsonOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -175,21 +189,18 @@ public sealed class AnthropicProvider : BaseAIProvider
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                yield return Result<AIStreamChunk>.Failure($"API error: {response.StatusCode} - {errorContent}");
+                Logger.LogError("Anthropic streaming API error: {StatusCode} - {Error}", response.StatusCode, errorContent);
                 yield break;
             }
         }
         catch (Exception ex)
         {
-            yield return Result<AIStreamChunk>.Failure($"Request failed: {ex.Message}");
+            Logger.LogError(ex, "Anthropic streaming request failed");
             yield break;
         }
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var reader = new StreamReader(stream);
-
-        var totalInputTokens = 0;
-        var totalOutputTokens = 0;
 
         while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
         {
@@ -213,74 +224,10 @@ public sealed class AnthropicProvider : BaseAIProvider
 
             if (evt == null) continue;
 
-            switch (evt.Type)
+            if (evt.Type == "content_block_delta" && evt.Delta?.Type == "text_delta" && !string.IsNullOrEmpty(evt.Delta.Text))
             {
-                case "message_start":
-                    if (evt.Message?.Usage != null)
-                    {
-                        totalInputTokens = evt.Message.Usage.InputTokens;
-                    }
-                    break;
-
-                case "content_block_delta":
-                    if (evt.Delta?.Type == "text_delta" && !string.IsNullOrEmpty(evt.Delta.Text))
-                    {
-                        yield return Result<AIStreamChunk>.Success(new AIStreamChunk
-                        {
-                            Content = evt.Delta.Text,
-                            IsComplete = false
-                        });
-                    }
-                    break;
-
-                case "message_delta":
-                    if (evt.Usage != null)
-                    {
-                        totalOutputTokens = evt.Usage.OutputTokens;
-                    }
-                    break;
-
-                case "message_stop":
-                    yield return Result<AIStreamChunk>.Success(new AIStreamChunk
-                    {
-                        IsComplete = true,
-                        FinishReason = "stop",
-                        Usage = new TokenUsage
-                        {
-                            PromptTokens = totalInputTokens,
-                            CompletionTokens = totalOutputTokens,
-                            TotalTokens = totalInputTokens + totalOutputTokens
-                        }
-                    });
-                    break;
+                yield return evt.Delta.Text;
             }
-        }
-    }
-
-    /// <inheritdoc />
-    public override async Task<Result<bool>> ValidateApiKeyAsync(
-        string apiKey,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            using var testClient = new HttpClient();
-            testClient.DefaultRequestHeaders.Add("x-api-key", apiKey);
-            testClient.DefaultRequestHeaders.Add("anthropic-version", ApiVersion);
-            
-            var testRequest = new
-            {
-                model = "claude-haiku-3-5-20241022",
-                max_tokens = 10,
-                messages = new[] { new { role = "user", content = "Hi" } }
-            };
-
-            var response = await testClient.PostAsJsonAsync(ApiUrl, testRequest, cancellationToken);
-            return Result<bool>.Success(response.IsSuccessStatusCode);
-        }
-        catch (Exception ex)
-        {
-            return Result<bool>.Failure($"API key validation failed: {ex.Message}");
         }
     }
 
@@ -327,9 +274,8 @@ public sealed class AnthropicProvider : BaseAIProvider
             FinishReason = response.StopReason ?? "unknown",
             Usage = new TokenUsage
             {
-                PromptTokens = response.Usage?.InputTokens ?? 0,
-                CompletionTokens = response.Usage?.OutputTokens ?? 0,
-                TotalTokens = (response.Usage?.InputTokens ?? 0) + (response.Usage?.OutputTokens ?? 0)
+                InputTokens = response.Usage?.InputTokens ?? 0,
+                OutputTokens = response.Usage?.OutputTokens ?? 0
             },
             GeneratedAt = DateTime.UtcNow
         };

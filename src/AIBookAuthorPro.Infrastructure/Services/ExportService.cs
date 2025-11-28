@@ -3,7 +3,9 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.IO;
 using System.Text;
+using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;

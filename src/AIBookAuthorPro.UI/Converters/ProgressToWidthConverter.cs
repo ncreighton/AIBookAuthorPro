@@ -137,51 +137,6 @@ public sealed class WordCountDisplayConverter : IMultiValueConverter
 }
 
 /// <summary>
-/// Converts decimal cost to formatted currency string.
-/// </summary>
-public sealed class CostDisplayConverter : IValueConverter
-{
-    /// <inheritdoc />
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is not decimal cost)
-            return "$0.00";
-
-        return cost < 0.01m ? "< $0.01" : $"${cost:F2}";
-    }
-
-    /// <inheritdoc />
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-/// <summary>
-/// Converts generation mode to icon.
-/// </summary>
-public sealed class GenerationModeToIconConverter : IValueConverter
-{
-    /// <inheritdoc />
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return value?.ToString() switch
-        {
-            "Quick" => "Lightning",
-            "Standard" => "FileDocument",
-            "Premium" => "Diamond",
-            _ => "FileDocument"
-        };
-    }
-
-    /// <inheritdoc />
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-/// <summary>
 /// Converts chapter status to color.
 /// </summary>
 public sealed class ChapterStatusToColorConverter : IValueConverter

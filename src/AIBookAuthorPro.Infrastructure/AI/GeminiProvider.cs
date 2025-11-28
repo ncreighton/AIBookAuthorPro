@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
@@ -29,60 +30,71 @@ public sealed class GeminiProvider : BaseAIProvider
     {
         new AIModelInfo
         {
-            Id = "gemini-2.0-flash-exp",
-            Name = "Gemini 2.0 Flash",
-            Provider = AIProviderType.Google,
+            ModelId = "gemini-2.0-flash-exp",
+            DisplayName = "Gemini 2.0 Flash",
+            Provider = Enums.AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
             MaxContextTokens = 1000000,
             MaxOutputTokens = 8192,
-            CostPer1KInputTokens = 0.00015m, // Free tier available
-            CostPer1KOutputTokens = 0.0006m,
-            SupportsVision = true,
+            InputCostPer1K = 0.00015m, // Free tier available
+            OutputCostPer1K = 0.0006m,
+true,
             SupportsStreaming = true,
-            Description = "Latest experimental model with 1M context window"
+            RecommendedFor = "Latest experimental model with 1M context window"
         },
         new AIModelInfo
         {
-            Id = "gemini-1.5-pro",
-            Name = "Gemini 1.5 Pro",
-            Provider = AIProviderType.Google,
+            ModelId = "gemini-1.5-pro",
+            DisplayName = "Gemini 1.5 Pro",
+            Provider = Enums.AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
             MaxContextTokens = 2000000,
             MaxOutputTokens = 8192,
-            CostPer1KInputTokens = 0.00125m,
-            CostPer1KOutputTokens = 0.005m,
-            SupportsVision = true,
+            InputCostPer1K = 0.00125m,
+            OutputCostPer1K = 0.005m,
+true,
             SupportsStreaming = true,
-            Description = "Most capable Gemini model with 2M context window"
+            RecommendedFor = "Most capable Gemini model with 2M context window"
         },
         new AIModelInfo
         {
-            Id = "gemini-1.5-flash",
-            Name = "Gemini 1.5 Flash",
-            Provider = AIProviderType.Google,
+            ModelId = "gemini-1.5-flash",
+            DisplayName = "Gemini 1.5 Flash",
+            Provider = Enums.AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
             MaxContextTokens = 1000000,
             MaxOutputTokens = 8192,
-            CostPer1KInputTokens = 0.000075m,
-            CostPer1KOutputTokens = 0.0003m,
-            SupportsVision = true,
+            InputCostPer1K = 0.000075m,
+            OutputCostPer1K = 0.0003m,
+true,
             SupportsStreaming = true,
-            Description = "Fast and efficient model for high-volume tasks"
+            RecommendedFor = "Fast and efficient model for high-volume tasks"
         },
         new AIModelInfo
         {
-            Id = "gemini-1.5-flash-8b",
-            Name = "Gemini 1.5 Flash 8B",
-            Provider = AIProviderType.Google,
+            ModelId = "gemini-1.5-flash-8b",
+            DisplayName = "Gemini 1.5 Flash 8B",
+            Provider = Enums.AIProviderType.Ollama, // Note: Gemini uses Ollama enum value temporarily
             MaxContextTokens = 1000000,
             MaxOutputTokens = 8192,
-            CostPer1KInputTokens = 0.0000375m,
-            CostPer1KOutputTokens = 0.00015m,
-            SupportsVision = true,
+            InputCostPer1K = 0.0000375m,
+            OutputCostPer1K = 0.00015m,
+true,
             SupportsStreaming = true,
-            Description = "Smallest and fastest Flash model for simple tasks"
+            RecommendedFor = "Smallest and fastest Flash model for simple tasks"
         }
     };
 
-    public override string Name => "Google Gemini";
-    public override AIProviderType ProviderType => AIProviderType.Google;
+    /// <inheritdoc />
+    public override string ProviderName => "Google Gemini";
+    
+    /// <inheritdoc />
+    public override bool SupportsStreaming => true;
+    
+    /// <inheritdoc />
+    public override int MaxContextTokens => 2000000;
+    
+    /// <inheritdoc />
+    public override bool IsConfigured => !string.IsNullOrEmpty(_settings.ApiKey);
+    
+    /// <inheritdoc />
     public override IReadOnlyList<AIModelInfo> AvailableModels => _models;
 
     public GeminiProvider(
@@ -109,22 +121,25 @@ public sealed class GeminiProvider : BaseAIProvider
     }
 
     /// <inheritdoc />
-    public override async Task<Result<AIGenerationResponse>> GenerateAsync(
-        AIGenerationRequest request,
+    public override async Task<Result<GenerationResult>> GenerateAsync(
+        GenerationRequest request,
         CancellationToken cancellationToken = default)
     {
         var validation = ValidateRequest(request);
         if (!validation.IsSuccess)
         {
-            return Result<AIGenerationResponse>.Failure(validation.Error!);
+            return Result<GenerationResult>.Failure(validation.Error!);
         }
 
         LogRequest(request);
+        
+        // Convert to compatibility type for internal processing
+        var compatRequest = AIGenerationRequest.FromGenerationRequest(request);
 
         try
         {
-            var geminiRequest = BuildRequest(request);
-            var url = GetApiUrl(request.Model);
+            var geminiRequest = BuildRequest(compatRequest);
+            var url = GetApiUrl(compatRequest.Model);
             
             var response = await HttpClient.PostAsJsonAsync(
                 url,
@@ -136,55 +151,57 @@ public sealed class GeminiProvider : BaseAIProvider
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 Logger.LogError("Gemini API error: {StatusCode} - {Error}", response.StatusCode, errorContent);
-                return Result<AIGenerationResponse>.Failure($"API error: {response.StatusCode} - {errorContent}");
+                return Result<GenerationResult>.Failure($"API error: {response.StatusCode} - {errorContent}");
             }
 
             var result = await response.Content.ReadFromJsonAsync<GeminiResponse>(JsonOptions, cancellationToken);
             if (result == null)
             {
-                return Result<AIGenerationResponse>.Failure("Failed to deserialize API response");
+                return Result<GenerationResult>.Failure("Failed to deserialize API response");
             }
 
-            var generationResponse = MapResponse(result, request.Model);
-            LogResponse(generationResponse);
+            var compatResponse = MapResponse(result, compatRequest.Model);
+            var generationResult = compatResponse.ToGenerationResult();
+            LogResponse(generationResult);
             
-            return Result<AIGenerationResponse>.Success(generationResponse);
+            return Result<GenerationResult>.Success(generationResult);
         }
         catch (HttpRequestException ex)
         {
             Logger.LogError(ex, "HTTP request failed for Gemini API");
-            return Result<AIGenerationResponse>.Failure($"Network error: {ex.Message}");
+            return Result<GenerationResult>.Failure($"Network error: {ex.Message}");
         }
         catch (TaskCanceledException ex) when (ex.CancellationToken == cancellationToken)
         {
             Logger.LogInformation("Request cancelled by user");
-            return Result<AIGenerationResponse>.Failure("Request cancelled");
+            return Result<GenerationResult>.Failure("Request cancelled");
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Unexpected error in Gemini generation");
-            return Result<AIGenerationResponse>.Failure($"Unexpected error: {ex.Message}");
+            return Result<GenerationResult>.Failure($"Unexpected error: {ex.Message}");
         }
     }
 
     /// <inheritdoc />
-    public override async IAsyncEnumerable<Result<AIStreamChunk>> GenerateStreamAsync(
-        AIGenerationRequest request,
+    public override async IAsyncEnumerable<string> StreamGenerateAsync(
+        GenerationRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var validation = ValidateRequest(request);
         if (!validation.IsSuccess)
         {
-            yield return Result<AIStreamChunk>.Failure(validation.Error!);
             yield break;
         }
 
         LogRequest(request);
-
-        var geminiRequest = BuildRequest(request);
+        
+        // Convert to compatibility type for internal processing
+        var compatRequest = AIGenerationRequest.FromGenerationRequest(request);
+        var geminiRequest = BuildRequest(compatRequest);
         var json = JsonSerializer.Serialize(geminiRequest, JsonOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var url = GetApiUrl(request.Model, stream: true) + "&alt=sse";
+        var url = GetApiUrl(compatRequest.Model, stream: true) + "&alt=sse";
 
         HttpResponseMessage response;
         try
@@ -198,21 +215,18 @@ public sealed class GeminiProvider : BaseAIProvider
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                yield return Result<AIStreamChunk>.Failure($"API error: {response.StatusCode} - {errorContent}");
+                Logger.LogError("Gemini streaming API error: {StatusCode} - {Error}", response.StatusCode, errorContent);
                 yield break;
             }
         }
         catch (Exception ex)
         {
-            yield return Result<AIStreamChunk>.Failure($"Request failed: {ex.Message}");
+            Logger.LogError(ex, "Gemini streaming request failed");
             yield break;
         }
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var reader = new StreamReader(stream);
-
-        var totalPromptTokens = 0;
-        var totalCompletionTokens = 0;
 
         while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
         {
@@ -238,94 +252,8 @@ public sealed class GeminiProvider : BaseAIProvider
             var text = chunk.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
             if (!string.IsNullOrEmpty(text))
             {
-                yield return Result<AIStreamChunk>.Success(new AIStreamChunk
-                {
-                    Content = text,
-                    IsComplete = false
-                });
+                yield return text;
             }
-
-            // Track token usage from metadata
-            if (chunk.UsageMetadata != null)
-            {
-                totalPromptTokens = chunk.UsageMetadata.PromptTokenCount;
-                totalCompletionTokens = chunk.UsageMetadata.CandidatesTokenCount;
-            }
-
-            var finishReason = chunk.Candidates?.FirstOrDefault()?.FinishReason;
-            if (!string.IsNullOrEmpty(finishReason) && finishReason != "UNSPECIFIED")
-            {
-                yield return Result<AIStreamChunk>.Success(new AIStreamChunk
-                {
-                    IsComplete = true,
-                    FinishReason = finishReason,
-                    Usage = new TokenUsage
-                    {
-                        PromptTokens = totalPromptTokens,
-                        CompletionTokens = totalCompletionTokens,
-                        TotalTokens = totalPromptTokens + totalCompletionTokens
-                    }
-                });
-            }
-        }
-    }
-
-    /// <inheritdoc />
-    public override async Task<Result<bool>> ValidateApiKeyAsync(
-        string apiKey,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            using var testClient = new HttpClient();
-            var url = $"{ApiBaseUrl}/models?key={apiKey}";
-            
-            var response = await testClient.GetAsync(url, cancellationToken);
-            return Result<bool>.Success(response.IsSuccessStatusCode);
-        }
-        catch (Exception ex)
-        {
-            return Result<bool>.Failure($"API key validation failed: {ex.Message}");
-        }
-    }
-
-    /// <inheritdoc />
-    public override async Task<Result<TokenUsage>> CountTokensAsync(
-        string text,
-        string model,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var url = $"{ApiBaseUrl}/models/{model}:countTokens?key={_settings.ApiKey}";
-            var request = new
-            {
-                contents = new[]
-                {
-                    new { parts = new[] { new { text } } }
-                }
-            };
-
-            var response = await HttpClient.PostAsJsonAsync(url, request, JsonOptions, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                // Fall back to estimation
-                return await base.CountTokensAsync(text, model, cancellationToken);
-            }
-
-            var result = await response.Content.ReadFromJsonAsync<GeminiCountTokensResponse>(
-                JsonOptions, cancellationToken);
-            
-            return Result<TokenUsage>.Success(new TokenUsage
-            {
-                PromptTokens = result?.TotalTokens ?? 0,
-                CompletionTokens = 0,
-                TotalTokens = result?.TotalTokens ?? 0
-            });
-        }
-        catch
-        {
-            return await base.CountTokensAsync(text, model, cancellationToken);
         }
     }
 
@@ -381,9 +309,8 @@ public sealed class GeminiProvider : BaseAIProvider
             FinishReason = candidate?.FinishReason ?? "unknown",
             Usage = new TokenUsage
             {
-                PromptTokens = response.UsageMetadata?.PromptTokenCount ?? 0,
-                CompletionTokens = response.UsageMetadata?.CandidatesTokenCount ?? 0,
-                TotalTokens = response.UsageMetadata?.TotalTokenCount ?? 0
+                InputTokens = response.UsageMetadata?.PromptTokenCount ?? 0,
+                OutputTokens = response.UsageMetadata?.CandidatesTokenCount ?? 0
             },
             GeneratedAt = DateTime.UtcNow
         };

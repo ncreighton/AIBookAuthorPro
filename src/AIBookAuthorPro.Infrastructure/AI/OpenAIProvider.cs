@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
@@ -29,60 +30,71 @@ public sealed class OpenAIProvider : BaseAIProvider
     {
         new AIModelInfo
         {
-            Id = "gpt-4o",
-            Name = "GPT-4o",
-            Provider = AIProviderType.OpenAI,
+            ModelId = "gpt-4o",
+            DisplayName = "GPT-4o",
+            Provider = Enums.AIProviderType.OpenAI,
             MaxContextTokens = 128000,
             MaxOutputTokens = 16384,
-            CostPer1KInputTokens = 0.005m,
-            CostPer1KOutputTokens = 0.015m,
-            SupportsVision = true,
+            InputCostPer1K = 0.005m,
+            OutputCostPer1K = 0.015m,
+true,
             SupportsStreaming = true,
-            Description = "Most capable GPT-4 model with vision capabilities"
+            RecommendedFor = "Most capable GPT-4 model with vision capabilities"
         },
         new AIModelInfo
         {
-            Id = "gpt-4o-mini",
-            Name = "GPT-4o Mini",
-            Provider = AIProviderType.OpenAI,
+            ModelId = "gpt-4o-mini",
+            DisplayName = "GPT-4o Mini",
+            Provider = Enums.AIProviderType.OpenAI,
             MaxContextTokens = 128000,
             MaxOutputTokens = 16384,
-            CostPer1KInputTokens = 0.00015m,
-            CostPer1KOutputTokens = 0.0006m,
-            SupportsVision = true,
+            InputCostPer1K = 0.00015m,
+            OutputCostPer1K = 0.0006m,
+true,
             SupportsStreaming = true,
-            Description = "Cost-effective smaller model with good performance"
+            RecommendedFor = "Cost-effective smaller model with good performance"
         },
         new AIModelInfo
         {
-            Id = "o1-preview",
-            Name = "o1 Preview",
-            Provider = AIProviderType.OpenAI,
+            ModelId = "o1-preview",
+            DisplayName = "o1 Preview",
+            Provider = Enums.AIProviderType.OpenAI,
             MaxContextTokens = 128000,
             MaxOutputTokens = 32768,
-            CostPer1KInputTokens = 0.015m,
-            CostPer1KOutputTokens = 0.06m,
-            SupportsVision = false,
+            InputCostPer1K = 0.015m,
+            OutputCostPer1K = 0.06m,
+false,
             SupportsStreaming = false,
-            Description = "Advanced reasoning model for complex tasks"
+            RecommendedFor = "Advanced reasoning model for complex tasks"
         },
         new AIModelInfo
         {
-            Id = "o1-mini",
-            Name = "o1 Mini",
-            Provider = AIProviderType.OpenAI,
+            ModelId = "o1-mini",
+            DisplayName = "o1 Mini",
+            Provider = Enums.AIProviderType.OpenAI,
             MaxContextTokens = 128000,
             MaxOutputTokens = 65536,
-            CostPer1KInputTokens = 0.003m,
-            CostPer1KOutputTokens = 0.012m,
-            SupportsVision = false,
+            InputCostPer1K = 0.003m,
+            OutputCostPer1K = 0.012m,
+false,
             SupportsStreaming = false,
-            Description = "Faster reasoning model for simpler tasks"
+            RecommendedFor = "Faster reasoning model for simpler tasks"
         }
     };
 
-    public override string Name => "OpenAI";
-    public override AIProviderType ProviderType => AIProviderType.OpenAI;
+    /// <inheritdoc />
+    public override string ProviderName => "OpenAI";
+    
+    /// <inheritdoc />
+    public override bool SupportsStreaming => true;
+    
+    /// <inheritdoc />
+    public override int MaxContextTokens => 128000;
+    
+    /// <inheritdoc />
+    public override bool IsConfigured => !string.IsNullOrEmpty(_settings.ApiKey);
+    
+    /// <inheritdoc />
     public override IReadOnlyList<AIModelInfo> AvailableModels => _models;
 
     public OpenAIProvider(
@@ -105,21 +117,24 @@ public sealed class OpenAIProvider : BaseAIProvider
     }
 
     /// <inheritdoc />
-    public override async Task<Result<AIGenerationResponse>> GenerateAsync(
-        AIGenerationRequest request,
+    public override async Task<Result<GenerationResult>> GenerateAsync(
+        GenerationRequest request,
         CancellationToken cancellationToken = default)
     {
         var validation = ValidateRequest(request);
         if (!validation.IsSuccess)
         {
-            return Result<AIGenerationResponse>.Failure(validation.Error!);
+            return Result<GenerationResult>.Failure(validation.Error!);
         }
 
         LogRequest(request);
+        
+        // Convert to compatibility type for internal processing
+        var compatRequest = AIGenerationRequest.FromGenerationRequest(request);
 
         try
         {
-            var openaiRequest = BuildRequest(request);
+            var openaiRequest = BuildRequest(compatRequest);
             
             var response = await HttpClient.PostAsJsonAsync(
                 ApiUrl,
@@ -131,73 +146,67 @@ public sealed class OpenAIProvider : BaseAIProvider
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 Logger.LogError("OpenAI API error: {StatusCode} - {Error}", response.StatusCode, errorContent);
-                return Result<AIGenerationResponse>.Failure($"API error: {response.StatusCode} - {errorContent}");
+                return Result<GenerationResult>.Failure($"API error: {response.StatusCode} - {errorContent}");
             }
 
             var result = await response.Content.ReadFromJsonAsync<OpenAIResponse>(JsonOptions, cancellationToken);
             if (result == null)
             {
-                return Result<AIGenerationResponse>.Failure("Failed to deserialize API response");
+                return Result<GenerationResult>.Failure("Failed to deserialize API response");
             }
 
-            var generationResponse = MapResponse(result);
-            LogResponse(generationResponse);
+            var compatResponse = MapResponse(result);
+            var generationResult = compatResponse.ToGenerationResult();
+            LogResponse(generationResult);
             
-            return Result<AIGenerationResponse>.Success(generationResponse);
+            return Result<GenerationResult>.Success(generationResult);
         }
         catch (HttpRequestException ex)
         {
             Logger.LogError(ex, "HTTP request failed for OpenAI API");
-            return Result<AIGenerationResponse>.Failure($"Network error: {ex.Message}");
+            return Result<GenerationResult>.Failure($"Network error: {ex.Message}");
         }
         catch (TaskCanceledException ex) when (ex.CancellationToken == cancellationToken)
         {
             Logger.LogInformation("Request cancelled by user");
-            return Result<AIGenerationResponse>.Failure("Request cancelled");
+            return Result<GenerationResult>.Failure("Request cancelled");
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Unexpected error in OpenAI generation");
-            return Result<AIGenerationResponse>.Failure($"Unexpected error: {ex.Message}");
+            return Result<GenerationResult>.Failure($"Unexpected error: {ex.Message}");
         }
     }
 
     /// <inheritdoc />
-    public override async IAsyncEnumerable<Result<AIStreamChunk>> GenerateStreamAsync(
-        AIGenerationRequest request,
+    public override async IAsyncEnumerable<string> StreamGenerateAsync(
+        GenerationRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var validation = ValidateRequest(request);
         if (!validation.IsSuccess)
         {
-            yield return Result<AIStreamChunk>.Failure(validation.Error!);
-            yield break;
-        }
-
-        // o1 models don't support streaming
-        if (request.Model.StartsWith("o1"))
-        {
-            var result = await GenerateAsync(request, cancellationToken);
-            if (result.IsSuccess && result.Value != null)
-            {
-                yield return Result<AIStreamChunk>.Success(new AIStreamChunk
-                {
-                    Content = result.Value.Content,
-                    IsComplete = true,
-                    FinishReason = result.Value.FinishReason,
-                    Usage = result.Value.Usage
-                });
-            }
-            else
-            {
-                yield return Result<AIStreamChunk>.Failure(result.Error ?? "Unknown error");
-            }
             yield break;
         }
 
         LogRequest(request);
+        
+        // Convert to compatibility type for internal processing
+        var compatRequest = AIGenerationRequest.FromGenerationRequest(request);
+        
+        // o1 models don't support streaming
+        if (compatRequest.Model.StartsWith("o1"))
+        {
+            var result = await GenerateAsync(request, cancellationToken);
+            if (result.IsSuccess && result.Value != null)
+            {
+                // Yield the entire content at once for non-streaming models
+                yield return result.Value.Content;
+            }
+            yield break;
+        }
 
-        var openaiRequest = BuildRequest(request, stream: true);
+        var openaiRequest = BuildRequest(compatRequest, stream: true);
         var json = JsonSerializer.Serialize(openaiRequest, JsonOptions);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -213,13 +222,13 @@ public sealed class OpenAIProvider : BaseAIProvider
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                yield return Result<AIStreamChunk>.Failure($"API error: {response.StatusCode} - {errorContent}");
+                Logger.LogError("OpenAI streaming API error: {StatusCode} - {Error}", response.StatusCode, errorContent);
                 yield break;
             }
         }
         catch (Exception ex)
         {
-            yield return Result<AIStreamChunk>.Failure($"Request failed: {ex.Message}");
+            Logger.LogError(ex, "OpenAI streaming request failed");
             yield break;
         }
 
@@ -236,11 +245,6 @@ public sealed class OpenAIProvider : BaseAIProvider
             var data = line[6..];
             if (data == "[DONE]")
             {
-                yield return Result<AIStreamChunk>.Success(new AIStreamChunk
-                {
-                    IsComplete = true,
-                    FinishReason = "stop"
-                });
                 break;
             }
 
@@ -256,44 +260,8 @@ public sealed class OpenAIProvider : BaseAIProvider
 
             if (chunk?.Choices?.FirstOrDefault()?.Delta?.Content is { } chunkContent)
             {
-                yield return Result<AIStreamChunk>.Success(new AIStreamChunk
-                {
-                    Content = chunkContent,
-                    IsComplete = false
-                });
+                yield return chunkContent;
             }
-
-            var finishReason = chunk?.Choices?.FirstOrDefault()?.FinishReason;
-            if (!string.IsNullOrEmpty(finishReason))
-            {
-                yield return Result<AIStreamChunk>.Success(new AIStreamChunk
-                {
-                    IsComplete = true,
-                    FinishReason = finishReason
-                });
-            }
-        }
-    }
-
-    /// <inheritdoc />
-    public override async Task<Result<bool>> ValidateApiKeyAsync(
-        string apiKey,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            using var testClient = new HttpClient();
-            testClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-            
-            var response = await testClient.GetAsync(
-                "https://api.openai.com/v1/models",
-                cancellationToken);
-            
-            return Result<bool>.Success(response.IsSuccessStatusCode);
-        }
-        catch (Exception ex)
-        {
-            return Result<bool>.Failure($"API key validation failed: {ex.Message}");
         }
     }
 
@@ -351,9 +319,8 @@ public sealed class OpenAIProvider : BaseAIProvider
             FinishReason = choice?.FinishReason ?? "unknown",
             Usage = new TokenUsage
             {
-                PromptTokens = response.Usage?.PromptTokens ?? 0,
-                CompletionTokens = response.Usage?.CompletionTokens ?? 0,
-                TotalTokens = response.Usage?.TotalTokens ?? 0
+                InputTokens = response.Usage?.PromptTokens ?? 0,
+                OutputTokens = response.Usage?.CompletionTokens ?? 0
             },
             GeneratedAt = DateTime.UtcNow
         };

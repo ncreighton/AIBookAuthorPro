@@ -36,7 +36,7 @@ public interface IGenerationPipelineService
     System.Threading.Tasks.Task<Result<string>> RefineContentAsync(
         string content,
         string instructions,
-        AIProviderType provider,
+        Enums.AIProviderType provider,
         CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -66,29 +66,21 @@ public sealed class AIGenerationResponse
 }
 
 /// <summary>
-/// Represents the AI provider type for model identification.
-/// Maps to the Enums.AIProviderType but includes Infrastructure-specific values.
-/// </summary>
-public enum AIProviderType
-{
-    Anthropic = 0,
-    OpenAI = 1,
-    Google = 2,
-    Local = 3
-}
-
-/// <summary>
 /// Extended AIModelInfo with additional properties used by Infrastructure.
+/// Uses composition since AIModelInfo is sealed.
 /// </summary>
-public sealed class AIModelInfoExtended : AIModelInfo
+public sealed class AIModelInfoExtended
 {
-    public string Id { get; init; } = string.Empty;
-    public string Name { get; init; } = string.Empty;
-    public new AIProviderType Provider { get; init; }
-    public decimal CostPer1KInputTokens { get; init; }
-    public decimal CostPer1KOutputTokens { get; init; }
+    public AIModelInfo BaseInfo { get; init; } = null!;
     public bool SupportsVision { get; init; }
     public string Description { get; init; } = string.Empty;
+    
+    // Convenience properties that delegate to BaseInfo
+    public string Id => BaseInfo.ModelId;
+    public string Name => BaseInfo.DisplayName;
+    public Enums.AIProviderType Provider => BaseInfo.Provider;
+    public decimal CostPer1KInputTokens => BaseInfo.InputCostPer1K;
+    public decimal CostPer1KOutputTokens => BaseInfo.OutputCostPer1K;
 }
 
 /// <summary>
