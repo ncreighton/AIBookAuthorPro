@@ -1,0 +1,635 @@
+<UserControl 
+    x:Class="AIBookAuthorPro.UI.Views.ResearchView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=vm:ResearchViewModel}"
+    d:DesignHeight="800"
+    d:DesignWidth="1200">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+        
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+        </Style>
+        
+        <Style x:Key="CardStyle" TargetType="materialDesign:Card">
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Margin" Value="8"/>
+            <Setter Property="UniformCornerRadius" Value="8"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel: Research Tools -->
+        <ScrollViewer 
+            Grid.Column="0" 
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
+            
+            <StackPanel Margin="8">
+                <!-- Header -->
+                <TextBlock 
+                    Text="Research Assistant"
+                    Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                    Margin="8,8,8,16"/>
+
+                <!-- General Research -->
+                <materialDesign:Card Style="{StaticResource CardStyle}">
+                    <Expander 
+                        Header="General Research" 
+                        IsExpanded="True"
+                        materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                        
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Search Query"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                AcceptsReturn="True"
+                                TextWrapping="Wrap"
+                                MinHeight="60"
+                                Margin="0,0,0,12"/>
+
+                            <ComboBox
+                                materialDesign:HintAssist.Hint="Research Type"
+                                materialDesign:HintAssist.IsFloating="True"
+                                ItemsSource="{Binding AvailableResearchTypes}"
+                                SelectedItem="{Binding SelectedResearchType}"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Time Period (optional)"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding TimePeriod, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Geographic Context (optional)"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding GeographicContext, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Genre Context (optional)"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding GenreContext, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="Max Results:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Slider 
+                                    Value="{Binding MaxResults}"
+                                    Minimum="1"
+                                    Maximum="20"
+                                    Width="120"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="{Binding MaxResults}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+
+                            <CheckBox
+                                Content="Include AI Summary"
+                                IsChecked="{Binding IncludeAISummary}"
+                                Margin="0,0,0,16"/>
+
+                            <Button
+                                Content="Search"
+                                Command="{Binding SearchCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                IsEnabled="{Binding IsNotSearching}"/>
+                        </StackPanel>
+                    </Expander>
+                </materialDesign:Card>
+
+                <!-- Character Names -->
+                <materialDesign:Card Style="{StaticResource CardStyle}">
+                    <Expander 
+                        Header="Character Names"
+                        materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                        
+                        <StackPanel Margin="0,16,0,0">
+                            <ComboBox
+                                materialDesign:HintAssist.Hint="Gender"
+                                materialDesign:HintAssist.IsFloating="True"
+                                SelectedItem="{Binding NameGender}"
+                                Margin="0,0,0,12">
+                                <ComboBoxItem Content="Male"/>
+                                <ComboBoxItem Content="Female"/>
+                                <ComboBoxItem Content="Neutral"/>
+                                <ComboBoxItem Content="Any"/>
+                            </ComboBox>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Cultural Origin"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding NameOrigin, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Time Period"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding NameTimePeriod, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="Count:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <Slider 
+                                    Value="{Binding NameCount}"
+                                    Minimum="1"
+                                    Maximum="20"
+                                    Width="120"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="{Binding NameCount}" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+
+                            <Button
+                                Content="Generate Names"
+                                Command="{Binding GenerateNamesCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </Expander>
+                </materialDesign:Card>
+
+                <!-- Genre Tropes -->
+                <materialDesign:Card Style="{StaticResource CardStyle}">
+                    <Expander 
+                        Header="Genre Tropes"
+                        materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                        
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Genre"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding TropeGenre, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <CheckBox
+                                Content="Include Subversions"
+                                IsChecked="{Binding IncludeSubversions}"
+                                Margin="0,0,0,16"/>
+
+                            <Button
+                                Content="Get Tropes"
+                                Command="{Binding GetTropesCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </Expander>
+                </materialDesign:Card>
+
+                <!-- Historical Accuracy -->
+                <materialDesign:Card Style="{StaticResource CardStyle}">
+                    <Expander 
+                        Header="Historical Accuracy Check"
+                        materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                        
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Text to Check"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding TextToCheck, UpdateSourceTrigger=PropertyChanged}"
+                                AcceptsReturn="True"
+                                TextWrapping="Wrap"
+                                MinHeight="80"
+                                MaxHeight="200"
+                                VerticalScrollBarVisibility="Auto"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Time Period"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding AccuracyTimePeriod, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Location (optional)"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding AccuracyLocation, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <Button
+                                Content="Check Accuracy"
+                                Command="{Binding CheckAccuracyCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </Expander>
+                </materialDesign:Card>
+
+                <!-- Location Research -->
+                <materialDesign:Card Style="{StaticResource CardStyle}">
+                    <Expander 
+                        Header="Location Research"
+                        materialDesign:ExpanderAssist.HorizontalHeaderPadding="0">
+                        
+                        <StackPanel Margin="0,16,0,0">
+                            <TextBox
+                                materialDesign:HintAssist.Hint="Location Name"
+                                materialDesign:HintAssist.IsFloating="True"
+                                Text="{Binding LocationToResearch, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12"/>
+
+                            <Button
+                                Content="Research Location"
+                                Command="{Binding ResearchLocationCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        </StackPanel>
+                    </Expander>
+                </materialDesign:Card>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Right Panel: Results -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Error Message -->
+            <materialDesign:Card 
+                Grid.Row="0"
+                Margin="8"
+                Padding="12"
+                Background="{DynamicResource MaterialDesignErrorBrush}"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVisConverter}}">
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock 
+                        Text="{Binding ErrorMessage}" 
+                        Foreground="White"
+                        TextWrapping="Wrap"/>
+                    
+                    <Button 
+                        Grid.Column="1"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding ClearMessagesCommand}"
+                        Foreground="White">
+                        <materialDesign:PackIcon Kind="Close"/>
+                    </Button>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- Results TabControl -->
+            <TabControl Grid.Row="1" Margin="8">
+                <!-- Search Results Tab -->
+                <TabItem Header="Search Results">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Summary -->
+                        <materialDesign:Card 
+                            Grid.Row="0" 
+                            Margin="0,0,0,8"
+                            Padding="16"
+                            Visibility="{Binding CurrentResultSet.Summary, Converter={StaticResource BoolToVisConverter}}">
+                            
+                            <StackPanel>
+                                <TextBlock Text="AI Summary" Style="{StaticResource SectionHeaderStyle}"/>
+                                <TextBlock 
+                                    Text="{Binding CurrentResultSet.Summary}"
+                                    TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </materialDesign:Card>
+
+                        <!-- Results List -->
+                        <ListBox 
+                            Grid.Row="1"
+                            ItemsSource="{Binding CurrentResultSet.Results}"
+                            SelectedItem="{Binding SelectedResult}">
+                            
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <materialDesign:Card Padding="12" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <TextBlock 
+                                                Text="{Binding Title}"
+                                                FontWeight="Medium"
+                                                FontSize="14"/>
+                                            
+                                            <TextBlock 
+                                                Text="{Binding Content}"
+                                                TextWrapping="Wrap"
+                                                MaxHeight="100"
+                                                Margin="0,8,0,8"
+                                                Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:Chip 
+                                                    Content="{Binding Type}"
+                                                    Margin="0,0,8,0"/>
+                                                
+                                                <Button
+                                                    Content="Copy"
+                                                    Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding Content}"
+                                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                    Height="28"
+                                                    Padding="8,0"/>
+
+                                                <Button
+                                                    Content="Save to Project"
+                                                    Command="{Binding DataContext.SaveResultCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                    Height="28"
+                                                    Padding="8,0"
+                                                    Margin="8,0,0,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </materialDesign:Card>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Loading Indicator -->
+                        <ProgressBar 
+                            Grid.Row="1"
+                            IsIndeterminate="True"
+                            Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisConverter}}"
+                            VerticalAlignment="Top"
+                            Margin="0,100,0,0"/>
+                    </Grid>
+                </TabItem>
+
+                <!-- Names Tab -->
+                <TabItem Header="Character Names">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                            <Button 
+                                Content="Clear"
+                                Command="{Binding ClearNamesCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"/>
+                        </StackPanel>
+
+                        <DataGrid 
+                            Grid.Row="1"
+                            ItemsSource="{Binding NameSuggestions}"
+                            AutoGenerateColumns="False"
+                            IsReadOnly="True"
+                            CanUserAddRows="False">
+                            
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="Meaning" Binding="{Binding Meaning}" Width="*"/>
+                                <DataGridTextColumn Header="Origin" Binding="{Binding Origin}" Width="100"/>
+                                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="*"/>
+                                <DataGridTemplateColumn Header="Actions" Width="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button
+                                                Command="{Binding DataContext.CopyToClipboardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding Name}"
+                                                Style="{StaticResource MaterialDesignIconButton}"
+                                                Height="24" Width="24">
+                                                <materialDesign:PackIcon Kind="ContentCopy" Height="16" Width="16"/>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- Tropes Tab -->
+                <TabItem Header="Genre Tropes">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Tropes List -->
+                        <ListBox 
+                            Grid.Column="0"
+                            ItemsSource="{Binding GenreTropes}"
+                            SelectedItem="{Binding SelectedTrope}"
+                            Margin="0,0,8,0">
+                            
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="Medium"/>
+                                        <TextBlock 
+                                            Text="{Binding Description}" 
+                                            TextTrimming="CharacterEllipsis"
+                                            Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Trope Details -->
+                        <ScrollViewer Grid.Column="1">
+                            <StackPanel DataContext="{Binding SelectedTrope}">
+                                <TextBlock 
+                                    Text="{Binding Name}"
+                                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                    Margin="0,0,0,8"/>
+
+                                <TextBlock Text="Description" Style="{StaticResource SectionHeaderStyle}"/>
+                                <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                                <TextBlock Text="Examples" Style="{StaticResource SectionHeaderStyle}"/>
+                                <ItemsControl ItemsSource="{Binding Examples}" Margin="0,0,0,16">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding StringFormat='• {0}'}" TextWrapping="Wrap"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Text="Writing Tips" Style="{StaticResource SectionHeaderStyle}"/>
+                                <TextBlock Text="{Binding WritingTips}" TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                                <TextBlock Text="Subversion Ideas" Style="{StaticResource SectionHeaderStyle}"
+                                           Visibility="{Binding SubversionSuggestion, Converter={StaticResource BoolToVisConverter}}"/>
+                                <TextBlock Text="{Binding SubversionSuggestion}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+
+                <!-- Accuracy Tab -->
+                <TabItem Header="Accuracy Issues">
+                    <DataGrid 
+                        ItemsSource="{Binding AccuracyIssues}"
+                        AutoGenerateColumns="False"
+                        IsReadOnly="True"
+                        CanUserAddRows="False">
+                        
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="80"/>
+                            <DataGridTextColumn Header="Issue" Binding="{Binding Issue}" Width="*"/>
+                            <DataGridTextColumn Header="Original Text" Binding="{Binding OriginalText}" Width="150"/>
+                            <DataGridTextColumn Header="Suggested Fix" Binding="{Binding SuggestedFix}" Width="*"/>
+                            <DataGridTextColumn Header="Explanation" Binding="{Binding Explanation}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <!-- Location Tab -->
+                <TabItem Header="Location Details">
+                    <ScrollViewer DataContext="{Binding LocationResult}">
+                        <StackPanel Margin="16">
+                            <TextBlock 
+                                Text="{Binding LocationName}"
+                                Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                Margin="0,0,0,16"/>
+
+                            <!-- Geography -->
+                            <materialDesign:Card Padding="16" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Geography" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Coordinates:" FontWeight="Medium" Margin="0,0,16,4"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Geography.Coordinates}"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Terrain:" FontWeight="Medium" Margin="0,0,16,4"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Geography.Terrain}" TextWrapping="Wrap"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Population:" FontWeight="Medium" Margin="0,0,16,4"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Geography.Population}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <!-- Climate -->
+                            <materialDesign:Card Padding="16" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Climate" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <TextBlock Text="{Binding Climate.Type}" FontWeight="Medium"/>
+                                    <TextBlock Text="{Binding Climate.Seasons}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                    <TextBlock Text="{Binding Climate.Weather}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <!-- Culture -->
+                            <materialDesign:Card Padding="16" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Culture" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <TextBlock Text="{Binding Culture.Language}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding Culture.Religion}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding Culture.Customs}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <!-- Sensory Details -->
+                            <materialDesign:Card Padding="16" Margin="0,0,0,16">
+                                <StackPanel>
+                                    <TextBlock Text="Sensory Details" Style="{StaticResource SectionHeaderStyle}"/>
+                                    
+                                    <TextBlock Text="Sights:" FontWeight="Medium" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding SensoryDetails.Sights}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Sounds:" FontWeight="Medium" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding SensoryDetails.Sounds}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Smells:" FontWeight="Medium" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding SensoryDetails.Smells}" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="Atmosphere:" FontWeight="Medium" Margin="0,0,0,4"/>
+                                    <TextBlock Text="{Binding SensoryDetails.Atmosphere}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </materialDesign:Card>
+
+                            <!-- Landmarks -->
+                            <materialDesign:Card Padding="16">
+                                <StackPanel>
+                                    <TextBlock Text="Notable Landmarks" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <ItemsControl ItemsSource="{Binding Landmarks}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding StringFormat='• {0}'}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Saved Research Tab -->
+                <TabItem Header="Saved Research">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Button 
+                            Grid.Row="0"
+                            Content="Load Saved Research"
+                            Command="{Binding LoadSavedResearchCommand}"
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            HorizontalAlignment="Left"
+                            Margin="0,0,0,8"/>
+
+                        <ListBox 
+                            Grid.Row="1"
+                            ItemsSource="{Binding SavedResults}">
+                            
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <materialDesign:Card Padding="12" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <TextBlock 
+                                                Text="{Binding Title}"
+                                                FontWeight="Medium"
+                                                FontSize="14"/>
+                                            
+                                            <TextBlock 
+                                                Text="{Binding Content}"
+                                                TextWrapping="Wrap"
+                                                MaxHeight="60"
+                                                Margin="0,8,0,0"
+                                                Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                                        </StackPanel>
+                                    </materialDesign:Card>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</UserControl>
