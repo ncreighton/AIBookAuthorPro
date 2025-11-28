@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.Xaml.Behaviors;
 using TextBox = System.Windows.Controls.TextBox;
+using DataObject = System.Windows.DataObject;
 
 namespace AIBookAuthorPro.UI.Behaviors;
 

@@ -8,6 +8,13 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Microsoft.Xaml.Behaviors;
+using Panel = System.Windows.Controls.Panel;
+using Point = System.Windows.Point;
+using Color = System.Windows.Media.Color;
+using Brushes = System.Windows.Media.Brushes;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using ProgressBar = System.Windows.Controls.ProgressBar;
+using Application = System.Windows.Application;
 
 namespace AIBookAuthorPro.UI.Behaviors;
 

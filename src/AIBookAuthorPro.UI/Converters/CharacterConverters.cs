@@ -8,6 +8,8 @@ using System.Windows.Data;
 using System.Windows.Media;
 using AIBookAuthorPro.Core.Enums;
 using Brush = System.Windows.Media.Brush;
+using Color = System.Windows.Media.Color;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace AIBookAuthorPro.UI.Converters;
 

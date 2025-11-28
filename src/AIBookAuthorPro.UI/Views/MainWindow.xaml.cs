@@ -10,6 +10,7 @@ using AIBookAuthorPro.Infrastructure.Services;
 using AIBookAuthorPro.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MessageBox = System.Windows.MessageBox;
 
 namespace AIBookAuthorPro.UI.Views;
 

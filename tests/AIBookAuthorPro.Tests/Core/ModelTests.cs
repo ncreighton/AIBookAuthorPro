@@ -8,6 +8,8 @@ using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
 using FluentAssertions;
 using Xunit;
+using CharacterRoleEnum = AIBookAuthorPro.Core.Enums.CharacterRole;
+using OutlineItemTypeEnum = AIBookAuthorPro.Core.Enums.OutlineItemType;
 
 namespace AIBookAuthorPro.Tests.Core;
 
@@ -48,7 +50,7 @@ public class ModelTests
         var character = new Character { Name = "Test" };
 
         // Assert
-        character.Role.Should().Be(CharacterRole.Supporting);
+        character.Role.Should().Be((Core.Models.CharacterRole)CharacterRoleEnum.Supporting);
     }
 
     [Fact]
@@ -70,13 +72,13 @@ public class ModelTests
         var parent = new OutlineItem
         {
             Title = "Act I",
-            ItemType = OutlineItemType.Act
+            ItemType = (Core.Models.OutlineItemType)OutlineItemTypeEnum.Act
         };
 
         var child = new OutlineItem
         {
             Title = "Chapter 1",
-            ItemType = OutlineItemType.Chapter
+            ItemType = (Core.Models.OutlineItemType)OutlineItemTypeEnum.Chapter
         };
 
         // Act

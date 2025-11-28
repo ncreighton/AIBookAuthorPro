@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using AIBookAuthorPro.Infrastructure.Services;
 using UserControl = System.Windows.Controls.UserControl;
+using Button = System.Windows.Controls.Button;
 
 namespace AIBookAuthorPro.UI.Views;
 

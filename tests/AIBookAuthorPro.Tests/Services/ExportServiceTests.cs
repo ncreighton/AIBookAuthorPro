@@ -172,7 +172,7 @@ public class ExportServiceTests
         result.IsSuccess.Should().BeTrue();
         _markdownExporterMock.Verify(x => x.ExportAsync(
             project,
-            It.Is<IReadOnlyList<Chapter>>(chapters => chapters.Count == 1 && chapters.First().Title.Contains("Chapter 1")),
+            It.Is<List<Chapter>>(chapters => chapters.Count == 1 && chapters.First().Title.Contains("Chapter 1")),
             options,
             It.IsAny<CancellationToken>()), Times.Once);
     }
