@@ -30,6 +30,9 @@
     <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
 
+    <!-- Windows Forms (for FolderBrowserDialog) -->
+    <PackageVersion Include="System.Windows.Forms" Version="8.0.0" />
+
     <!-- JSON - Updated to fix vulnerability -->
     <PackageVersion Include="System.Text.Json" Version="8.0.5" />
 
