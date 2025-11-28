@@ -97,7 +97,7 @@ public partial class App : Application
         services.AddSingleton<IFlowDocumentService, FlowDocumentService>();
         
         // Export services (must be registered before IExportService)
-        services.AddSingleton<IDocxExporter, Services.DocxExporter>();
+        services.AddSingleton<IDocxExporter, DocxExporter>();
         services.AddSingleton<IMarkdownExporter, MarkdownExporter>();
         services.AddSingleton<IHtmlExporter, HtmlExporter>();
         services.AddSingleton<IExportService, ExportService>();
