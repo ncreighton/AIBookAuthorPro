@@ -266,38 +266,27 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
             yield break;
         }
 
-        if (!provider.SupportsStreaming)
+        // Streaming not available - use regular generation and wrap as StreamingChunk
+        var generationResult = await provider.GenerateAsync(generationRequest, cancellationToken);
+        if (generationResult.IsSuccess && generationResult.Value != null)
         {
-            // Fall back to non-streaming
-            var result = await provider.GenerateAsync(generationRequest, cancellationToken);
-
-            if (result.IsSuccess && result.Value != null)
+            yield return new StreamingChunk
             {
-                yield return new StreamingChunk
-                {
-                    Text = result.Value.Content,
-                    IsFinal = true,
-                    FinishReason = result.Value.FinishReason,
-                    Usage = result.Value.Usage
-                };
-            }
-            else
-            {
-                yield return new StreamingChunk
-                {
-                    Text = "Error: " + result.Error,
-                    IsFinal = true,
-                    FinishReason = "error"
-                };
-            }
-            yield break;
+                Text = generationResult.Value.Content,
+                IsFinal = true,
+                FinishReason = generationResult.Value.FinishReason,
+                Usage = generationResult.Value.Usage
+            };
         }
-
-        // Streaming not available - use regular generation
-        var result = await provider.GenerateAsync(generationRequest, cancellationToken);
-        if (result.IsSuccess && result.Value != null)
+        else
         {
-            yield return result.Value.Content;
+            yield return new StreamingChunk
+            {
+                Text = "Error: " + generationResult.Error,
+                IsFinal = true,
+                FinishReason = "error",
+                Error = generationResult.Error
+            };
         }
     }
 

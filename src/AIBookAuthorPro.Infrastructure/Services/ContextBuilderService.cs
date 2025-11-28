@@ -536,7 +536,7 @@ public sealed class ContextBuilderService : IContextBuilderService
 
         // Add main characters if we have room
         var mainCharacters = project.Characters
-            .Where(c => c.Role == Core.Enums.CharacterRole.Protagonist || c.Role == Core.Enums.CharacterRole.Antagonist)
+            .Where(c => c.Role == Core.Models.CharacterRole.Protagonist || c.Role == Core.Models.CharacterRole.Antagonist)
             .Take(5);
 
         foreach (var character in mainCharacters)

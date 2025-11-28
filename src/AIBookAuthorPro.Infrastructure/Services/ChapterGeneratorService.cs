@@ -251,7 +251,7 @@ Outline:";
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // ContextBuildOptions doesn't have those properties - pass null and let BuildChapterContext use defaults
-        var contextOptions = (ContextBuildOptions?)null;
+        // ContextBuildOptions passed as null - BuildChapterContext will use defaults
 
         var contextResult = _contextBuilder.BuildChapterContext(
             request.Project, 
