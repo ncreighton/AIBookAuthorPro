@@ -78,6 +78,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _currentPageTitle = "Dashboard";
 
+    [ObservableProperty]
+    private bool _isInitialized;
+
     /// <summary>
     /// Gets the recent projects list.
     /// </summary>
@@ -114,6 +117,7 @@ public partial class MainViewModel : ObservableObject
         _settingsService = settingsService;
         _logger = logger;
 
+<<<<<<< HEAD
         // Initialize recent projects asynchronously to avoid deadlock
         // This will be called after the window is loaded
         _ = Task.Run(async () =>
@@ -127,6 +131,45 @@ public partial class MainViewModel : ObservableObject
                 _logger.LogError(ex, "Failed to load recent projects during initialization");
             }
         });
+=======
+        _logger.LogDebug("MainViewModel created");
+        
+        // DO NOT call any commands here - they will be called after the window loads
+        // This prevents UI thread deadlocks during startup
+    }
+
+    /// <summary>
+    /// Initializes the view model asynchronously. Call this from Loaded event.
+    /// </summary>
+    [RelayCommand]
+    public async Task InitializeAsync()
+    {
+        if (IsInitialized) return;
+
+        _logger.LogDebug("Initializing MainViewModel");
+        
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Loading...";
+
+            // Load recent projects on background thread
+            await LoadRecentProjectsAsync();
+
+            IsInitialized = true;
+            StatusMessage = "Ready";
+            _logger.LogInformation("MainViewModel initialized successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to initialize MainViewModel");
+            StatusMessage = "Failed to initialize";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+>>>>>>> 1b9798acd926b365f6d87a1deb8950c293c5732f
     }
 
     [RelayCommand]
@@ -204,6 +247,7 @@ public partial class MainViewModel : ObservableObject
 
             if (result.IsSuccess)
             {
+                HasUnsavedChanges = false;
                 StatusMessage = "Project saved successfully";
             }
             else
@@ -235,6 +279,7 @@ public partial class MainViewModel : ObservableObject
             if (result.IsSuccess)
             {
                 Title = $"AI Book Author Pro - {CurrentProject.Metadata.Title}";
+                HasUnsavedChanges = false;
                 StatusMessage = "Project saved successfully";
             }
             else
@@ -262,21 +307,30 @@ public partial class MainViewModel : ObservableObject
         SelectedChapter = null;
         Title = "AI Book Author Pro";
         StatusMessage = "Project closed";
+        HasUnsavedChanges = false;
         NavigateTo(NavigationDestination.Dashboard);
     }
 
     [RelayCommand]
     private async Task LoadRecentProjectsAsync()
     {
-        var result = await _projectService.GetRecentProjectsAsync();
-        
-        if (result.IsSuccess && result.Value != null)
+        try
         {
-            RecentProjects.Clear();
-            foreach (var project in result.Value)
+            var result = await _projectService.GetRecentProjectsAsync();
+            
+            if (result.IsSuccess && result.Value != null)
             {
-                RecentProjects.Add(project);
+                RecentProjects.Clear();
+                foreach (var project in result.Value)
+                {
+                    RecentProjects.Add(project);
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to load recent projects");
+            // Non-fatal - continue without recent projects
         }
     }
 
@@ -293,6 +347,7 @@ public partial class MainViewModel : ObservableObject
         CurrentProject.AddChapter(newChapter);
         Chapters.Add(newChapter);
         SelectedChapter = newChapter;
+        HasUnsavedChanges = true;
         StatusMessage = $"Added {newChapter.Title}";
     }
 
@@ -309,6 +364,8 @@ public partial class MainViewModel : ObservableObject
             {
                 SelectedChapter = Chapters.FirstOrDefault();
             }
+            
+            HasUnsavedChanges = true;
         }
 
         StatusMessage = $"Deleted {chapter.Title}";

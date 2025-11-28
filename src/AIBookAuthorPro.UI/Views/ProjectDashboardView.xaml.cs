@@ -15,27 +15,26 @@ namespace AIBookAuthorPro.UI.Views;
 /// </summary>
 public partial class ProjectDashboardView : UserControl
 {
+    private readonly ProjectDashboardViewModel _viewModel;
+
     /// <summary>
     /// Initializes a new instance of ProjectDashboardView.
     /// </summary>
-    public ProjectDashboardView()
+    public ProjectDashboardView(ProjectDashboardViewModel viewModel)
     {
+        _viewModel = viewModel;
+        DataContext = _viewModel;
+        
         InitializeComponent();
     }
 
     private void OnCharactersCardClick(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is ProjectDashboardViewModel vm)
-        {
-            vm.NavigateToCharactersCommand.Execute(null);
-        }
+        _viewModel.NavigateToCharactersCommand.Execute(null);
     }
 
     private void OnLocationsCardClick(object sender, MouseButtonEventArgs e)
     {
-        if (DataContext is ProjectDashboardViewModel vm)
-        {
-            vm.NavigateToLocationsCommand.Execute(null);
-        }
+        _viewModel.NavigateToLocationsCommand.Execute(null);
     }
 }

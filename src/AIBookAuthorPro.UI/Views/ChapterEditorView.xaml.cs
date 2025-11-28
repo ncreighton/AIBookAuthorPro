@@ -5,6 +5,7 @@
 
 using System.Windows.Controls;
 using AIBookAuthorPro.Core.Enums;
+using AIBookAuthorPro.UI.ViewModels;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace AIBookAuthorPro.UI.Views;
@@ -14,11 +15,16 @@ namespace AIBookAuthorPro.UI.Views;
 /// </summary>
 public partial class ChapterEditorView : UserControl
 {
+    private readonly ChapterEditorViewModel _viewModel;
+
     /// <summary>
     /// Initializes a new instance of ChapterEditorView.
     /// </summary>
-    public ChapterEditorView()
+    public ChapterEditorView(ChapterEditorViewModel viewModel)
     {
+        _viewModel = viewModel;
+        DataContext = _viewModel;
+        
         InitializeComponent();
     }
 }
