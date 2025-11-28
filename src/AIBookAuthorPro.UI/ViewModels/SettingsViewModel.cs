@@ -187,7 +187,7 @@ public partial class SettingsViewModel : ObservableObject
     [
         AIProviderType.Claude,
         AIProviderType.OpenAI,
-        AIProviderType.Gemini
+        AIProviderType.Ollama
     ];
 
     /// <summary>
@@ -195,9 +195,9 @@ public partial class SettingsViewModel : ObservableObject
     /// </summary>
     public ObservableCollection<GenerationMode> AvailableModes { get; } =
     [
-        GenerationMode.Quick,
+        GenerationMode.Fast,
         GenerationMode.Standard,
-        GenerationMode.Premium
+        GenerationMode.HighQuality
     ];
 
     /// <summary>
@@ -326,7 +326,7 @@ public partial class SettingsViewModel : ObservableObject
             {
                 "anthropic" => AIProviderType.Claude,
                 "openai" => AIProviderType.OpenAI,
-                "gemini" => AIProviderType.Gemini,
+                "gemini" => AIProviderType.Ollama,
                 _ => AIProviderType.Claude
             };
 

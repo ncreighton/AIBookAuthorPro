@@ -33,9 +33,9 @@ public static class ChapterStatusOptions
     public static ChapterStatus[] All { get; } =
     [
         ChapterStatus.NotStarted,
-        ChapterStatus.InProgress,
-        ChapterStatus.Draft,
-        ChapterStatus.Review,
+        ChapterStatus.Drafting,
+        ChapterStatus.FirstDraft,
+        ChapterStatus.Revising,
         ChapterStatus.Complete
     ];
 }

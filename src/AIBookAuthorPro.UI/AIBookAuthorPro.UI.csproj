@@ -24,6 +24,9 @@
     
     <!-- Logging -->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    
+    <!-- Windows Forms (for FolderBrowserDialog) -->
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
 </Project>

@@ -211,7 +211,7 @@ public partial class ChapterEditorViewModel : ObservableObject, IHasFlowDocument
         // Update status based on word count
         if (Status == ChapterStatus.NotStarted && WordCount > 0)
         {
-            Status = ChapterStatus.InProgress;
+            Status = ChapterStatus.Drafting;
         }
     }
 

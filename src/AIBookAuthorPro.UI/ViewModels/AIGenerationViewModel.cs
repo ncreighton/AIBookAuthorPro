@@ -195,7 +195,7 @@ public partial class AIGenerationViewModel : ObservableObject
             {
                 "Claude (Anthropic)" => AIProviderType.Claude,
                 "OpenAI" => AIProviderType.OpenAI,
-                "Gemini (Google)" => AIProviderType.Gemini,
+                "Gemini (Google)" => AIProviderType.Ollama,
                 _ => AIProviderType.Claude
             };
 
@@ -242,7 +242,7 @@ public partial class AIGenerationViewModel : ObservableObject
         // Select appropriate model for mode
         SelectedModel = SelectedMode switch
         {
-            GenerationMode.Quick => AvailableModels.FirstOrDefault(m =>
+            GenerationMode.Fast => AvailableModels.FirstOrDefault(m =>
                 m.Contains("haiku", StringComparison.OrdinalIgnoreCase) ||
                 m.Contains("mini", StringComparison.OrdinalIgnoreCase) ||
                 m.Contains("flash", StringComparison.OrdinalIgnoreCase)) ?? AvailableModels.FirstOrDefault() ?? string.Empty,
@@ -252,7 +252,7 @@ public partial class AIGenerationViewModel : ObservableObject
                 m.Contains("4o", StringComparison.OrdinalIgnoreCase) ||
                 m.Contains("pro", StringComparison.OrdinalIgnoreCase)) ?? AvailableModels.FirstOrDefault() ?? string.Empty,
 
-            GenerationMode.Premium => AvailableModels.FirstOrDefault(m =>
+            GenerationMode.HighQuality => AvailableModels.FirstOrDefault(m =>
                 m.Contains("opus", StringComparison.OrdinalIgnoreCase) ||
                 m.Contains("o1", StringComparison.OrdinalIgnoreCase) ||
                 m.Contains("2.0", StringComparison.OrdinalIgnoreCase)) ?? AvailableModels.FirstOrDefault() ?? string.Empty,

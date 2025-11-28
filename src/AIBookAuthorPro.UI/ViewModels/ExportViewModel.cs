@@ -4,6 +4,7 @@
 // =============================================================================
 
 using System.Collections.ObjectModel;
+using System.IO;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
@@ -156,7 +157,7 @@ public partial class ExportViewModel : ObservableObject
             Chapters.Add(new ChapterSelection
             {
                 Chapter = chapter,
-                IsSelected = chapter.Status != ChapterStatus.Outline
+                IsSelected = chapter.Status != ChapterStatus.Outlined
             });
         }
 

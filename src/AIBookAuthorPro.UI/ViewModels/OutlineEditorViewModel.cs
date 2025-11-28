@@ -487,7 +487,7 @@ Format as a hierarchical outline.";
             Id = Guid.NewGuid(),
             Title = item.Item.Title,
             Order = Project.Chapters.Count + 1,
-            Status = ChapterStatus.Outline,
+            Status = ChapterStatus.Outlined,
             CreatedAt = DateTime.UtcNow,
             ModifiedAt = DateTime.UtcNow
         };
