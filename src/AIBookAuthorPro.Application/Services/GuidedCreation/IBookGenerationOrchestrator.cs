@@ -219,27 +219,32 @@ public sealed record GenerationProgress
     /// <summary>
     /// Current phase.
     /// </summary>
-    public required GenerationPhase Phase { get; init; }
+    public GenerationPhase Phase { get; init; }
 
     /// <summary>
     /// Current operation description.
     /// </summary>
-    public required string CurrentOperation { get; init; }
+    public string CurrentOperation { get; init; } = string.Empty;
 
     /// <summary>
     /// Overall progress (0-100).
     /// </summary>
-    public required double OverallProgress { get; init; }
+    public double OverallPercentage { get; init; }
 
     /// <summary>
     /// Phase progress (0-100).
     /// </summary>
-    public required double PhaseProgress { get; init; }
+    public double PhaseProgress { get; init; }
 
     /// <summary>
     /// Current chapter number if applicable.
     /// </summary>
     public int? CurrentChapter { get; init; }
+
+    /// <summary>
+    /// Total chapters.
+    /// </summary>
+    public int TotalChapters { get; init; }
 
     /// <summary>
     /// Current scene if applicable.
@@ -249,17 +254,17 @@ public sealed record GenerationProgress
     /// <summary>
     /// Words generated.
     /// </summary>
-    public required int WordsGenerated { get; init; }
+    public int WordsGenerated { get; init; }
 
     /// <summary>
     /// Target words.
     /// </summary>
-    public required int TargetWords { get; init; }
+    public int TargetWords { get; init; }
 
     /// <summary>
     /// Elapsed time.
     /// </summary>
-    public required TimeSpan ElapsedTime { get; init; }
+    public TimeSpan ElapsedTime { get; init; }
 
     /// <summary>
     /// Estimated remaining time.
@@ -290,6 +295,57 @@ public sealed record GenerationProgress
     /// Issues auto-fixed.
     /// </summary>
     public int IssuesAutoFixed { get; init; }
+
+    /// <summary>
+    /// Progress status.
+    /// </summary>
+    public GenerationProgressStatus Status { get; init; }
+}
+
+/// <summary>
+/// Generation progress status.
+/// </summary>
+public enum GenerationProgressStatus
+{
+    /// <summary>Not started.</summary>
+    NotStarted,
+    /// <summary>Currently generating.</summary>
+    Generating,
+    /// <summary>Evaluating quality.</summary>
+    Evaluating,
+    /// <summary>Revising content.</summary>
+    Revising,
+    /// <summary>Paused.</summary>
+    Paused,
+    /// <summary>Complete.</summary>
+    Complete,
+    /// <summary>Error occurred.</summary>
+    Error,
+    /// <summary>Cancelled.</summary>
+    Cancelled
+}
+
+/// <summary>
+/// Generation phase.
+/// </summary>
+public enum GenerationPhase
+{
+    /// <summary>Initializing.</summary>
+    Initializing,
+    /// <summary>Building context.</summary>
+    BuildingContext,
+    /// <summary>Generating content.</summary>
+    Generating,
+    /// <summary>Quality checking.</summary>
+    QualityCheck,
+    /// <summary>Continuity verification.</summary>
+    ContinuityVerification,
+    /// <summary>Revising.</summary>
+    Revising,
+    /// <summary>Finalizing.</summary>
+    Finalizing,
+    /// <summary>Completed.</summary>
+    Completed
 }
 
 /// <summary>
@@ -300,17 +356,17 @@ public sealed record ChapterGenerationProgress
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Current step.
     /// </summary>
-    public required string CurrentStep { get; init; }
+    public string CurrentStep { get; init; } = string.Empty;
 
     /// <summary>
     /// Progress (0-100).
     /// </summary>
-    public required double Progress { get; init; }
+    public double Progress { get; init; }
 
     /// <summary>
     /// Current scene if generating by scene.
@@ -341,72 +397,72 @@ public sealed record GenerationStatistics
     /// <summary>
     /// Session ID.
     /// </summary>
-    public required Guid SessionId { get; init; }
+    public Guid SessionId { get; init; }
 
     /// <summary>
     /// Total chapters.
     /// </summary>
-    public required int TotalChapters { get; init; }
+    public int TotalChapters { get; init; }
 
     /// <summary>
     /// Completed chapters.
     /// </summary>
-    public required int CompletedChapters { get; init; }
+    public int CompletedChapters { get; init; }
 
     /// <summary>
     /// Total words generated.
     /// </summary>
-    public required int TotalWordsGenerated { get; init; }
+    public int TotalWordsGenerated { get; init; }
 
     /// <summary>
     /// Target word count.
     /// </summary>
-    public required int TargetWordCount { get; init; }
+    public int TargetWordCount { get; init; }
 
     /// <summary>
     /// Total tokens used.
     /// </summary>
-    public required long TotalTokensUsed { get; init; }
+    public long TotalTokensUsed { get; init; }
 
     /// <summary>
     /// Total cost.
     /// </summary>
-    public required decimal TotalCost { get; init; }
+    public decimal TotalCost { get; init; }
 
     /// <summary>
     /// Total time elapsed.
     /// </summary>
-    public required TimeSpan TotalTimeElapsed { get; init; }
+    public TimeSpan TotalTimeElapsed { get; init; }
 
     /// <summary>
     /// Average time per chapter.
     /// </summary>
-    public required TimeSpan AverageTimePerChapter { get; init; }
+    public TimeSpan AverageTimePerChapter { get; init; }
 
     /// <summary>
     /// Average quality score.
     /// </summary>
-    public required double AverageQualityScore { get; init; }
+    public double AverageQualityScore { get; init; }
 
     /// <summary>
     /// Total issues found.
     /// </summary>
-    public required int TotalIssuesFound { get; init; }
+    public int TotalIssuesFound { get; init; }
 
     /// <summary>
     /// Total issues auto-fixed.
     /// </summary>
-    public required int TotalIssuesAutoFixed { get; init; }
+    public int TotalIssuesAutoFixed { get; init; }
 
     /// <summary>
     /// Chapters requiring review.
     /// </summary>
-    public required int ChaptersRequiringReview { get; init; }
+    public int ChaptersRequiringReview { get; init; }
 
     /// <summary>
     /// Total retry count.
     /// </summary>
-    public required int TotalRetries { get; init; }
+    public int TotalRetries { get; init; }
 
     /// <summary>
     /// Words per minute rate.
@@ -443,40 +499,40 @@ public sealed record ChapterStatistics
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Word count.
     /// </summary>
-    public required int WordCount { get; init; }
+    public int WordCount { get; init; }
 
     /// <summary>
     /// Quality score.
     /// </summary>
-    public required double QualityScore { get; init; }
+    public double QualityScore { get; init; }
 
     /// <summary>
     /// Generation time.
     /// </summary>
-    public required TimeSpan GenerationTime { get; init; }
+    public TimeSpan GenerationTime { get; init; }
 
     /// <summary>
     /// Cost.
     /// </summary>
-    public required decimal Cost { get; init; }
+    public decimal Cost { get; init; }
 
     /// <summary>
     /// Attempt count.
     /// </summary>
-    public required int AttemptCount { get; init; }
+    public int AttemptCount { get; init; }
 
     /// <summary>
     /// Issues found.
     /// </summary>
-    public required int IssuesFound { get; init; }
+    public int IssuesFound { get; init; }
 
     /// <summary>
     /// Status.
     /// </summary>
-    public required ChapterGenerationStatus Status { get; init; }
+    public ChapterGenerationStatus Status { get; init; }
 }
