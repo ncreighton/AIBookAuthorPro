@@ -11,6 +11,7 @@ using AIBookAuthorPro.UI.ViewModels;
 using AIBookAuthorPro.UI.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Application = System.Windows.Application;
 
 namespace AIBookAuthorPro.App;
 
