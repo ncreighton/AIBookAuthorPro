@@ -50,7 +50,7 @@ public class ModelTests
         var character = new Character { Name = "Test" };
 
         // Assert
-        character.Role.Should().Be((Core.Models.CharacterRole)CharacterRoleEnum.Supporting);
+        character.Role.Should().Be(Core.Models.CharacterRole.Supporting);
     }
 
     [Fact]
@@ -72,13 +72,13 @@ public class ModelTests
         var parent = new OutlineItem
         {
             Title = "Act I",
-            ItemType = (Core.Models.OutlineItemType)OutlineItemTypeEnum.Act
+            ItemType = Core.Models.OutlineItemType.Act
         };
 
         var child = new OutlineItem
         {
             Title = "Chapter 1",
-            ItemType = (Core.Models.OutlineItemType)OutlineItemTypeEnum.Chapter
+            ItemType = Core.Models.OutlineItemType.Chapter
         };
 
         // Act

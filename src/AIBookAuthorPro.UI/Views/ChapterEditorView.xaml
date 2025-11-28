@@ -8,6 +8,7 @@
     xmlns:behaviors="clr-namespace:AIBookAuthorPro.UI.Behaviors"
     xmlns:converters="clr-namespace:AIBookAuthorPro.UI.Converters"
     xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    xmlns:views="clr-namespace:AIBookAuthorPro.UI.Views"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=vm:ChapterEditorViewModel}"
@@ -68,7 +69,7 @@
 
                     <!-- Status Indicator -->
                     <ComboBox
-                        ItemsSource="{Binding Source={x:Static vm:ChapterStatusOptions.All}}"
+                        ItemsSource="{Binding Source={x:Static views:ChapterStatusOptions.All}}"
                         SelectedItem="{Binding Status}"
                         Style="{StaticResource MaterialDesignOutlinedComboBox}"
                         materialDesign:HintAssist.Hint="Status"

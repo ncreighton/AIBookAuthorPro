@@ -7,6 +7,7 @@
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:converters="clr-namespace:AIBookAuthorPro.UI.Converters"
     xmlns:vm="clr-namespace:AIBookAuthorPro.UI.ViewModels"
+    xmlns:views="clr-namespace:AIBookAuthorPro.UI.Views"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Type=vm:CharacterListViewModel}"
     d:DesignHeight="700"
@@ -97,21 +98,21 @@
                         Style="{StaticResource MaterialDesignFlatToggleButton}"
                         Content="Protagonist"
                         Command="{Binding FilterByRoleCommand}"
-                        CommandParameter="{x:Static vm:CharacterRoleValue.Protagonist}"
+                        CommandParameter="{x:Static views:CharacterRoleValue.Protagonist}"
                         Margin="0,0,8,0" />
 
                     <ToggleButton
                         Style="{StaticResource MaterialDesignFlatToggleButton}"
                         Content="Antagonist"
                         Command="{Binding FilterByRoleCommand}"
-                        CommandParameter="{x:Static vm:CharacterRoleValue.Antagonist}"
+                        CommandParameter="{x:Static views:CharacterRoleValue.Antagonist}"
                         Margin="0,0,8,0" />
 
                     <ToggleButton
                         Style="{StaticResource MaterialDesignFlatToggleButton}"
                         Content="Supporting"
                         Command="{Binding FilterByRoleCommand}"
-                        CommandParameter="{x:Static vm:CharacterRoleValue.Supporting}" />
+                        CommandParameter="{x:Static views:CharacterRoleValue.Supporting}" />
                 </StackPanel>
 
                 <!-- Search -->
