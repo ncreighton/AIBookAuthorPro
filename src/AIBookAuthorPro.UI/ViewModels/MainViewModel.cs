@@ -26,7 +26,10 @@ public enum NavigationDestination
     Outline,
     Research,
     Export,
-    Settings
+    Settings,
+    GuidedCreation,
+    GuidedWizard,
+    GenerationDashboard
 }
 
 /// <summary>
@@ -82,6 +85,16 @@ public partial class MainViewModel : ObservableObject
     private bool _isInitialized;
 
     /// <summary>
+    /// Gets the total word count for the current project.
+    /// </summary>
+    public int TotalWordCount => CurrentProject?.TotalWordCount ?? 0;
+
+    /// <summary>
+    /// Gets the chapter count for the current project.
+    /// </summary>
+    public int ChapterCount => CurrentProject?.Chapters.Count ?? 0;
+
+    /// <summary>
     /// Gets the recent projects list.
     /// </summary>
     public ObservableCollection<ProjectSummary> RecentProjects { get; } = new();
@@ -105,6 +118,11 @@ public partial class MainViewModel : ObservableObject
     /// Event raised when settings dialog should be shown.
     /// </summary>
     public event EventHandler? ShowSettingsDialogRequested;
+
+    /// <summary>
+    /// Event raised when guided creation wizard should be shown.
+    /// </summary>
+    public event EventHandler? ShowGuidedCreationWizardRequested;
 
     public MainViewModel(
         IProjectService projectService,
@@ -360,6 +378,7 @@ public partial class MainViewModel : ObservableObject
     {
         CurrentNavigation = destination;
         SelectedNavigationItem = destination.ToString();
+        CurrentPageTitle = GetPageTitle(destination);
         _logger.LogDebug("Navigating to: {Destination}", destination);
 
         // Raise navigation event for view to handle
@@ -392,9 +411,37 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void ShowGuidedCreationWizard()
+    {
+        _logger.LogDebug("Showing guided creation wizard");
+        ShowGuidedCreationWizardRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void StartGuidedCreation()
+    {
+        _logger.LogInformation("Starting Guided Book Creation");
+        NavigateTo(NavigationDestination.GuidedWizard);
+    }
+
+    [RelayCommand]
     private void ToggleNavigation()
     {
         IsNavigationExpanded = !IsNavigationExpanded;
+    }
+
+    [RelayCommand]
+    private void ToggleFullScreen()
+    {
+        // TODO: Implement full screen toggle
+        _logger.LogDebug("Toggle full screen requested");
+    }
+
+    [RelayCommand]
+    private void ShowHelp()
+    {
+        _logger.LogDebug("Showing help");
+        // TODO: Open help documentation
     }
 
     [RelayCommand]
@@ -419,6 +466,8 @@ public partial class MainViewModel : ObservableObject
         IsProjectOpen = value != null;
         SaveProjectCommand.NotifyCanExecuteChanged();
         SaveProjectAsCommand.NotifyCanExecuteChanged();
+        OnPropertyChanged(nameof(TotalWordCount));
+        OnPropertyChanged(nameof(ChapterCount));
     }
 
     private void UpdateChaptersList()
@@ -432,7 +481,25 @@ public partial class MainViewModel : ObservableObject
             }
         }
         SelectedChapter = Chapters.FirstOrDefault();
+        OnPropertyChanged(nameof(TotalWordCount));
+        OnPropertyChanged(nameof(ChapterCount));
     }
+
+    private static string GetPageTitle(NavigationDestination destination) => destination switch
+    {
+        NavigationDestination.Dashboard => "Dashboard",
+        NavigationDestination.Editor => "Chapter Editor",
+        NavigationDestination.Characters => "Characters",
+        NavigationDestination.Locations => "Locations",
+        NavigationDestination.Outline => "Outline",
+        NavigationDestination.Research => "Research",
+        NavigationDestination.Export => "Export",
+        NavigationDestination.Settings => "Settings",
+        NavigationDestination.GuidedCreation => "Guided Creation",
+        NavigationDestination.GuidedWizard => "Book Creation Wizard",
+        NavigationDestination.GenerationDashboard => "Generation Dashboard",
+        _ => "AI Book Author Pro"
+    };
 }
 
 /// <summary>

@@ -39,6 +39,7 @@
         <KeyBinding Key="D3" Modifiers="Control" Command="{Binding NavigateToStringCommand}" CommandParameter="Characters"/>
         <KeyBinding Key="D4" Modifiers="Control" Command="{Binding NavigateToStringCommand}" CommandParameter="Locations"/>
         <KeyBinding Key="D5" Modifiers="Control" Command="{Binding NavigateToStringCommand}" CommandParameter="Outline"/>
+        <KeyBinding Key="G" Modifiers="Control+Shift" Command="{Binding StartGuidedCreationCommand}"/>
 
         <!-- Application -->
         <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding ShowSettingsCommand}"/>
@@ -68,6 +69,7 @@
                 <Grid Width="{Binding IsNavigationExpanded, Converter={StaticResource BoolToWidthConverter}}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
@@ -92,9 +94,26 @@
                             Visibility="{Binding IsNavigationExpanded, Converter={StaticResource BoolToVisibility}}"/>
                     </StackPanel>
 
+                    <!-- Quick Start / Guided Creation Button -->
+                    <Button
+                        Grid.Row="1"
+                        Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                        Command="{Binding StartGuidedCreationCommand}"
+                        ToolTip="Start Guided Book Creation (Ctrl+Shift+G)"
+                        Margin="12,0,12,16">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AutoFix" Width="20" Height="20" VerticalAlignment="Center"/>
+                            <TextBlock
+                                Text="Create Book"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding DataContext.IsNavigationExpanded, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}"/>
+                        </StackPanel>
+                    </Button>
+
                     <!-- Navigation Items -->
                     <ListBox
-                        Grid.Row="1"
+                        Grid.Row="2"
                         x:Name="NavigationList"
                         SelectedItem="{Binding SelectedNavigationItem}"
                         Style="{StaticResource MaterialDesignNavigationPrimaryListBox}"
@@ -173,6 +192,34 @@
                         <Separator Margin="8,8"/>
 
                         <ListBoxItem
+                            Tag="GuidedWizard"
+                            ToolTip="Book Creation Wizard">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Wizard" Width="24" Height="24"/>
+                                <TextBlock
+                                    Text="Wizard"
+                                    Margin="16,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding DataContext.IsNavigationExpanded, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+
+                        <ListBoxItem
+                            Tag="GenerationDashboard"
+                            ToolTip="Generation Dashboard">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="RocketLaunch" Width="24" Height="24"/>
+                                <TextBlock
+                                    Text="Generation"
+                                    Margin="16,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Visibility="{Binding DataContext.IsNavigationExpanded, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisibility}}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+
+                        <Separator Margin="8,8"/>
+
+                        <ListBoxItem
                             Tag="Export"
                             IsEnabled="{Binding IsProjectOpen}"
                             ToolTip="Export (Ctrl+Shift+E)">
@@ -189,7 +236,7 @@
 
                     <!-- Bottom Actions -->
                     <StackPanel
-                        Grid.Row="2"
+                        Grid.Row="3"
                         Margin="8,16">
 
                         <Button
