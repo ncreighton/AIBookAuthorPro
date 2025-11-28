@@ -14,19 +14,24 @@ namespace AIBookAuthorPro.UI.Views;
 /// </summary>
 public partial class OutlineEditorView : UserControl
 {
+    private readonly OutlineEditorViewModel _viewModel;
+
     /// <summary>
     /// Initializes a new instance of OutlineEditorView.
     /// </summary>
-    public OutlineEditorView()
+    public OutlineEditorView(OutlineEditorViewModel viewModel)
     {
+        _viewModel = viewModel;
+        DataContext = _viewModel;
+        
         InitializeComponent();
     }
 
     private void TreeView_SelectedItemChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<object> e)
     {
-        if (DataContext is OutlineEditorViewModel vm && e.NewValue is OutlineItemViewModel item)
+        if (e.NewValue is OutlineItemViewModel item)
         {
-            vm.SelectedItem = item;
+            _viewModel.SelectedItem = item;
         }
     }
 }
