@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>AIBookAuthorPro.UI</RootNamespace>
     <AssemblyName>AIBookAuthorPro.UI</AssemblyName>
     <Description>UI components, ViewModels, and Views for AI Book Author Pro</Description>
@@ -24,9 +25,6 @@
     
     <!-- Logging -->
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-    
-    <!-- Windows Forms (for FolderBrowserDialog) -->
-    <PackageReference Include="System.Windows.Forms" />
   </ItemGroup>
 
 </Project>

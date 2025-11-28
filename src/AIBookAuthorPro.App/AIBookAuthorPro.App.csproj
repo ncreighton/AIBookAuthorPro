@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>AIBookAuthorPro.App</RootNamespace>
     <AssemblyName>AIBookAuthorPro</AssemblyName>
     <Description>AI Book Author Pro - AI-Powered Book Writing Application</Description>
