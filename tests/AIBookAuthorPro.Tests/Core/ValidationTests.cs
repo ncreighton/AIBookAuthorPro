@@ -18,7 +18,6 @@ public class ValidationTests
         // Arrange
         var project = new Project
         {
-            Id = Guid.NewGuid(),
             Name = "My Novel",
             Metadata = new BookMetadata
             {
@@ -41,7 +40,6 @@ public class ValidationTests
         // Arrange
         var project = new Project
         {
-            Id = Guid.NewGuid(),
             Name = "",
             Metadata = new BookMetadata { Title = "Test" }
         };
@@ -60,7 +58,6 @@ public class ValidationTests
         // Arrange
         var project = new Project
         {
-            Id = Guid.NewGuid(),
             Name = "Test Project",
             Metadata = null!
         };
@@ -79,7 +76,6 @@ public class ValidationTests
         // Arrange
         var chapter = new Chapter
         {
-            Id = Guid.NewGuid(),
             Title = "Chapter 1: The Beginning",
             Order = 1
         };
@@ -97,7 +93,6 @@ public class ValidationTests
         // Arrange
         var chapter = new Chapter
         {
-            Id = Guid.NewGuid(),
             Title = "",
             Order = 1
         };
@@ -116,7 +111,6 @@ public class ValidationTests
         // Arrange
         var character = new Character
         {
-            Id = Guid.NewGuid(),
             Name = "John Smith"
         };
 
@@ -133,7 +127,6 @@ public class ValidationTests
         // Arrange
         var character = new Character
         {
-            Id = Guid.NewGuid(),
             Name = "Test",
             Age = -5
         };

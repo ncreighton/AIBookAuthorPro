@@ -26,22 +26,18 @@ public class ModelTests
     }
 
     [Fact]
-    public void Chapter_MarkAsModified_ShouldUpdateTimestamp()
+    public void Chapter_ShouldHaveDefaults()
     {
-        // Arrange
+        // Arrange & Act
         var chapter = new Chapter
         {
-            Id = Guid.NewGuid(),
-            Title = "Test",
-            ModifiedAt = DateTime.UtcNow.AddDays(-1)
+            Title = "Test"
         };
-        var originalModified = chapter.ModifiedAt;
-
-        // Act
-        chapter.MarkAsModified();
 
         // Assert
-        chapter.ModifiedAt.Should().BeAfter(originalModified);
+        chapter.Id.Should().NotBeEmpty();
+        chapter.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        chapter.ModifiedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
@@ -51,41 +47,43 @@ public class ModelTests
         var character = new Character { Name = "Test" };
 
         // Assert
-        character.Role.Should().Be(CharacterRole.Supporting);
+        character.Role.Should().Be(Core.Models.CharacterRole.Supporting);
     }
 
     [Fact]
-    public void BookMetadata_WordCount_ShouldDefaultToZero()
+    public void BookMetadata_ShouldHaveDefaults()
     {
         // Act
         var metadata = new BookMetadata();
 
         // Assert
-        metadata.WordCount.Should().Be(0);
-        metadata.TargetWordCount.Should().Be(0);
+        metadata.Title.Should().BeEmpty();
+        metadata.Author.Should().BeEmpty();
+        metadata.Genre.Should().BeEmpty();
     }
 
     [Fact]
-    public void OutlineItem_WithChildren_ShouldTrackParentId()
+    public void OutlineItem_WithChildren_ShouldTrackHierarchy()
     {
         // Arrange
         var parent = new OutlineItem
         {
-            Id = Guid.NewGuid(),
             Title = "Act I",
-            Type = OutlineItemType.Act
+            ItemType = Core.Models.OutlineItemType.Act
         };
 
         var child = new OutlineItem
         {
-            Id = Guid.NewGuid(),
             Title = "Chapter 1",
-            Type = OutlineItemType.Chapter,
-            ParentId = parent.Id
+            ItemType = Core.Models.OutlineItemType.Chapter
         };
 
+        // Act
+        parent.AddChild(child);
+
         // Assert
-        child.ParentId.Should().Be(parent.Id);
+        parent.Children.Should().Contain(child);
+        parent.Children.Should().HaveCount(1);
     }
 
     [Fact]
@@ -97,12 +95,12 @@ public class ModelTests
 
         var relationship = new CharacterRelationship
         {
-            CharacterId = character2.Id,
+            OtherCharacterId = character2.Id,
             RelationshipType = "Sibling"
         };
 
         // Act
-        character1.Relationships.Add(relationship);
+        character1.AddRelationship(relationship);
 
         // Assert
         character1.Relationships.Should().HaveCount(1);
@@ -110,23 +108,22 @@ public class ModelTests
     }
 
     [Fact]
-    public void ProjectInfo_ShouldContainSummaryInformation()
+    public void ProjectSummary_ShouldContainSummaryInformation()
     {
         // Arrange
-        var projectInfo = new ProjectInfo
+        var projectSummary = new ProjectSummary
         {
-            Id = Guid.NewGuid(),
             Name = "My Novel",
             FilePath = "C:\\Projects\\novel.abpro",
-            LastOpened = DateTime.UtcNow,
+            LastModified = DateTime.UtcNow,
             WordCount = 50000,
             ChapterCount = 15
         };
 
         // Assert
-        projectInfo.Name.Should().Be("My Novel");
-        projectInfo.WordCount.Should().Be(50000);
-        projectInfo.ChapterCount.Should().Be(15);
+        projectSummary.Name.Should().Be("My Novel");
+        projectSummary.WordCount.Should().Be(50000);
+        projectSummary.ChapterCount.Should().Be(15);
     }
 
     [Theory]

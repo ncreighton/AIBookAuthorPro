@@ -15,15 +15,13 @@ namespace AIBookAuthorPro.Tests.Services;
 
 public class ProjectServiceTests
 {
-    private readonly Mock<IFileSystemService> _fileSystemServiceMock;
     private readonly Mock<ILogger<ProjectService>> _loggerMock;
     private readonly ProjectService _projectService;
 
     public ProjectServiceTests()
     {
-        _fileSystemServiceMock = new Mock<IFileSystemService>();
         _loggerMock = new Mock<ILogger<ProjectService>>();
-        _projectService = new ProjectService(_fileSystemServiceMock.Object, _loggerMock.Object);
+        _projectService = new ProjectService(_loggerMock.Object);
     }
 
     [Fact]
@@ -33,7 +31,7 @@ public class ProjectServiceTests
         var projectName = "My New Novel";
 
         // Act
-        var result = await _projectService.CreateProjectAsync(projectName);
+        var result = await _projectService.CreateAsync(projectName);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -50,7 +48,7 @@ public class ProjectServiceTests
         var projectName = "";
 
         // Act
-        var result = await _projectService.CreateProjectAsync(projectName);
+        var result = await _projectService.CreateAsync(projectName);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -64,7 +62,7 @@ public class ProjectServiceTests
         var projectName = "   ";
 
         // Act
-        var result = await _projectService.CreateProjectAsync(projectName);
+        var result = await _projectService.CreateAsync(projectName);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -76,18 +74,13 @@ public class ProjectServiceTests
         // Arrange
         var project = new Project
         {
-            Id = Guid.NewGuid(),
             Name = "Test Project",
             FilePath = "C:\\test\\project.abpro",
             Metadata = new BookMetadata { Title = "Test" }
         };
 
-        _fileSystemServiceMock
-            .Setup(x => x.WriteAllTextAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
         // Act
-        var result = await _projectService.SaveProjectAsync(project);
+        var result = await _projectService.SaveAsync(project);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -97,7 +90,7 @@ public class ProjectServiceTests
     public async Task SaveProjectAsync_WithNullProject_ShouldFail()
     {
         // Act
-        var result = await _projectService.SaveProjectAsync(null!);
+        var result = await _projectService.SaveAsync(null!);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -109,14 +102,13 @@ public class ProjectServiceTests
         // Arrange
         var project = new Project
         {
-            Id = Guid.NewGuid(),
             Name = "Test",
             FilePath = null,
             Metadata = new BookMetadata()
         };
 
         // Act
-        var result = await _projectService.SaveProjectAsync(project);
+        var result = await _projectService.SaveAsync(project);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -133,7 +125,7 @@ public class ProjectServiceTests
             .Returns(false);
 
         // Act
-        var result = await _projectService.LoadProjectAsync(filePath);
+        var result = await _projectService.LoadAsync(filePath);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -141,21 +133,22 @@ public class ProjectServiceTests
     }
 
     [Fact]
-    public void GetRecentProjects_ShouldReturnEmptyListInitially()
+    public async Task GetRecentProjectsAsync_ShouldReturnEmptyListInitially()
     {
         // Act
-        var result = _projectService.GetRecentProjects();
+        var result = await _projectService.GetRecentProjectsAsync();
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().BeEmpty();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Should().BeEmpty();
     }
 
     [Fact]
     public async Task CreateProjectAsync_ShouldInitializeCollections()
     {
         // Act
-        var result = await _projectService.CreateProjectAsync("Test");
+        var result = await _projectService.CreateAsync("Test");
 
         // Assert
         result.IsSuccess.Should().BeTrue();

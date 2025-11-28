@@ -7,6 +7,7 @@ using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
 using AIBookAuthorPro.Infrastructure.Services;
+using AIBookAuthorPro.Core.Common;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -16,49 +17,57 @@ namespace AIBookAuthorPro.Tests.Services;
 
 public class ExportServiceTests
 {
-    private readonly Mock<IFileSystemService> _fileSystemMock;
     private readonly Mock<ILogger<ExportService>> _loggerMock;
+    private readonly Mock<IDocxExporter> _docxExporterMock;
+    private readonly Mock<IMarkdownExporter> _markdownExporterMock;
+    private readonly Mock<IHtmlExporter> _htmlExporterMock;
     private readonly ExportService _exportService;
 
     public ExportServiceTests()
     {
-        _fileSystemMock = new Mock<IFileSystemService>();
         _loggerMock = new Mock<ILogger<ExportService>>();
-        _exportService = new ExportService(_fileSystemMock.Object, _loggerMock.Object);
+        _docxExporterMock = new Mock<IDocxExporter>();
+        _markdownExporterMock = new Mock<IMarkdownExporter>();
+        _htmlExporterMock = new Mock<IHtmlExporter>();
+        _exportService = new ExportService(
+            _loggerMock.Object,
+            _docxExporterMock.Object,
+            _markdownExporterMock.Object,
+            _htmlExporterMock.Object);
     }
 
     private Project CreateTestProject()
     {
-        return new Project
+        var project = new Project
         {
-            Id = Guid.NewGuid(),
             Name = "Test Novel",
             Metadata = new BookMetadata
             {
                 Title = "Test Novel",
                 Author = "Test Author",
                 Description = "A test novel for unit testing."
-            },
-            Chapters = new List<Chapter>
-            {
-                new()
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Chapter 1: The Beginning",
-                    Content = "<Paragraph>This is the first chapter.</Paragraph>",
-                    Order = 1,
-                    Status = ChapterStatus.FirstDraft
-                },
-                new()
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Chapter 2: The Middle",
-                    Content = "<Paragraph>This is the second chapter.</Paragraph>",
-                    Order = 2,
-                    Status = ChapterStatus.FirstDraft
-                }
             }
         };
+
+        var chapter1 = new Chapter
+        {
+            Title = "Chapter 1: The Beginning",
+            Content = "<Paragraph>This is the first chapter.</Paragraph>",
+            Order = 1,
+            Status = ChapterStatus.FirstDraft
+        };
+        project.AddChapter(chapter1);
+
+        var chapter2 = new Chapter
+        {
+            Title = "Chapter 2: The Middle",
+            Content = "<Paragraph>This is the second chapter.</Paragraph>",
+            Order = 2,
+            Status = ChapterStatus.FirstDraft
+        };
+        project.AddChapter(chapter2);
+
+        return project;
     }
 
     [Fact]
@@ -73,9 +82,9 @@ public class ExportServiceTests
             IncludeTableOfContents = true
         };
 
-        _fileSystemMock
-            .Setup(x => x.WriteAllTextAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+        _markdownExporterMock
+            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<IReadOnlyList<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<string>.Success(options.OutputPath));
 
         // Act
         var result = await _exportService.ExportAsync(project, options);
@@ -107,10 +116,8 @@ public class ExportServiceTests
         // Arrange
         var project = new Project
         {
-            Id = Guid.NewGuid(),
             Name = "Empty",
-            Metadata = new BookMetadata { Title = "Empty" },
-            Chapters = new List<Chapter>()
+            Metadata = new BookMetadata { Title = "Empty" }
         };
 
         var options = new ExportOptions
@@ -127,31 +134,17 @@ public class ExportServiceTests
         result.Error.Should().Contain("chapters");
     }
 
-    [Theory]
-    [InlineData(ExportFormat.Markdown, ".md")]
-    [InlineData(ExportFormat.Html, ".html")]
-    [InlineData(ExportFormat.PlainText, ".txt")]
-    [InlineData(ExportFormat.Docx, ".docx")]
-    public void GetFileExtension_ShouldReturnCorrectExtension(ExportFormat format, string expectedExtension)
-    {
-        // Act
-        var extension = _exportService.GetFileExtension(format);
-
-        // Assert
-        extension.Should().Be(expectedExtension);
-    }
-
     [Fact]
-    public void GetSupportedFormats_ShouldReturnAllFormats()
+    public void GetAvailableFormats_ShouldReturnAllFormats()
     {
         // Act
-        var formats = _exportService.GetSupportedFormats();
+        var formats = _exportService.GetAvailableFormats();
 
         // Assert
-        formats.Should().Contain(ExportFormat.Markdown);
-        formats.Should().Contain(ExportFormat.Html);
-        formats.Should().Contain(ExportFormat.Docx);
-        formats.Should().Contain(ExportFormat.PlainText);
+        formats.Should().NotBeEmpty();
+        formats.Should().Contain(f => f.Format == ExportFormat.Markdown);
+        formats.Should().Contain(f => f.Format == ExportFormat.Html);
+        formats.Should().Contain(f => f.Format == ExportFormat.Docx);
     }
 
     [Fact]
@@ -165,22 +158,23 @@ public class ExportServiceTests
         {
             Format = ExportFormat.Markdown,
             OutputPath = "C:\\test\\output.md",
-            ChapterIds = new List<Guid> { selectedChapterId }
+            ChapterFilter = new List<Guid> { selectedChapterId }
         };
 
-        string? exportedContent = null;
-        _fileSystemMock
-            .Setup(x => x.WriteAllTextAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Callback<string, string, CancellationToken>((path, content, ct) => exportedContent = content)
-            .Returns(Task.CompletedTask);
+        _markdownExporterMock
+            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<IReadOnlyList<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<string>.Success(options.OutputPath));
 
         // Act
         var result = await _exportService.ExportAsync(project, options);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        exportedContent.Should().Contain("Chapter 1");
-        exportedContent.Should().NotContain("Chapter 2");
+        _markdownExporterMock.Verify(x => x.ExportAsync(
+            project,
+            It.Is<List<Chapter>>(chapters => chapters.Count == 1 && chapters.First().Title.Contains("Chapter 1")),
+            options,
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -194,20 +188,14 @@ public class ExportServiceTests
             OutputPath = "C:\\test\\output.md"
         };
 
-        var progressValues = new List<int>();
-        var progress = new Progress<int>(value => progressValues.Add(value));
-
-        _fileSystemMock
-            .Setup(x => x.WriteAllTextAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+        _markdownExporterMock
+            .Setup(x => x.ExportAsync(It.IsAny<Project>(), It.IsAny<IReadOnlyList<Chapter>>(), It.IsAny<ExportOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<string>.Success(options.OutputPath));
 
         // Act
-        var result = await _exportService.ExportAsync(project, options, progress);
+        var result = await _exportService.ExportAsync(project, options);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        // Progress should have been reported
-        await Task.Delay(100); // Allow progress callbacks to complete
-        progressValues.Should().NotBeEmpty();
     }
 }

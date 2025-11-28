@@ -4,6 +4,7 @@
 // =============================================================================
 
 using System.Collections.ObjectModel;
+using System.Windows.Forms;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
@@ -364,7 +365,7 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void BrowseOutputDirectory()
     {
-        var dialog = new System.Windows.Forms.FolderBrowserDialog
+        var dialog = new FolderBrowserDialog
         {
             Description = "Select default export directory",
             UseDescriptionForTitle = true
@@ -375,7 +376,7 @@ public partial class SettingsViewModel : ObservableObject
             dialog.SelectedPath = DefaultOutputDirectory;
         }
 
-        if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+        if (dialog.ShowDialog() == DialogResult.OK)
         {
             DefaultOutputDirectory = dialog.SelectedPath;
             HasChanges = true;

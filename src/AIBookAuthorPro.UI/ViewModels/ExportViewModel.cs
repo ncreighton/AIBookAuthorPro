@@ -5,6 +5,7 @@
 
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Windows.Forms;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models;
@@ -202,14 +203,14 @@ public partial class ExportViewModel : ObservableObject
     [RelayCommand]
     private void BrowseOutputPath()
     {
-        var dialog = new System.Windows.Forms.FolderBrowserDialog
+        var dialog = new FolderBrowserDialog
         {
             Description = "Select export location",
             UseDescriptionForTitle = true,
             SelectedPath = OutputPath
         };
 
-        if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+        if (dialog.ShowDialog() == DialogResult.OK)
         {
             OutputPath = dialog.SelectedPath;
         }

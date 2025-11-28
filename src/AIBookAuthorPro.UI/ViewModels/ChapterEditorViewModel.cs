@@ -146,16 +146,13 @@ public partial class ChapterEditorViewModel : ObservableObject, IHasFlowDocument
 
         var chapter = new Chapter
         {
-            Id = Guid.NewGuid(),
             Title = $"Chapter {chapterNumber}",
             Order = chapterNumber,
             TargetWordCount = 3000,
-            Status = ChapterStatus.NotStarted,
-            CreatedAt = DateTime.UtcNow,
-            ModifiedAt = DateTime.UtcNow
+            Status = ChapterStatus.NotStarted
         };
 
-        project.Chapters.Add(chapter);
+        project.AddChapter(chapter);
         LoadChapter(project, chapter);
     }
 
@@ -287,13 +284,8 @@ public partial class ChapterEditorViewModel : ObservableObject, IHasFlowDocument
             Chapter.Notes = Notes;
             Chapter.TargetWordCount = TargetWordCount;
             Chapter.Status = Status;
-            Chapter.MarkAsModified();
-
-            // Mark project as modified
-            _projectService.MarkAsModified();
-
             // Auto-save project
-            var result = await _projectService.SaveProjectAsync();
+            var result = await _projectService.SaveAsync(Project);
 
             if (result.IsSuccess)
             {
