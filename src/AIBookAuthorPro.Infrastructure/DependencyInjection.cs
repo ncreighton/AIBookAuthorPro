@@ -46,7 +46,7 @@ public static class DependencyInjection
         services.AddSingleton<IGenerationPipelineService, GenerationPipelineService>();
 
         // Export services
-        services.AddSingleton<IDocxExporter, DocxExporter>();
+        services.AddSingleton<IDocxExporter, Services.DocxExporter>();
         services.AddSingleton<IMarkdownExporter, MarkdownExporter>();
         services.AddSingleton<IHtmlExporter, HtmlExporter>();
         services.AddSingleton<IExportService, ExportService>();

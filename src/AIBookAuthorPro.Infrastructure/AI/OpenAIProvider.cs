@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -10,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using AIBookAuthorPro.Core.Common;
+using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models.AI;
 using Microsoft.Extensions.Logging;
@@ -37,7 +39,6 @@ public sealed class OpenAIProvider : BaseAIProvider
             MaxOutputTokens = 16384,
             InputCostPer1K = 0.005m,
             OutputCostPer1K = 0.015m,
-true,
             SupportsStreaming = true,
             RecommendedFor = "Most capable GPT-4 model with vision capabilities"
         },
@@ -50,7 +51,6 @@ true,
             MaxOutputTokens = 16384,
             InputCostPer1K = 0.00015m,
             OutputCostPer1K = 0.0006m,
-true,
             SupportsStreaming = true,
             RecommendedFor = "Cost-effective smaller model with good performance"
         },
@@ -63,7 +63,6 @@ true,
             MaxOutputTokens = 32768,
             InputCostPer1K = 0.015m,
             OutputCostPer1K = 0.06m,
-false,
             SupportsStreaming = false,
             RecommendedFor = "Advanced reasoning model for complex tasks"
         },
@@ -76,7 +75,6 @@ false,
             MaxOutputTokens = 65536,
             InputCostPer1K = 0.003m,
             OutputCostPer1K = 0.012m,
-false,
             SupportsStreaming = false,
             RecommendedFor = "Faster reasoning model for simpler tasks"
         }

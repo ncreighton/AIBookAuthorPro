@@ -29,15 +29,15 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
     {
         [AIProviderType.Claude] = new()
         {
-            [GenerationMode.QuickDraft] = "claude-3-5-haiku-20241022",
+            [GenerationMode.Fast] = "claude-3-5-haiku-20241022",
             [GenerationMode.Standard] = "claude-sonnet-4-20250514",
-            [GenerationMode.Premium] = "claude-opus-4-20250514"
+            [GenerationMode.HighQuality] = "claude-opus-4-20250514"
         },
         [AIProviderType.OpenAI] = new()
         {
-            [GenerationMode.QuickDraft] = "gpt-4o-mini",
+            [GenerationMode.Fast] = "gpt-4o-mini",
             [GenerationMode.Standard] = "gpt-4o",
-            [GenerationMode.Premium] = "o1-preview"
+            [GenerationMode.HighQuality] = "o1-preview"
         }
     };
 
@@ -148,7 +148,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
             // Execute based on mode
             GenerationResult result;
 
-            if (request.Mode == GenerationMode.Premium)
+            if (request.Mode == GenerationMode.HighQuality)
             {
                 // Premium mode: multi-pass generation
                 result = await ExecutePremiumPipelineAsync(
@@ -407,7 +407,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
         [
             new GenerationModeInfo
             {
-                Mode = GenerationMode.QuickDraft,
+                Mode = GenerationMode.Fast,
                 Name = "Quick Draft",
                 Description = "Fast generation using economical models. Best for drafts and exploration.",
                 RecommendedFor = "First drafts, brainstorming, experimentation",
@@ -425,7 +425,7 @@ public sealed class GenerationPipelineService : IGenerationPipelineService
             },
             new GenerationModeInfo
             {
-                Mode = GenerationMode.Premium,
+                Mode = GenerationMode.HighQuality,
                 Name = "Premium",
                 Description = "Highest quality using top-tier models with refinement pass. Best for important chapters.",
                 RecommendedFor = "Opening chapters, climactic scenes, final drafts",

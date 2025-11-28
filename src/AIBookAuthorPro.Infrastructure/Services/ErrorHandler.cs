@@ -3,6 +3,9 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System;
+using System.IO;
+using System.Net.Http;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Interfaces;
 using Microsoft.Extensions.Logging;

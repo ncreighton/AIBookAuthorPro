@@ -30,21 +30,22 @@ public sealed class AIProviderFactory : IAIProviderFactory
         
         _providerTypes = new Dictionary<AIProviderType, Type>
         {
-            [AIProviderType.Anthropic] = typeof(AnthropicProvider),
+            [AIProviderType.Claude] = typeof(AnthropicProvider),
             [AIProviderType.OpenAI] = typeof(OpenAIProvider),
-            [AIProviderType.Google] = typeof(GeminiProvider)
+            [AIProviderType.Ollama] = typeof(GeminiProvider) // Gemini uses Ollama enum temporarily
         };
 
         // Map model IDs to provider types
         _modelToProviderMap = new Dictionary<string, AIProviderType>(StringComparer.OrdinalIgnoreCase)
         {
             // Claude models
-            ["claude-3-opus-20240229"] = AIProviderType.Anthropic,
-            ["claude-3-5-sonnet-20241022"] = AIProviderType.Anthropic,
-            ["claude-3-sonnet-20240229"] = AIProviderType.Anthropic,
-            ["claude-3-haiku-20240307"] = AIProviderType.Anthropic,
-            ["claude-sonnet-4-20250514"] = AIProviderType.Anthropic,
-            ["claude-opus-4-20250514"] = AIProviderType.Anthropic,
+            ["claude-3-opus-20240229"] = AIProviderType.Claude,
+            ["claude-3-5-sonnet-20241022"] = AIProviderType.Claude,
+            ["claude-3-sonnet-20240229"] = AIProviderType.Claude,
+            ["claude-3-haiku-20240307"] = AIProviderType.Claude,
+            ["claude-sonnet-4-20250514"] = AIProviderType.Claude,
+            ["claude-opus-4-20250514"] = AIProviderType.Claude,
+            ["claude-haiku-3-5-20241022"] = AIProviderType.Claude,
             
             // OpenAI models
             ["gpt-4o"] = AIProviderType.OpenAI,
@@ -52,11 +53,15 @@ public sealed class AIProviderFactory : IAIProviderFactory
             ["gpt-4-turbo"] = AIProviderType.OpenAI,
             ["gpt-4"] = AIProviderType.OpenAI,
             ["gpt-3.5-turbo"] = AIProviderType.OpenAI,
+            ["o1-preview"] = AIProviderType.OpenAI,
+            ["o1-mini"] = AIProviderType.OpenAI,
             
-            // Gemini models
-            ["gemini-1.5-pro"] = AIProviderType.Google,
-            ["gemini-1.5-flash"] = AIProviderType.Google,
-            ["gemini-pro"] = AIProviderType.Google
+            // Gemini models (using Ollama enum temporarily)
+            ["gemini-1.5-pro"] = AIProviderType.Ollama,
+            ["gemini-1.5-flash"] = AIProviderType.Ollama,
+            ["gemini-1.5-flash-8b"] = AIProviderType.Ollama,
+            ["gemini-2.0-flash-exp"] = AIProviderType.Ollama,
+            ["gemini-pro"] = AIProviderType.Ollama
         };
     }
 
@@ -92,20 +97,20 @@ public sealed class AIProviderFactory : IAIProviderFactory
         // Try to infer from model name
         if (modelId.StartsWith("claude", StringComparison.OrdinalIgnoreCase))
         {
-            return GetProvider(AIProviderType.Anthropic);
+            return GetProvider(AIProviderType.Claude);
         }
-        if (modelId.StartsWith("gpt", StringComparison.OrdinalIgnoreCase))
+        if (modelId.StartsWith("gpt", StringComparison.OrdinalIgnoreCase) || modelId.StartsWith("o1", StringComparison.OrdinalIgnoreCase))
         {
             return GetProvider(AIProviderType.OpenAI);
         }
         if (modelId.StartsWith("gemini", StringComparison.OrdinalIgnoreCase))
         {
-            return GetProvider(AIProviderType.Google);
+            return GetProvider(AIProviderType.Ollama); // Gemini uses Ollama enum temporarily
         }
 
-        // Default to Anthropic
-        _logger.LogWarning("Unknown model ID '{ModelId}', defaulting to Anthropic", modelId);
-        return GetProvider(AIProviderType.Anthropic);
+        // Default to Claude
+        _logger.LogWarning("Unknown model ID '{ModelId}', defaulting to Claude", modelId);
+        return GetProvider(AIProviderType.Claude);
     }
 
     /// <inheritdoc />
@@ -116,13 +121,13 @@ public sealed class AIProviderFactory : IAIProviderFactory
         
         if (providers.Count == 0)
         {
-            // Return Anthropic even if not configured, let it fail with a better error
-            return GetProvider(AIProviderType.Anthropic);
+            // Return Claude even if not configured, let it fail with a better error
+            return GetProvider(AIProviderType.Claude);
         }
 
-        // Prefer Anthropic if available
-        var anthropic = providers.FirstOrDefault(p => p.ProviderName == "Anthropic");
-        if (anthropic != null) return anthropic;
+        // Prefer Claude if available
+        var claude = providers.FirstOrDefault(p => p.ProviderName.Contains("Claude") || p.ProviderName.Contains("Anthropic"));
+        if (claude != null) return claude;
 
         // Then OpenAI
         var openai = providers.FirstOrDefault(p => p.ProviderName == "OpenAI");

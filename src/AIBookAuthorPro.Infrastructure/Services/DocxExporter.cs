@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Xml.Linq;

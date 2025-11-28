@@ -37,26 +37,3 @@ public sealed class BoolToVisibilityConverter : IValueConverter
     }
 }
 
-/// <summary>
-/// Converts null values to Visibility.
-/// </summary>
-public sealed class NullToVisibilityConverter : IValueConverter
-{
-    /// <summary>
-    /// Gets or sets whether to show when null (true) or when not null (false).
-    /// </summary>
-    public bool ShowWhenNull { get; set; }
-
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        var isNull = value == null || (value is string s && string.IsNullOrEmpty(s));
-        var shouldShow = ShowWhenNull ? isNull : !isNull;
-        return shouldShow ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        throw new NotImplementedException();
-    }
-}
-

@@ -3,6 +3,7 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -10,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using AIBookAuthorPro.Core.Common;
+using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
 using AIBookAuthorPro.Core.Models.AI;
 using Microsoft.Extensions.Logging;
@@ -37,7 +39,6 @@ public sealed class GeminiProvider : BaseAIProvider
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.00015m, // Free tier available
             OutputCostPer1K = 0.0006m,
-true,
             SupportsStreaming = true,
             RecommendedFor = "Latest experimental model with 1M context window"
         },
@@ -50,7 +51,6 @@ true,
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.00125m,
             OutputCostPer1K = 0.005m,
-true,
             SupportsStreaming = true,
             RecommendedFor = "Most capable Gemini model with 2M context window"
         },
@@ -63,7 +63,6 @@ true,
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.000075m,
             OutputCostPer1K = 0.0003m,
-true,
             SupportsStreaming = true,
             RecommendedFor = "Fast and efficient model for high-volume tasks"
         },
@@ -76,7 +75,6 @@ true,
             MaxOutputTokens = 8192,
             InputCostPer1K = 0.0000375m,
             OutputCostPer1K = 0.00015m,
-true,
             SupportsStreaming = true,
             RecommendedFor = "Smallest and fastest Flash model for simple tasks"
         }
