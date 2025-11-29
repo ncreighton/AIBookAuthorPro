@@ -12,7 +12,7 @@ namespace AIBookAuthorPro.UI;
 /// <summary>
 /// Extension methods for registering UI services.
 /// </summary>
-public static class DependencyInjection
+public static class UIServiceRegistration
 {
     /// <summary>
     /// Adds UI services to the service collection.

@@ -157,29 +157,44 @@ public sealed record QualityEvaluationContext
     public List<GeneratedChapter> PreviousChapters { get; init; } = new();
 
     /// <summary>
+    /// Chapter blueprint.
+    /// </summary>
+    public ChapterBlueprint? Blueprint { get; init; }
+
+    /// <summary>
     /// Character bible.
     /// </summary>
-    public required CharacterBible CharacterBible { get; init; }
+    public CharacterBible? CharacterBible { get; init; }
 
     /// <summary>
     /// World bible.
     /// </summary>
-    public required WorldBible WorldBible { get; init; }
+    public WorldBible? WorldBible { get; init; }
+
+    /// <summary>
+    /// World alias.
+    /// </summary>
+    public WorldBible? World { get => WorldBible; init => WorldBible = value; }
 
     /// <summary>
     /// Plot architecture.
     /// </summary>
-    public required PlotArchitecture PlotArchitecture { get; init; }
+    public PlotArchitecture? PlotArchitecture { get; init; }
 
     /// <summary>
     /// Style guide.
     /// </summary>
-    public required StyleGuide StyleGuide { get; init; }
+    public StyleGuide? StyleGuide { get; init; }
+
+    /// <summary>
+    /// Style alias.
+    /// </summary>
+    public StyleGuide? Style { get => StyleGuide; init => StyleGuide = value; }
 
     /// <summary>
     /// Quality thresholds.
     /// </summary>
-    public required QualityThresholds Thresholds { get; init; }
+    public QualityThresholds Thresholds { get; init; } = new();
 
     /// <summary>
     /// Character states from previous chapters.

@@ -18,17 +18,17 @@ public sealed class GeneratedChapter
     /// <summary>
     /// Reference to chapter blueprint.
     /// </summary>
-    public required Guid BlueprintChapterId { get; init; }
+    public Guid BlueprintChapterId { get; init; }
 
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Chapter title.
     /// </summary>
-    public required string Title { get; init; }
+    public string Title { get; init; } = string.Empty;
 
     /// <summary>
     /// Generation status.
@@ -55,7 +55,7 @@ public sealed class GeneratedChapter
     /// <summary>
     /// The generated content.
     /// </summary>
-    public required string Content { get; set; }
+    public string Content { get; set; } = string.Empty;
 
     /// <summary>
     /// Content formatted as HTML.
@@ -66,6 +66,16 @@ public sealed class GeneratedChapter
     /// Generated scenes.
     /// </summary>
     public List<GeneratedScene> Scenes { get; init; } = new();
+
+    /// <summary>
+    /// Character states at end of chapter.
+    /// </summary>
+    public List<CharacterStateSnapshot> CharacterStatesAtEnd { get; set; } = new();
+
+    /// <summary>
+    /// Generation duration in milliseconds.
+    /// </summary>
+    public long GenerationDurationMs { get; set; }
 
     // ================== METRICS ==================
 
@@ -116,6 +126,11 @@ public sealed class GeneratedChapter
     /// </summary>
     public ContinuityReport? ContinuityReport { get; set; }
 
+    /// <summary>
+    /// Chapter summaries at different levels.
+    /// </summary>
+    public ChapterSummaries? Summaries { get; set; }
+
     // ================== GENERATION METADATA ==================
 
     /// <summary>
@@ -124,14 +139,19 @@ public sealed class GeneratedChapter
     public int GenerationAttempt { get; init; } = 1;
 
     /// <summary>
+    /// Number of revisions applied.
+    /// </summary>
+    public int RevisionCount { get; set; }
+
+    /// <summary>
     /// Model used.
     /// </summary>
-    public required string ModelUsed { get; init; }
+    public string ModelUsed { get; init; } = string.Empty;
 
     /// <summary>
     /// Token usage.
     /// </summary>
-    public required TokenUsage TokenUsage { get; init; }
+    public TokenUsage TokenUsage { get; init; } = new();
 
     /// <summary>
     /// Generation cost.
@@ -147,6 +167,11 @@ public sealed class GeneratedChapter
     /// Context used for generation.
     /// </summary>
     public GenerationContextSummary? ContextUsed { get; init; }
+
+    /// <summary>
+    /// Failure reason if generation failed.
+    /// </summary>
+    public string? FailureReason { get; set; }
 
     // ================== REVISIONS ==================
 
@@ -218,17 +243,17 @@ public sealed class GeneratedScene
     /// <summary>
     /// Reference to scene blueprint.
     /// </summary>
-    public required Guid BlueprintSceneId { get; init; }
+    public Guid BlueprintSceneId { get; init; }
 
     /// <summary>
     /// Scene number.
     /// </summary>
-    public required int SceneNumber { get; init; }
+    public int SceneNumber { get; init; }
 
     /// <summary>
     /// Content.
     /// </summary>
-    public required string Content { get; set; }
+    public string Content { get; set; } = string.Empty;
 
     /// <summary>
     /// Word count.
@@ -254,7 +279,7 @@ public sealed record ChapterRevision
     /// <summary>
     /// Revision number.
     /// </summary>
-    public required int RevisionNumber { get; init; }
+    public int RevisionNumber { get; init; }
 
     /// <summary>
     /// Timestamp.
@@ -264,12 +289,12 @@ public sealed record ChapterRevision
     /// <summary>
     /// Revision type (auto, manual, AI).
     /// </summary>
-    public required string RevisionType { get; init; }
+    public string RevisionType { get; init; } = "auto";
 
     /// <summary>
     /// What was changed.
     /// </summary>
-    public required string ChangeDescription { get; init; }
+    public string ChangeDescription { get; init; } = string.Empty;
 
     /// <summary>
     /// Previous content (for undo).
@@ -326,22 +351,22 @@ public sealed record CharacterStateSnapshot
     /// <summary>
     /// Character ID.
     /// </summary>
-    public required Guid CharacterId { get; init; }
+    public Guid CharacterId { get; init; }
 
     /// <summary>
     /// Character name.
     /// </summary>
-    public required string CharacterName { get; init; }
+    public string CharacterName { get; init; } = string.Empty;
 
     /// <summary>
     /// Emotional state.
     /// </summary>
-    public required string EmotionalState { get; init; }
+    public string EmotionalState { get; init; } = string.Empty;
 
     /// <summary>
     /// Physical location.
     /// </summary>
-    public required string Location { get; init; }
+    public string Location { get; init; } = string.Empty;
 
     /// <summary>
     /// Key knowledge gained.

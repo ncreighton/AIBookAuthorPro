@@ -10,11 +10,10 @@ using System.Windows.Media.Animation;
 using Microsoft.Xaml.Behaviors;
 using Panel = System.Windows.Controls.Panel;
 using Point = System.Windows.Point;
-using Color = System.Windows.Media.Color;
 using Brushes = System.Windows.Media.Brushes;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using ProgressBar = System.Windows.Controls.ProgressBar;
-using Application = System.Windows.Application;
+using WpfApplication = System.Windows.Application;
 
 namespace AIBookAuthorPro.UI.Behaviors;
 
@@ -155,7 +154,7 @@ public class LoadingOverlayBehavior : Behavior<FrameworkElement>
             IsIndeterminate = true,
             Width = 50,
             Height = 50,
-            Style = (Style)Application.Current.FindResource("MaterialDesignCircularProgressBar")
+            Style = (Style)WpfApplication.Current.FindResource("MaterialDesignCircularProgressBar")
         };
         stack.Children.Add(spinner);
 

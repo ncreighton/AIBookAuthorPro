@@ -293,6 +293,34 @@ public partial class SettingsViewModel : ObservableObject
         return key[..4] + new string('•', key.Length - 8) + key[^4..];
     }
 
+    private void SaveApiKeyIfChanged(string provider, string? apiKey)
+    {
+        // Skip if empty or if it's still the masked version (contains •)
+        if (string.IsNullOrEmpty(apiKey)) return;
+        if (apiKey.Contains('•')) return;
+
+        // It's a new key - save it
+        _settingsService.SetApiKey(provider, apiKey);
+        _logger.LogInformation("API key updated for {Provider}", provider);
+
+        // Update configured status
+        switch (provider.ToLowerInvariant())
+        {
+            case "anthropic":
+                AnthropicConfigured = true;
+                AnthropicApiKey = MaskApiKey(apiKey);
+                break;
+            case "openai":
+                OpenAIConfigured = true;
+                OpenAIApiKey = MaskApiKey(apiKey);
+                break;
+            case "gemini":
+                GeminiConfigured = true;
+                GeminiApiKey = MaskApiKey(apiKey);
+                break;
+        }
+    }
+
     // Track changes
     partial void OnDefaultProviderChanged(AIProviderType value) => HasChanges = true;
     partial void OnDefaultModeChanged(GenerationMode value) => HasChanges = true;
@@ -392,6 +420,11 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             _logger.LogDebug("Saving settings");
+
+            // Save API keys if they've been changed (not masked)
+            SaveApiKeyIfChanged("anthropic", AnthropicApiKey);
+            SaveApiKeyIfChanged("openai", OpenAIApiKey);
+            SaveApiKeyIfChanged("gemini", GeminiApiKey);
 
             var settings = _settingsService.CurrentSettings;
 

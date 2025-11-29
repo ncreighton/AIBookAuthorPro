@@ -21,13 +21,19 @@ public static class ViewModelServiceExtensions
     {
         // Main application ViewModels
         services.AddTransient<MainViewModel>();
-        services.AddTransient<DashboardViewModel>();
-        services.AddTransient<EditorViewModel>();
-        services.AddTransient<CharacterViewModel>();
-        services.AddTransient<LocationViewModel>();
-        services.AddTransient<OutlineViewModel>();
+        services.AddTransient<ProjectDashboardViewModel>();
+        services.AddTransient<ChapterEditorViewModel>();
+        services.AddTransient<CharacterEditorViewModel>();
+        services.AddTransient<CharacterListViewModel>();
+        services.AddTransient<LocationEditorViewModel>();
+        services.AddTransient<LocationListViewModel>();
+        services.AddTransient<OutlineEditorViewModel>();
         services.AddTransient<SettingsViewModel>();
-        services.AddTransient<ExportDialogViewModel>();
+        services.AddTransient<ExportViewModel>();
+        services.AddTransient<AIGenerationViewModel>();
+        services.AddTransient<CoverViewModel>();
+        services.AddTransient<KDPViewModel>();
+        services.AddTransient<ResearchViewModel>();
 
         // Guided Creation ViewModels
         services.AddTransient<GuidedCreationWizardViewModel>();

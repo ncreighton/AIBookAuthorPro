@@ -19,7 +19,17 @@ public sealed class GenerationSession
     /// <summary>
     /// Reference to the blueprint.
     /// </summary>
-    public required Guid BlueprintId { get; init; }
+    public Guid BlueprintId { get; init; }
+
+    /// <summary>
+    /// The book blueprint for this session.
+    /// </summary>
+    public BookBlueprint? Blueprint { get; init; }
+
+    /// <summary>
+    /// Generation configuration.
+    /// </summary>
+    public GenerationConfiguration? Configuration { get; init; }
 
     /// <summary>
     /// Current status.
@@ -51,7 +61,7 @@ public sealed class GenerationSession
     /// <summary>
     /// Total chapters to generate.
     /// </summary>
-    public required int TotalChapters { get; init; }
+    public int TotalChapters { get; init; }
 
     /// <summary>
     /// Chapters completed.
@@ -81,7 +91,7 @@ public sealed class GenerationSession
     /// <summary>
     /// Target word count.
     /// </summary>
-    public required int TotalWordCountTarget { get; init; }
+    public int TotalWordCountTarget { get; init; }
 
     /// <summary>
     /// Words generated so far.
@@ -132,9 +142,7 @@ public sealed class GenerationSession
     /// <summary>
     /// Average quality score.
     /// </summary>
-    public double AverageQualityScore => QualityResults.Count > 0
-        ? QualityResults.Average(q => q.OverallScore)
-        : 0;
+    public double AverageQualityScore { get; set; }
 
     /// <summary>
     /// Chapters requiring review.
@@ -151,7 +159,7 @@ public sealed class GenerationSession
     /// <summary>
     /// Token usage tracker.
     /// </summary>
-    public required TokenUsageTracker TokenUsage { get; init; }
+    public TokenUsageTracker TokenUsage { get; init; } = new();
 
     /// <summary>
     /// Estimated cost so far.
@@ -251,17 +259,17 @@ public sealed record ChapterCost
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Cost.
     /// </summary>
-    public required decimal Cost { get; init; }
+    public decimal Cost { get; init; }
 
     /// <summary>
     /// Token usage.
     /// </summary>
-    public required TokenUsage TokenUsage { get; init; }
+    public TokenUsage TokenUsage { get; init; } = new();
 
     /// <summary>
     /// Attempts.
@@ -277,17 +285,17 @@ public sealed record ChapterQualityResult
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Overall score.
     /// </summary>
-    public required double OverallScore { get; init; }
+    public double OverallScore { get; init; }
 
     /// <summary>
     /// Verdict.
     /// </summary>
-    public required QualityVerdict Verdict { get; init; }
+    public QualityVerdict Verdict { get; init; } = QualityVerdict.NeedsWork;
 
     /// <summary>
     /// Issue count.
@@ -328,7 +336,7 @@ public sealed record GenerationError
     /// <summary>
     /// Phase when error occurred.
     /// </summary>
-    public required GenerationPhase Phase { get; init; }
+    public GenerationPhase Phase { get; init; } = GenerationPhase.Initialization;
 
     /// <summary>
     /// Chapter number if applicable.
@@ -338,12 +346,12 @@ public sealed record GenerationError
     /// <summary>
     /// Error type.
     /// </summary>
-    public required string ErrorType { get; init; }
+    public string ErrorType { get; init; } = string.Empty;
 
     /// <summary>
     /// Error message.
     /// </summary>
-    public required string Message { get; init; }
+    public string Message { get; init; } = string.Empty;
 
     /// <summary>
     /// Stack trace.
@@ -374,12 +382,12 @@ public sealed record GenerationWarning
     /// <summary>
     /// Category.
     /// </summary>
-    public required string Category { get; init; }
+    public string Category { get; init; } = string.Empty;
 
     /// <summary>
     /// Message.
     /// </summary>
-    public required string Message { get; init; }
+    public string Message { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter number if applicable.
@@ -400,12 +408,12 @@ public sealed record ActivityLogEntry
     /// <summary>
     /// Activity type.
     /// </summary>
-    public required string ActivityType { get; init; }
+    public string ActivityType { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Details.
@@ -431,17 +439,17 @@ public sealed record SessionCheckpoint
     /// <summary>
     /// Last completed chapter.
     /// </summary>
-    public required int LastCompletedChapter { get; init; }
+    public int LastCompletedChapter { get; init; }
 
     /// <summary>
     /// Session state snapshot.
     /// </summary>
-    public required string StateSnapshot { get; init; }
+    public string StateSnapshot { get; init; } = string.Empty;
 
     /// <summary>
     /// Metrics at checkpoint.
     /// </summary>
-    public required CheckpointMetrics Metrics { get; init; }
+    public CheckpointMetrics Metrics { get; init; } = new();
 }
 
 /// <summary>

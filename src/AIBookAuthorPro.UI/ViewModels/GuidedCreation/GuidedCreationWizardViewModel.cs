@@ -13,6 +13,80 @@ using Microsoft.Extensions.Logging;
 namespace AIBookAuthorPro.UI.ViewModels.GuidedCreation;
 
 /// <summary>
+/// Information about a step in the wizard.
+/// </summary>
+public sealed class WizardStepInfo : ObservableObject
+{
+    private bool _isCurrent;
+    private bool _isCompleted;
+    private bool _isAvailable;
+    
+    public WizardStep Step { get; init; }
+    public string DisplayName { get; init; } = string.Empty;
+    public string Description { get; init; } = string.Empty;
+    public string Icon { get; init; } = string.Empty;
+    
+    public bool IsAvailable
+    {
+        get => _isAvailable;
+        set => SetProperty(ref _isAvailable, value);
+    }
+    
+    public bool IsCompleted
+    {
+        get => _isCompleted;
+        set => SetProperty(ref _isCompleted, value);
+    }
+    
+    public bool IsCurrent
+    {
+        get => _isCurrent;
+        set => SetProperty(ref _isCurrent, value);
+    }
+    
+    /// <summary>
+    /// Maps GuidedCreationStep to WizardStep.
+    /// </summary>
+    public static WizardStep FromGuidedCreationStep(GuidedCreationStep step) => step switch
+    {
+        GuidedCreationStep.Welcome => WizardStep.PromptEntry,
+        GuidedCreationStep.SeedPrompt => WizardStep.PromptEntry,
+        GuidedCreationStep.Analysis => WizardStep.PromptAnalysis,
+        GuidedCreationStep.BriefExpansion => WizardStep.PromptAnalysis,
+        GuidedCreationStep.Clarifications => WizardStep.Clarifications,
+        GuidedCreationStep.BlueprintGeneration => WizardStep.BlueprintReview,
+        GuidedCreationStep.BlueprintReview => WizardStep.BlueprintReview,
+        GuidedCreationStep.Configuration => WizardStep.SettingsConfirmation,
+        GuidedCreationStep.Generation => WizardStep.Generation,
+        GuidedCreationStep.Review => WizardStep.ReviewAndRefine,
+        GuidedCreationStep.Export => WizardStep.Completion,
+        GuidedCreationStep.Completed => WizardStep.Completion,
+        _ => WizardStep.PromptEntry
+    };
+    
+    /// <summary>
+    /// Maps WizardStep to GuidedCreationStep.
+    /// </summary>
+    public static GuidedCreationStep ToGuidedCreationStep(WizardStep step) => step switch
+    {
+        WizardStep.PromptEntry => GuidedCreationStep.SeedPrompt,
+        WizardStep.PromptAnalysis => GuidedCreationStep.Analysis,
+        WizardStep.Clarifications => GuidedCreationStep.Clarifications,
+        WizardStep.BlueprintReview => GuidedCreationStep.BlueprintReview,
+        WizardStep.StructureEditor => GuidedCreationStep.BlueprintReview,
+        WizardStep.CharacterEditor => GuidedCreationStep.BlueprintReview,
+        WizardStep.PlotEditor => GuidedCreationStep.BlueprintReview,
+        WizardStep.WorldEditor => GuidedCreationStep.BlueprintReview,
+        WizardStep.StyleEditor => GuidedCreationStep.BlueprintReview,
+        WizardStep.SettingsConfirmation => GuidedCreationStep.Configuration,
+        WizardStep.Generation => GuidedCreationStep.Generation,
+        WizardStep.ReviewAndRefine => GuidedCreationStep.Review,
+        WizardStep.Completion => GuidedCreationStep.Completed,
+        _ => GuidedCreationStep.Welcome
+    };
+}
+
+/// <summary>
 /// Main ViewModel for the guided creation wizard.
 /// </summary>
 public partial class GuidedCreationWizardViewModel : ObservableObject
@@ -77,7 +151,7 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
     
     public bool CanGoNext => !IsProcessing && CanProceedFromCurrentStep();
 
-    public double OverallProgressPercentage => Session?.OverallProgress ?? 0;
+    public double OverallProgressPercentage => Session?.ProgressPercentage ?? 0;
 
     public string CurrentStepTitle => CurrentStep switch
     {
@@ -178,11 +252,11 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
 
         try
         {
-            var result = await _wizardService.MoveToPreviousStepAsync(Session, cancellationToken);
+            var result = await _wizardService.GoToPreviousStepAsync(Session, cancellationToken);
             if (result.IsSuccess)
             {
                 Session = result.Value;
-                CurrentStep = Session!.CurrentStep;
+                CurrentStep = WizardStepInfo.FromGuidedCreationStep(Session!.CurrentStep);
                 UpdateStepStates();
             }
             else
@@ -219,11 +293,11 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
             }
 
             // Move to next step
-            var result = await _wizardService.MoveToNextStepAsync(Session, cancellationToken);
+            var result = await _wizardService.AdvanceToNextStepAsync(Session, cancellationToken);
             if (result.IsSuccess)
             {
                 Session = result.Value;
-                CurrentStep = Session!.CurrentStep;
+                CurrentStep = WizardStepInfo.FromGuidedCreationStep(Session!.CurrentStep);
                 UpdateStepStates();
                 
                 // Initialize next step if needed
@@ -256,11 +330,11 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
 
         try
         {
-            var result = await _wizardService.MoveToStepAsync(Session, step, cancellationToken);
+            var result = await _wizardService.GoToStepAsync(Session, WizardStepInfo.ToGuidedCreationStep(step), cancellationToken);
             if (result.IsSuccess)
             {
                 Session = result.Value;
-                CurrentStep = Session!.CurrentStep;
+                CurrentStep = WizardStepInfo.FromGuidedCreationStep(Session!.CurrentStep);
                 UpdateStepStates();
                 await InitializeCurrentStepAsync(cancellationToken);
             }
@@ -289,7 +363,9 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
 
         try
         {
-            await _wizardService.CancelSessionAsync(Session.Id, cancellationToken);
+            // Mark session as cancelled and save
+            Session.Status = WizardSessionStatus.Cancelled;
+            await _wizardService.SaveSessionAsync(Session, cancellationToken);
             Session = null;
             // Navigate away from wizard
         }
@@ -408,18 +484,9 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
 
         foreach (var step in Steps)
         {
-            var updatedStep = step with
-            {
-                IsCurrent = step.Step == CurrentStep,
-                IsCompleted = Session.CompletedSteps.Contains(step.Step),
-                IsAvailable = IsStepAccessible(step.Step)
-            };
-
-            var index = Steps.IndexOf(step);
-            if (index >= 0)
-            {
-                Steps[index] = updatedStep;
-            }
+            step.IsCurrent = step.Step == CurrentStep;
+            step.IsCompleted = Session.StepHistory.Contains(WizardStepInfo.ToGuidedCreationStep(step.Step));
+            step.IsAvailable = IsStepAccessible(step.Step);
         }
     }
 
@@ -434,7 +501,7 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
         var stepIndex = (int)step;
         for (int i = 0; i < stepIndex; i++)
         {
-            if (!Session.CompletedSteps.Contains((WizardStep)i))
+            if (!Session.StepHistory.Contains((GuidedCreationStep)i))
                 return false;
         }
 
@@ -456,7 +523,7 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
             WizardStep.PlotEditor => true,
             WizardStep.WorldEditor => true,
             WizardStep.StyleEditor => true,
-            WizardStep.SettingsConfirmation => Session.IsBlueprintApproved,
+            WizardStep.SettingsConfirmation => Session.BlueprintApproved,
             WizardStep.Generation => Session.GenerationSession?.Status == GenerationSessionStatus.Completed,
             WizardStep.ReviewAndRefine => true,
             WizardStep.Completion => true,
@@ -523,7 +590,7 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
         if (Session == null) return false;
 
         // Blueprint should already be generated and reviewed
-        Session.IsBlueprintApproved = true;
+        Session.BlueprintApproved = true;
         return true;
     }
 
@@ -532,7 +599,7 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
         if (Session == null) return false;
 
         // Create default generation config if not set
-        Session.GenerationConfig ??= new GenerationConfiguration();
+        Session.Configuration ??= new GenerationConfiguration();
 
         return true;
     }
@@ -556,17 +623,17 @@ public partial class GuidedCreationWizardViewModel : ObservableObject
                 break;
 
             case WizardStep.BlueprintReview:
-                if (Session?.CreativeBrief != null && Session.Blueprint == null)
+                if (Session?.ExpandedBrief != null && Session.Blueprint == null)
                 {
                     StatusMessage = "Generating blueprint...";
-                    var progress = new Progress<BlueprintGenerationProgress>(p =>
+                    var progress = new Progress<DetailedBlueprintProgress>(p =>
                     {
                         StatusMessage = p.CurrentOperation;
-                        Session.OverallProgress = p.OverallProgress;
+                        Session.ProgressPercentage = p.OverallProgress;
                     });
 
                     var result = await _blueprintGeneratorService.GenerateBlueprintAsync(
-                        Session.CreativeBrief, progress, cancellationToken);
+                        Session.ExpandedBrief, progress, cancellationToken);
                     if (result.IsSuccess)
                     {
                         Session.Blueprint = result.Value;

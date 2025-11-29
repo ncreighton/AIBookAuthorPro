@@ -8,6 +8,7 @@ using System.Text.Json;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
+using AIBookAuthorPro.Core.Models.AI;
 using AIBookAuthorPro.Core.Models.Covers;
 using Microsoft.Extensions.Logging;
 
@@ -414,7 +415,7 @@ Return ONLY the JSON array.";
     public async Task<Result<BookCover>> CreateFromTemplateAsync(
         Guid projectId,
         Guid templateId,
-        Dictionary<string, string>? customizations = null,
+        CoverTextElements? customizations = null,
         CancellationToken cancellationToken = default)
     {
         try
@@ -452,13 +453,21 @@ Return ONLY the JSON array.";
             // Apply customizations
             if (customizations != null)
             {
-                if (customizations.TryGetValue("subtitle", out var subtitle))
+                if (customizations.Subtitle != null)
                 {
-                    cover.TextElements.Subtitle = new TextElement { Text = subtitle };
+                    cover.TextElements.Subtitle = customizations.Subtitle;
                 }
-                if (customizations.TryGetValue("tagline", out var tagline))
+                if (customizations.Tagline != null)
                 {
-                    cover.TextElements.Tagline = new TextElement { Text = tagline };
+                    cover.TextElements.Tagline = customizations.Tagline;
+                }
+                if (customizations.Title != null)
+                {
+                    cover.TextElements.Title = customizations.Title;
+                }
+                if (customizations.AuthorName != null)
+                {
+                    cover.TextElements.AuthorName = customizations.AuthorName;
                 }
             }
 
@@ -659,18 +668,15 @@ Return ONLY the JSON array.";
     }
 
     /// <inheritdoc />
-    public Task<Result<List<ImageGenerationProvider>>> GetAvailableProvidersAsync(
-        CancellationToken cancellationToken = default)
+    public List<ImageGenerationProvider> GetAvailableProviders()
     {
-        var providers = new List<ImageGenerationProvider>
+        return new List<ImageGenerationProvider>
         {
             ImageGenerationProvider.DallE,
             ImageGenerationProvider.StabilityAI,
             ImageGenerationProvider.Ideogram,
             ImageGenerationProvider.Leonardo
         };
-
-        return Task.FromResult(Result<List<ImageGenerationProvider>>.Success(providers));
     }
 
     #region Private Methods
@@ -926,15 +932,4 @@ public record ImageGenerationResult
     public string? ImageUrl { get; init; }
     public TimeSpan Duration { get; init; }
     public decimal? Cost { get; init; }
-}
-
-/// <summary>
-/// Types of cover for import.
-/// </summary>
-public enum CoverType
-{
-    Front,
-    Back,
-    Full,
-    Spine
 }

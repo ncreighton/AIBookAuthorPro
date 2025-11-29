@@ -7,6 +7,7 @@ using System.Text.Json;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
+using AIBookAuthorPro.Core.Models.AI;
 using AIBookAuthorPro.Core.Models.KDP;
 using Microsoft.Extensions.Logging;
 
@@ -66,7 +67,7 @@ public sealed class KDPService : IKDPService
     }
 
     /// <inheritdoc />
-    public async Task<r> SaveMetadataAsync(
+    public async Task<Result> SaveMetadataAsync(
         Guid projectId,
         KDPMetadata metadata,
         CancellationToken cancellationToken = default)

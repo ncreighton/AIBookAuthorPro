@@ -22,7 +22,7 @@ public interface IBlueprintGeneratorService
     /// <returns>Complete book blueprint.</returns>
     Task<Result<BookBlueprint>> GenerateBlueprintAsync(
         ExpandedCreativeBrief brief,
-        IProgress<BlueprintGenerationProgress>? progress = null,
+        IProgress<DetailedBlueprintProgress>? progress = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -127,9 +127,13 @@ public interface IBlueprintGeneratorService
 }
 
 /// <summary>
-/// Blueprint generation progress.
+/// Detailed blueprint generation progress for internal orchestration.
 /// </summary>
-public sealed record BlueprintGenerationProgress
+/// <remarks>
+/// This is distinct from Core.Models.GuidedCreation.BlueprintGenerationProgress
+/// which is used for external API progress reporting.
+/// </remarks>
+public sealed record DetailedBlueprintProgress
 {
     /// <summary>
     /// Current phase.

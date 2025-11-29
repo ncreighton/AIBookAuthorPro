@@ -142,22 +142,32 @@ public sealed record ContinuityVerificationContext
     /// <summary>
     /// Chapter blueprint.
     /// </summary>
-    public required ChapterBlueprint Blueprint { get; init; }
+    public ChapterBlueprint Blueprint { get; init; } = new();
 
     /// <summary>
     /// Character bible.
     /// </summary>
-    public required CharacterBible CharacterBible { get; init; }
+    public CharacterBible? CharacterBible { get; init; }
 
     /// <summary>
     /// World bible.
     /// </summary>
-    public required WorldBible WorldBible { get; init; }
+    public WorldBible? WorldBible { get; init; }
+
+    /// <summary>
+    /// World alias.
+    /// </summary>
+    public WorldBible? World { get => WorldBible; init => WorldBible = value; }
 
     /// <summary>
     /// Plot architecture.
     /// </summary>
-    public required PlotArchitecture PlotArchitecture { get; init; }
+    public PlotArchitecture? PlotArchitecture { get; init; }
+
+    /// <summary>
+    /// Plot alias.
+    /// </summary>
+    public PlotArchitecture? Plot { get => PlotArchitecture; init => PlotArchitecture = value; }
 
     /// <summary>
     /// Previous chapters.

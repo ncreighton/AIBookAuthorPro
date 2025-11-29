@@ -29,6 +29,9 @@
     
     <!-- JSON -->
     <PackageReference Include="System.Text.Json" />
+    
+    <!-- Document Export -->
+    <PackageReference Include="DocumentFormat.OpenXml" />
   </ItemGroup>
 
   <ItemGroup>

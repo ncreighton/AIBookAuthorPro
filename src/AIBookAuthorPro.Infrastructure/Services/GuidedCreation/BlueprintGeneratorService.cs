@@ -8,7 +8,10 @@ using AIBookAuthorPro.Application.Services.GuidedCreation;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
 using AIBookAuthorPro.Core.Services;
+using CoreGenerationOptions = AIBookAuthorPro.Core.Services.GenerationOptions;
 using Microsoft.Extensions.Logging;
+
+using DetailedBlueprintProgress = AIBookAuthorPro.Application.Services.GuidedCreation.DetailedBlueprintProgress;
 
 namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
 
@@ -31,7 +34,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
     /// <inheritdoc />
     public async Task<Result<BookBlueprint>> GenerateBlueprintAsync(
         ExpandedCreativeBrief brief,
-        IProgress<BlueprintGenerationProgress>? progress = null,
+        IProgress<DetailedBlueprintProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (brief == null)
@@ -42,7 +45,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
         try
         {
             // Phase 1: Structure
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Structure,
                 PhaseProgress = 0,
@@ -54,7 +57,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             if (!structureResult.IsSuccess)
                 return Result<BookBlueprint>.Failure($"Structure generation failed: {structureResult.Error}");
 
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Structure,
                 PhaseProgress = 100,
@@ -62,8 +65,8 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
                 CurrentOperation = "Structural plan complete"
             });
 
-            // Phase 2: Characters
-            progress?.Report(new BlueprintGenerationProgress
+            // Phase 2: CharacterBible
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Characters,
                 PhaseProgress = 0,
@@ -75,7 +78,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             if (!charactersResult.IsSuccess)
                 return Result<BookBlueprint>.Failure($"Character generation failed: {charactersResult.Error}");
 
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Characters,
                 PhaseProgress = 100,
@@ -84,7 +87,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             });
 
             // Phase 3: World
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.World,
                 PhaseProgress = 0,
@@ -96,7 +99,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             if (!worldResult.IsSuccess)
                 return Result<BookBlueprint>.Failure($"World generation failed: {worldResult.Error}");
 
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.World,
                 PhaseProgress = 100,
@@ -105,7 +108,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             });
 
             // Phase 4: Plot
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Plot,
                 PhaseProgress = 0,
@@ -118,7 +121,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             if (!plotResult.IsSuccess)
                 return Result<BookBlueprint>.Failure($"Plot generation failed: {plotResult.Error}");
 
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Plot,
                 PhaseProgress = 100,
@@ -127,7 +130,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             });
 
             // Phase 5: Style
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Style,
                 PhaseProgress = 0,
@@ -139,7 +142,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             if (!styleResult.IsSuccess)
                 return Result<BookBlueprint>.Failure($"Style generation failed: {styleResult.Error}");
 
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Style,
                 PhaseProgress = 100,
@@ -148,7 +151,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             });
 
             // Phase 6: Chapter Details
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.ChapterDetails,
                 PhaseProgress = 0,
@@ -166,7 +169,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             if (!chaptersResult.IsSuccess)
                 return Result<BookBlueprint>.Failure($"Chapter generation failed: {chaptersResult.Error}");
 
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.ChapterDetails,
                 PhaseProgress = 100,
@@ -175,7 +178,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             });
 
             // Phase 7: Assemble Blueprint
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Finalization,
                 PhaseProgress = 0,
@@ -189,24 +192,23 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
                 Identity = new BookIdentity
                 {
                     Title = brief.WorkingTitle,
-                    Premise = brief.Premise,
+                    Premise = brief.ExpandedPremise,
                     Logline = brief.Logline,
                     Genre = "Fiction", // Would come from analysis
                     TargetWordCount = structureResult.Value!.TotalTargetWordCount
                 },
-                Structure = structureResult.Value!,
-                Characters = charactersResult.Value!,
+                // Set Structure with chapters included - ChapterBlueprints is computed from Structure.Chapters
+                Structure = structureResult.Value! with { Chapters = chaptersResult.Value! },
+                CharacterBible = charactersResult.Value!,
                 World = worldResult.Value!,
                 Plot = plotResult.Value!,
                 Style = styleResult.Value!,
-                ChapterBlueprints = chaptersResult.Value!,
                 Status = BlueprintStatus.Draft,
-                CreatedAt = DateTime.UtcNow,
                 Version = 1
             };
 
             // Phase 8: Validation
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Validation,
                 PhaseProgress = 0,
@@ -221,7 +223,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
                     string.Join(", ", validationResult.Value.Issues.Select(i => i.Description)));
             }
 
-            progress?.Report(new BlueprintGenerationProgress
+            progress?.Report(new DetailedBlueprintProgress
             {
                 Phase = BlueprintGenerationPhase.Finalization,
                 PhaseProgress = 100,
@@ -230,7 +232,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             });
 
             _logger.LogInformation("Blueprint generated successfully: {ChapterCount} chapters, {WordCount} target words",
-                blueprint.ChapterBlueprints.Count, blueprint.Identity.TargetWordCount);
+                blueprint.Structure.Chapters.Count, blueprint.Identity.TargetWordCount);
 
             return Result<BookBlueprint>.Success(blueprint);
         }
@@ -256,7 +258,7 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
         var prompt = BuildStructurePrompt(brief);
         var response = await _aiService.GenerateAsync(
             prompt,
-            new GenerationOptions { Temperature = 0.5, MaxTokens = 4000, ResponseFormat = "json" },
+            new CoreGenerationOptions { Temperature = 0.5, MaxTokens = 4000, ResponseFormat = "json" },
             cancellationToken);
 
         if (!response.IsSuccess)
@@ -276,13 +278,13 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
         var prompt = BuildCharacterPrompt(brief, structure);
         var response = await _aiService.GenerateAsync(
             prompt,
-            new GenerationOptions { Temperature = 0.7, MaxTokens = 6000, ResponseFormat = "json" },
+            new CoreGenerationOptions { Temperature = 0.7, MaxTokens = 6000, ResponseFormat = "json" },
             cancellationToken);
 
         if (!response.IsSuccess)
             return Result<CharacterBible>.Failure(response.Error!);
 
-        return ParseCharacterBible(response.Value!);
+        return ParseCharacters(response.Value!);
     }
 
     /// <inheritdoc />
@@ -296,34 +298,34 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
         var prompt = BuildWorldPrompt(brief, structure);
         var response = await _aiService.GenerateAsync(
             prompt,
-            new GenerationOptions { Temperature = 0.6, MaxTokens = 5000, ResponseFormat = "json" },
+            new CoreGenerationOptions { Temperature = 0.6, MaxTokens = 5000, ResponseFormat = "json" },
             cancellationToken);
 
         if (!response.IsSuccess)
             return Result<WorldBible>.Failure(response.Error!);
 
-        return ParseWorldBible(response.Value!);
+        return ParseWorld(response.Value!);
     }
 
     /// <inheritdoc />
     public async Task<Result<PlotArchitecture>> GeneratePlotArchitectureAsync(
         ExpandedCreativeBrief brief,
         StructuralPlan structure,
-        CharacterBible characters,
+        CharacterBible characterBible,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Generating plot architecture");
 
-        var prompt = BuildPlotPrompt(brief, structure, characters);
+        var prompt = BuildPlotPrompt(brief, structure, characterBible);
         var response = await _aiService.GenerateAsync(
             prompt,
-            new GenerationOptions { Temperature = 0.6, MaxTokens = 6000, ResponseFormat = "json" },
+            new CoreGenerationOptions { Temperature = 0.6, MaxTokens = 6000, ResponseFormat = "json" },
             cancellationToken);
 
         if (!response.IsSuccess)
             return Result<PlotArchitecture>.Failure(response.Error!);
 
-        return ParsePlotArchitecture(response.Value!);
+        return ParsePlot(response.Value!);
     }
 
     /// <inheritdoc />
@@ -336,22 +338,22 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
         var prompt = BuildStylePrompt(brief);
         var response = await _aiService.GenerateAsync(
             prompt,
-            new GenerationOptions { Temperature = 0.5, MaxTokens = 4000, ResponseFormat = "json" },
+            new CoreGenerationOptions { Temperature = 0.5, MaxTokens = 4000, ResponseFormat = "json" },
             cancellationToken);
 
         if (!response.IsSuccess)
             return Result<StyleGuide>.Failure(response.Error!);
 
-        return ParseStyleGuide(response.Value!);
+        return ParseStyle(response.Value!);
     }
 
     /// <inheritdoc />
     public async Task<Result<List<ChapterBlueprint>>> GenerateChapterBlueprintsAsync(
         StructuralPlan structure,
-        PlotArchitecture plot,
-        CharacterBible characters,
-        WorldBible world,
-        StyleGuide style,
+        PlotArchitecture plotArchitecture,
+        CharacterBible characterBible,
+        WorldBible worldBible,
+        StyleGuide styleGuide,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Generating chapter blueprints");
@@ -361,14 +363,16 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
 
         foreach (var act in structure.Acts)
         {
-            foreach (var chapterDef in act.Chapters)
+            // Get chapters for this act based on StartChapter and EndChapter
+            var actChapters = structure.Chapters.Where(c => c.ChapterNumber >= act.StartChapter && c.ChapterNumber <= act.EndChapter);
+            foreach (var chapterDef in actChapters)
             {
                 var prompt = BuildChapterBlueprintPrompt(
-                    chapterNumber, chapterDef, act, structure, plot, characters, world, style);
+                    chapterNumber, chapterDef, act, structure, plotArchitecture, characterBible, worldBible, styleGuide);
 
                 var response = await _aiService.GenerateAsync(
                     prompt,
-                    new GenerationOptions { Temperature = 0.6, MaxTokens = 3000, ResponseFormat = "json" },
+                    new CoreGenerationOptions { Temperature = 0.6, MaxTokens = 3000, ResponseFormat = "json" },
                     cancellationToken);
 
                 if (response.IsSuccess)
@@ -397,13 +401,11 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
     {
         _logger.LogInformation("Regenerating blueprint section: {Section}", section);
 
-        // For now, return the blueprint unchanged
+        // For now, update the blueprint in place and return it
         // Full implementation would regenerate the specific section
-        return Result<BookBlueprint>.Success(blueprint with
-        {
-            ModifiedAt = DateTime.UtcNow,
-            Version = blueprint.Version + 1
-        });
+        blueprint.ModifiedAt = DateTime.UtcNow;
+        blueprint.Version++;
+        return Result<BookBlueprint>.Success(blueprint);
     }
 
     /// <inheritdoc />
@@ -422,17 +424,17 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
             missing.Add("Structural Plan");
         if (blueprint.Characters == null)
             missing.Add("Character Bible");
-        if (blueprint.ChapterBlueprints?.Any() != true)
+        if (blueprint.Structure.Chapters?.Any() != true)
             missing.Add("Chapter Blueprints");
 
         // Check chapter count
-        if (blueprint.ChapterBlueprints?.Count < 5)
+        if (blueprint.Structure.Chapters?.Count < 5)
         {
             warnings.Add("Book has fewer than 5 chapters - this is quite short");
         }
 
         // Check word count targets
-        var totalTargetWords = blueprint.ChapterBlueprints?.Sum(c => c.TargetWordCount) ?? 0;
+        var totalTargetWords = blueprint.Structure.Chapters?.Sum(c => c.TargetWordCount) ?? 0;
         if (totalTargetWords < 40000)
         {
             warnings.Add($"Total target word count ({totalTargetWords}) is below typical novel length");
@@ -458,33 +460,33 @@ public sealed class BlueprintGeneratorService : IBlueprintGeneratorService
         return $@"Create a detailed structural plan for this book:
 
 Title: {brief.WorkingTitle}
-Premise: {brief.Premise}
+Premise: {brief.ExpandedPremise}
 Logline: {brief.Logline}
 
 Generate a three-act structure in JSON format:
 {{
-  "totalTargetWordCount": number,
-  "acts": [
+  ""totalTargetWordCount"": number,
+  ""acts"": [
     {{
-      "actNumber": 1,
-      "name": "Act I: Setup",
-      "purpose": "description",
-      "percentageOfBook": 25,
-      "chapters": [
+  ""actNumber"": 1,
+  ""name"": ""Act I: Setup"",
+  ""purpose"": ""description"",
+  ""percentageOfBook"": 25,
+  ""chapters"": [
         {{
-          "chapterNumber": 1,
-          "title": "chapter title",
-          "purpose": "chapter purpose",
-          "targetWordCount": number,
-          "keyBeats": ["beat1", "beat2"]
+  ""chapterNumber"": 1,
+  ""title"": ""chapter title"",
+  ""purpose"": ""chapter purpose"",
+  ""targetWordCount"": number,
+  ""keyBeats"": [""beat1"", ""beat2""]
         }}
       ]
     }}
   ],
-  "pacingMap": {{
-    "description": "pacing strategy",
-    "tensionPeaks": [{{"chapter": 1, "description": "peak"}}],
-    "breatherMoments": [{{"chapter": 2, "description": "breather"}}]
+  ""pacingMap"": {{
+  ""description"": ""pacing strategy"",
+  ""tensionPeaks"": [{{""chapter"": 1, ""description"": ""peak""}}],
+  ""breatherMoments"": [{{""chapter"": 2, ""description"": ""breather""}}]
   }}
 }}
 
@@ -496,61 +498,61 @@ Create a complete structure with 15-25 chapters total.";
         return $@"Create a character bible for this book:
 
 Title: {brief.WorkingTitle}
-Premise: {brief.Premise}
-Chapters: {structure.Acts.SelectMany(a => a.Chapters).Count()}
+Premise: {brief.ExpandedPremise}
+Chapters: {structure.Chapters?.Count ?? 0}
 
-Generate characters in JSON format:
+Generate Characters in JSON format:
 {{
-  "mainCharacters": [
+  ""mainCharacters"": [
     {{
-      "fullName": "name",
-      "preferredName": "name",
-      "role": "Protagonist",
-      "archetype": "archetype",
-      "concept": "one-line concept",
-      "physical": {{
-        "age": "age",
-        "gender": "gender",
-        "height": "height",
-        "build": "build",
-        "hair": "hair",
-        "eyes": "eyes",
-        "skin": "skin",
-        "typicalAttire": "attire",
-        "bearing": "bearing",
-        "firstImpression": "impression"
+  ""fullName"": ""name"",
+  ""preferredName"": ""name"",
+  ""role"": ""Protagonist"",
+  ""archetype"": ""archetype"",
+  ""concept"": ""one-line concept"",
+  ""physical"": {{
+  ""age"": ""age"",
+  ""gender"": ""gender"",
+  ""height"": ""height"",
+  ""build"": ""build"",
+  ""hair"": ""hair"",
+  ""eyes"": ""eyes"",
+  ""skin"": ""skin"",
+  ""typicalAttire"": ""attire"",
+  ""bearing"": ""bearing"",
+  ""firstImpression"": ""impression""
       }},
-      "psychology": {{
-        "coreTraits": ["trait1", "trait2"],
-        "strengths": ["strength1"],
-        "weaknesses": ["weakness1"],
-        "fears": ["fear1"],
-        "desires": ["desire1"],
-        "moralAlignment": "alignment",
-        "emotionalPatterns": "patterns",
-        "primaryMotivation": "motivation"
+  ""psychology"": {{
+  ""coreTraits"": [""trait1"", ""trait2""],
+  ""strengths"": [""strength1""],
+  ""weaknesses"": [""weakness1""],
+  ""fears"": [""fear1""],
+  ""desires"": [""desire1""],
+  ""moralAlignment"": ""alignment"",
+  ""emotionalPatterns"": ""patterns"",
+  ""primaryMotivation"": ""motivation""
       }},
-      "arc": {{
-        "arcType": "positive/negative/flat",
-        "startingState": "state",
-        "endingState": "state",
-        "internalConflict": "conflict",
-        "externalConflict": "conflict",
-        "want": "external goal",
-        "need": "internal need",
-        "flaw": "main flaw",
-        "wound": "emotional wound",
-        "lieTheyBelieve": "the lie",
-        "truthTheyLearn": "the truth",
-        "ghost": "backstory event"
+  ""arc"": {{
+  ""arcType"": ""positive/negative/flat"",
+  ""startingState"": ""state"",
+  ""endingState"": ""state"",
+  ""internalConflict"": ""conflict"",
+  ""externalConflict"": ""conflict"",
+  ""want"": ""external goal"",
+  ""need"": ""internal need"",
+  ""flaw"": ""main flaw"",
+  ""wound"": ""emotional wound"",
+  ""lieTheyBelieve"": ""the lie"",
+  ""truthTheyLearn"": ""the truth"",
+  ""ghost"": ""backstory event""
       }},
-      "storyFunction": "function",
-      "thematicRole": "role"
+  ""storyFunction"": ""function"",
+  ""thematicRole"": ""role""
     }}
   ],
-  "supportingCharacters": [],
-  "arcMap": {{
-    "interweaveDescription": "how arcs connect"
+  ""supportingCharacters"": [],
+  ""arcMap"": {{
+  ""interweaveDescription"": ""how arcs connect""
   }}
 }}
 
@@ -562,120 +564,120 @@ Create compelling, three-dimensional characters.";
         return $@"Create a world bible for this book:
 
 Title: {brief.WorkingTitle}
-Premise: {brief.Premise}
+Premise: {brief.ExpandedPremise}
 
 Generate world details in JSON format:
 {{
-  "overview": {{
-    "name": "world name",
-    "description": "description",
-    "worldType": "type",
-    "scale": "city/country/world",
-    "atmosphere": "atmosphere",
-    "uniqueElements": "what makes it unique"
+  ""overview"": {{
+  ""name"": ""world name"",
+  ""description"": ""description"",
+  ""worldType"": ""type"",
+  ""scale"": ""city/country/world"",
+  ""atmosphere"": ""atmosphere"",
+  ""uniqueElements"": ""what makes it unique""
   }},
-  "locations": [
+  ""locations"": [
     {{
-      "name": "location name",
-      "type": "type",
-      "description": "description",
-      "significance": "story significance",
-      "atmosphere": "mood",
-      "sensoryDetails": [
-        {{"senseType": "sight", "description": "detail"}}
+  ""name"": ""location name"",
+  ""type"": ""type"",
+  ""description"": ""description"",
+  ""significance"": ""story significance"",
+  ""atmosphere"": ""mood"",
+  ""sensoryDetails"": [
+        {{""senseType"": ""sight"", ""description"": ""detail""}}
       ],
-      "keyFeatures": ["feature1"]
+  ""keyFeatures"": [""feature1""]
     }}
   ],
-  "timePeriod": {{
-    "era": "era name",
-    "description": "description",
-    "keyCharacteristics": ["characteristic1"],
-    "fashion": "fashion description",
-    "transportation": "transportation",
-    "communication": "communication"
+  ""timePeriod"": {{
+  ""era"": ""era name"",
+  ""description"": ""description"",
+  ""keyCharacteristics"": [""characteristic1""],
+  ""fashion"": ""fashion description"",
+  ""transportation"": ""transportation"",
+  ""communication"": ""communication""
   }},
-  "timeline": {{
-    "totalDuration": "duration",
-    "startPoint": "when story starts",
-    "endPoint": "when story ends"
+  ""timeline"": {{
+  ""totalDuration"": ""duration"",
+  ""startPoint"": ""when story starts"",
+  ""endPoint"": ""when story ends""
   }},
-  "sensoryPalette": {{
-    "sights": ["sight1"],
-    "sounds": ["sound1"],
-    "smells": ["smell1"]
+  ""sensoryPalette"": {{
+  ""sights"": [""sight1""],
+  ""sounds"": [""sound1""],
+  ""smells"": [""smell1""]
   }}
 }}
 
 Create an immersive, consistent world.";
     }
 
-    private string BuildPlotPrompt(ExpandedCreativeBrief brief, StructuralPlan structure, CharacterBible characters)
+    private string BuildPlotPrompt(ExpandedCreativeBrief brief, StructuralPlan structure, CharacterBible characterBible)
     {
         return $@"Create a plot architecture for this book:
 
 Title: {brief.WorkingTitle}
-Premise: {brief.Premise}
-Chapters: {structure.Acts.SelectMany(a => a.Chapters).Count()}
+Premise: {brief.ExpandedPremise}
+Chapters: {structure.Chapters?.Count ?? 0}
 
 Generate plot in JSON format:
 {{
-  "mainPlot": {{
-    "plotType": "type (Quest, Revenge, etc.)",
-    "centralConflict": "conflict",
-    "stakes": "stakes",
-    "stakesEscalation": "how stakes escalate",
-    "dramaticQuestion": "will they...?",
-    "incitingIncident": {{"name": "Inciting Incident", "chapterNumber": 1, "description": "what happens", "significance": "why it matters", "emotionalImpact": "impact", "consequences": "results"}},
-    "firstPlotPoint": {{"name": "First Plot Point", "chapterNumber": 3, "description": "what happens", "significance": "why it matters", "emotionalImpact": "impact", "consequences": "results"}},
-    "midpoint": {{"name": "Midpoint", "chapterNumber": 8, "description": "what happens", "significance": "why it matters", "emotionalImpact": "impact", "consequences": "results"}},
-    "secondPlotPoint": {{"name": "Second Plot Point", "chapterNumber": 12, "description": "what happens", "significance": "why it matters", "emotionalImpact": "impact", "consequences": "results"}},
-    "darkNight": {{"name": "Dark Night", "chapterNumber": 13, "description": "what happens", "significance": "why it matters", "emotionalImpact": "impact", "consequences": "results"}},
-    "climax": {{"name": "Climax", "chapterNumber": 15, "description": "what happens", "significance": "why it matters", "emotionalImpact": "impact", "consequences": "results"}},
-    "resolution": {{"name": "Resolution", "chapterNumber": 16, "description": "what happens", "significance": "why it matters", "emotionalImpact": "impact", "consequences": "results"}},
-    "antagonisticForce": {{
-      "type": "person/nature/society/self",
-      "description": "description",
-      "goals": "goals",
-      "escalation": "how they escalate"
+  ""mainPlot"": {{
+  ""plotType"": ""type (Quest, Revenge, etc.)"",
+  ""centralConflict"": ""conflict"",
+  ""stakes"": ""stakes"",
+  ""stakesEscalation"": ""how stakes escalate"",
+  ""dramaticQuestion"": ""will they...?"",
+  ""incitingIncident"": {{""name"": ""Inciting Incident"", ""chapterNumber"": 1, ""description"": ""what happens"", ""significance"": ""why it matters"", ""emotionalImpact"": ""impact"", ""consequences"": ""results""}},
+  ""firstPlotPoint"": {{""name"": ""First Plot Point"", ""chapterNumber"": 3, ""description"": ""what happens"", ""significance"": ""why it matters"", ""emotionalImpact"": ""impact"", ""consequences"": ""results""}},
+  ""midpoint"": {{""name"": ""Midpoint"", ""chapterNumber"": 8, ""description"": ""what happens"", ""significance"": ""why it matters"", ""emotionalImpact"": ""impact"", ""consequences"": ""results""}},
+  ""secondPlotPoint"": {{""name"": ""Second Plot Point"", ""chapterNumber"": 12, ""description"": ""what happens"", ""significance"": ""why it matters"", ""emotionalImpact"": ""impact"", ""consequences"": ""results""}},
+  ""darkNight"": {{""name"": ""Dark Night"", ""chapterNumber"": 13, ""description"": ""what happens"", ""significance"": ""why it matters"", ""emotionalImpact"": ""impact"", ""consequences"": ""results""}},
+  ""climax"": {{""name"": ""Climax"", ""chapterNumber"": 15, ""description"": ""what happens"", ""significance"": ""why it matters"", ""emotionalImpact"": ""impact"", ""consequences"": ""results""}},
+  ""resolution"": {{""name"": ""Resolution"", ""chapterNumber"": 16, ""description"": ""what happens"", ""significance"": ""why it matters"", ""emotionalImpact"": ""impact"", ""consequences"": ""results""}},
+  ""antagonisticForce"": {{
+  ""type"": ""person/nature/society/self"",
+  ""description"": ""description"",
+  ""goals"": ""goals"",
+  ""escalation"": ""how they escalate""
     }}
   }},
-  "subplots": [
+  ""subplots"": [
     {{
-      "name": "subplot name",
-      "type": "romance/mystery/etc",
-      "description": "description",
-      "conflict": "conflict",
-      "stakes": "stakes",
-      "mainPlotConnection": "how it connects",
-      "startChapter": 2,
-      "endChapter": 15,
-      "resolution": "resolution",
-      "thematicPurpose": "purpose"
+  ""name"": ""subplot name"",
+  ""type"": ""romance/mystery/etc"",
+  ""description"": ""description"",
+  ""conflict"": ""conflict"",
+  ""stakes"": ""stakes"",
+  ""mainPlotConnection"": ""how it connects"",
+  ""startChapter"": 2,
+  ""endChapter"": 15,
+  ""resolution"": ""resolution"",
+  ""thematicPurpose"": ""purpose""
     }}
   ],
-  "thematicStructure": {{
-    "centralTheme": "theme",
-    "themeStatement": "what the book argues",
-    "counterArgument": "opposing view",
-    "themeProof": "how theme is proven"
+  ""thematicStructure"": {{
+  ""centralTheme"": ""theme"",
+  ""themeStatement"": ""what the book argues"",
+  ""counterArgument"": ""opposing view"",
+  ""themeProof"": ""how theme is proven""
   }},
-  "setupPayoffs": {{
-    "pairs": [
+  ""setupPayoffs"": {{
+  ""pairs"": [
       {{
-        "element": "element name",
-        "description": "description",
-        "type": "Foreshadowing",
-        "setupChapter": 2,
-        "setupDescription": "setup",
-        "payoffChapter": 14,
-        "payoffDescription": "payoff",
-        "importanceLevel": 8
+  ""element"": ""element name"",
+  ""description"": ""description"",
+  ""type"": ""Foreshadowing"",
+  ""setupChapter"": 2,
+  ""setupDescription"": ""setup"",
+  ""payoffChapter"": 14,
+  ""payoffDescription"": ""payoff"",
+  ""importanceLevel"": 8
       }}
     ]
   }},
-  "tensionMap": {{
-    "strategy": "tension strategy"
+  ""tensionMap"": {{
+  ""strategy"": ""tension strategy""
   }}
 }}
 
@@ -687,99 +689,99 @@ Create a compelling, well-structured plot.";
         return $@"Create a style guide for this book:
 
 Title: {brief.WorkingTitle}
-Premise: {brief.Premise}
+Premise: {brief.ExpandedPremise}
 
 Generate style guide in JSON format:
 {{
-  "voice": {{
-    "description": "overall voice",
-    "toneKeywords": ["keyword1", "keyword2"],
-    "narrativePersonality": "personality",
-    "narrativeDistance": "close/medium/distant",
-    "narratorReliability": "reliable/unreliable",
-    "emotionalTransparency": "transparency level",
-    "philosophicalDepth": "depth level"
+  ""voice"": {{
+  ""description"": ""overall voice"",
+  ""toneKeywords"": [""keyword1"", ""keyword2""],
+  ""narrativePersonality"": ""personality"",
+  ""narrativeDistance"": ""close/medium/distant"",
+  ""narratorReliability"": ""reliable/unreliable"",
+  ""emotionalTransparency"": ""transparency level"",
+  ""philosophicalDepth"": ""depth level""
   }},
-  "prose": {{
-    "sentenceLength": "varied/short/long",
-    "sentenceVariety": "guidance",
-    "paragraphLength": "guidance",
-    "vocabularyLevel": "level",
-    "imageryDensity": "sparse/moderate/rich",
-    "rhythm": "rhythm description",
-    "showVsTell": "guidance",
-    "filteringWords": "avoid/minimal/allowed",
-    "adverbUsage": "guidance",
-    "passiveVoice": "guidance",
-    "metaphors": {{
-      "frequency": "frequency",
-      "preferredTypes": ["type1"]
+  ""prose"": {{
+  ""sentenceLength"": ""varied/short/long"",
+  ""sentenceVariety"": ""guidance"",
+  ""paragraphLength"": ""guidance"",
+  ""vocabularyLevel"": ""level"",
+  ""imageryDensity"": ""sparse/moderate/rich"",
+  ""rhythm"": ""rhythm description"",
+  ""showVsTell"": ""guidance"",
+  ""filteringWords"": ""avoid/minimal/allowed"",
+  ""adverbUsage"": ""guidance"",
+  ""passiveVoice"": ""guidance"",
+  ""metaphors"": {{
+  ""frequency"": ""frequency"",
+  ""preferredTypes"": [""type1""]
     }}
   }},
-  "dialogue": {{
-    "dialogueRatio": "percentage",
-    "tags": {{
-      "preferredSimpleTags": ["said", "asked"],
-      "actionBeatUsage": "guidance",
-      "tagPlacement": "guidance",
-      "saidFrequency": "guidance"
+  ""dialogue"": {{
+  ""dialogueRatio"": ""percentage"",
+  ""tags"": {{
+  ""preferredSimpleTags"": [""said"", ""asked""],
+  ""actionBeatUsage"": ""guidance"",
+  ""tagPlacement"": ""guidance"",
+  ""saidFrequency"": ""guidance""
     }},
-    "subtextLevel": "minimal/moderate/heavy",
-    "interruptionStyle": "style",
-    "accentHandling": "guidance",
-    "expositionHandling": "guidance",
-    "internalMonologue": "style"
+  ""subtextLevel"": ""minimal/moderate/heavy"",
+  ""interruptionStyle"": ""style"",
+  ""accentHandling"": ""guidance"",
+  ""expositionHandling"": ""guidance"",
+  ""internalMonologue"": ""style""
   }},
-  "description": {{
-    "settingDepth": "depth",
-    "characterDescriptionApproach": "approach",
-    "sensoryBalance": {{
-      "visual": 8,
-      "auditory": 6,
-      "olfactory": 4,
-      "tactile": 5,
-      "gustatory": 2
+  ""description"": {{
+  ""settingDepth"": ""depth"",
+  ""characterDescriptionApproach"": ""approach"",
+  ""sensoryBalance"": {{
+  ""visual"": 8,
+  ""auditory"": 6,
+  ""olfactory"": 4,
+  ""tactile"": 5,
+  ""gustatory"": 2
     }},
-    "descriptionPacing": "guidance",
-    "actionIntegration": "guidance",
-    "worldBuildingIntegration": "guidance"
+  ""descriptionPacing"": ""guidance"",
+  ""actionIntegration"": ""guidance"",
+  ""worldBuildingIntegration"": ""guidance""
   }},
-  "action": {{
-    "sentenceStructure": "structure",
-    "detailLevel": "level",
-    "choreographyClarity": "clarity",
-    "violenceLevel": "level",
-    "emotionalAnchoring": "anchoring",
-    "timeManipulation": "manipulation"
+  ""action"": {{
+  ""sentenceStructure"": ""structure"",
+  ""detailLevel"": ""level"",
+  ""choreographyClarity"": ""clarity"",
+  ""violenceLevel"": ""level"",
+  ""emotionalAnchoring"": ""anchoring"",
+  ""timeManipulation"": ""manipulation""
   }},
-  "emotional": {{
-    "emotionalDepth": "depth",
-    "vulnerabilityLevel": "level",
-    "physicalManifestation": "guidance",
-    "restraintVsRelease": "balance",
-    "romanticContentLevel": "level"
+  ""emotional"": {{
+  ""emotionalDepth"": ""depth"",
+  ""vulnerabilityLevel"": ""level"",
+  ""physicalManifestation"": ""guidance"",
+  ""restraintVsRelease"": ""balance"",
+  ""romanticContentLevel"": ""level""
   }},
-  "pacing": {{
-    "overall": "overall pacing",
-    "sceneTransitions": "transition style",
-    "chapterEndings": "ending style",
-    "chapterOpenings": "opening style",
-    "cliffhangerUsage": "usage",
-    "breatherScenes": "guidance"
+  ""pacing"": {{
+  ""overall"": ""overall pacing"",
+  ""sceneTransitions"": ""transition style"",
+  ""chapterEndings"": ""ending style"",
+  ""chapterOpenings"": ""opening style"",
+  ""cliffhangerUsage"": ""usage"",
+  ""breatherScenes"": ""guidance""
   }},
-  "genreConventions": {{
-    "primaryGenre": "genre",
-    "conventionsToFollow": [],
-    "conventionsToSubvert": [],
-    "readerExpectations": [],
-    "uniqueTwists": []
+  ""genreConventions"": {{
+  ""primaryGenre"": ""genre"",
+  ""conventionsToFollow"": [],
+  ""conventionsToSubvert"": [],
+  ""readerExpectations"": [],
+  ""uniqueTwists"": []
   }},
-  "formatting": {{
-    "sceneBreakMarker": "***",
-    "thoughtFormatting": "italics",
-    "emphasisFormatting": "italics",
-    "flashbackIndication": "indication style",
-    "timeSkipIndication": "indication style"
+  ""formatting"": {{
+  ""sceneBreakMarker"": ""***"",
+  ""thoughtFormatting"": ""italics"",
+  ""emphasisFormatting"": ""italics"",
+  ""flashbackIndication"": ""indication style"",
+  ""timeSkipIndication"": ""indication style""
   }}
 }}
 
@@ -791,10 +793,10 @@ Create a comprehensive, consistent style guide.";
         object chapterDef,
         ActDefinition act,
         StructuralPlan structure,
-        PlotArchitecture plot,
-        CharacterBible characters,
-        WorldBible world,
-        StyleGuide style)
+        PlotArchitecture plotArchitecture,
+        CharacterBible characterBible,
+        WorldBible worldBible,
+        StyleGuide styleGuide)
     {
         return $@"Create a detailed blueprint for Chapter {chapterNumber}.
 
@@ -803,48 +805,48 @@ Target Word Count: 3000-4000 words
 
 Generate chapter blueprint in JSON format:
 {{
-  "title": "chapter title",
-  "purpose": "chapter purpose",
-  "targetWordCount": 3500,
-  "minWordCount": 2975,
-  "maxWordCount": 4025,
-  "pov": "character name",
-  "tone": "Light|Serious|Dark|etc",
-  "pacingIntensity": "Slow|Moderate|Fast|etc",
-  "emotionalJourney": {{
-    "startEmotion": "starting emotion",
-    "endEmotion": "ending emotion",
-    "arc": "emotional arc description"
+  ""title"": ""chapter title"",
+  ""purpose"": ""chapter purpose"",
+  ""targetWordCount"": 3500,
+  ""minWordCount"": 2975,
+  ""maxWordCount"": 4025,
+  ""pov"": ""character name"",
+  ""tone"": ""Light|Serious|Dark|etc"",
+  ""pacingIntensity"": ""Slow|Moderate|Fast|etc"",
+  ""emotionalJourney"": {{
+  ""startEmotion"": ""starting emotion"",
+  ""endEmotion"": ""ending emotion"",
+  ""arc"": ""emotional arc description""
   }},
-  "scenes": [
+  ""scenes"": [
     {{
-      "sceneNumber": 1,
-      "type": "Action|Dialogue|Introspection|etc",
-      "purpose": "scene purpose",
-      "targetWordCount": 1000,
-      "setting": "where it takes place",
-      "charactersPresent": ["character1"],
-      "summary": "what happens",
-      "sensoryFocus": ["sight", "sound"],
-      "emotionalBeat": "emotional moment",
-      "conflictLevel": 5
+  ""sceneNumber"": 1,
+  ""type"": ""Action|Dialogue|Introspection|etc"",
+  ""purpose"": ""scene purpose"",
+  ""targetWordCount"": 1000,
+  ""setting"": ""where it takes place"",
+  ""charactersPresent"": [""character1""],
+  ""summary"": ""what happens"",
+  ""sensoryFocus"": [""sight"", ""sound""],
+  ""emotionalBeat"": ""emotional moment"",
+  ""conflictLevel"": 5
     }}
   ],
-  "mustInclude": ["element1"],
-  "mustAvoid": ["element1"],
-  "characterAppearances": ["character1"],
-  "keyDialogueBeats": [
+  ""mustInclude"": [""element1""],
+  ""mustAvoid"": [""element1""],
+  ""characterAppearances"": [""character1""],
+  ""keyDialogueBeats"": [
     {{
-      "characters": ["char1", "char2"],
-      "topic": "what they discuss",
-      "subtext": "underlying meaning",
-      "outcome": "result"
+  ""CharacterBible"": [""char1"", ""char2""],
+  ""topic"": ""what they discuss"",
+  ""subtext"": ""underlying meaning"",
+  ""outcome"": ""result""
     }}
   ],
-  "chapterEnding": {{
-    "type": "Cliffhanger|Resolution|Revelation|etc",
-    "description": "how chapter ends",
-    "hookForNext": "what makes reader continue"
+  ""chapterEnding"": {{
+  ""type"": ""Cliffhanger|Resolution|Revelation|etc"",
+  ""description"": ""how chapter ends"",
+  ""hookForNext"": ""what makes reader continue""
   }}
 }}
 
@@ -869,7 +871,7 @@ Create a detailed, actionable chapter blueprint.";
                     {
                         ActNumber = 1,
                         Name = "Act I: Setup",
-                        Purpose = "Introduce characters and world",
+                        Purpose = "Introduce CharacterBible and world",
                         PercentageOfBook = 25,
                         Chapters = GenerateDefaultChapters(1, 5)
                     },
@@ -919,7 +921,7 @@ Create a detailed, actionable chapter blueprint.";
         return chapters;
     }
 
-    private Result<CharacterBible> ParseCharacterBible(string response)
+    private Result<CharacterBible> ParseCharacters(string response)
     {
         // Return a basic structure
         return Result<CharacterBible>.Success(new CharacterBible
@@ -931,7 +933,7 @@ Create a detailed, actionable chapter blueprint.";
         });
     }
 
-    private Result<WorldBible> ParseWorldBible(string response)
+    private Result<WorldBible> ParseWorld(string response)
     {
         return Result<WorldBible>.Success(new WorldBible
         {
@@ -962,7 +964,7 @@ Create a detailed, actionable chapter blueprint.";
         });
     }
 
-    private Result<PlotArchitecture> ParsePlotArchitecture(string response)
+    private Result<PlotArchitecture> ParsePlot(string response)
     {
         return Result<PlotArchitecture>.Success(new PlotArchitecture
         {
@@ -1016,7 +1018,7 @@ Create a detailed, actionable chapter blueprint.";
         };
     }
 
-    private Result<StyleGuide> ParseStyleGuide(string response)
+    private Result<StyleGuide> ParseStyle(string response)
     {
         return Result<StyleGuide>.Success(new StyleGuide
         {
@@ -1126,3 +1128,6 @@ Create a detailed, actionable chapter blueprint.";
 
     #endregion
 }
+
+
+

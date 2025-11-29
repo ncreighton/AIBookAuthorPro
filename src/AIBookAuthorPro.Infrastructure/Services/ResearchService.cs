@@ -7,6 +7,7 @@ using System.Text.Json;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Enums;
 using AIBookAuthorPro.Core.Interfaces;
+using AIBookAuthorPro.Core.Models.AI;
 using AIBookAuthorPro.Core.Models.Research;
 using Microsoft.Extensions.Logging;
 
@@ -410,7 +411,9 @@ Return ONLY the JSON object, no other text.";
             {
                 Title = result.Title,
                 Content = result.Content,
-                Category = result.Type.ToString(),
+                Category = Enum.TryParse<Core.Models.ResearchCategory>(result.Type.ToString(), out var category) 
+                    ? category 
+                    : Core.Models.ResearchCategory.General,
                 Source = result.SourceUrl,
                 Tags = result.KeyFacts
             };

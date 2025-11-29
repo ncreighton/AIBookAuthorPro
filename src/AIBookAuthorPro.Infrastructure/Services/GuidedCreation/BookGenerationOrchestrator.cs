@@ -8,7 +8,11 @@ using AIBookAuthorPro.Application.Services.GuidedCreation;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
 using AIBookAuthorPro.Core.Services;
+using CoreGenerationOptions = AIBookAuthorPro.Core.Services.GenerationOptions;
 using Microsoft.Extensions.Logging;
+
+using GenerationOptions = AIBookAuthorPro.Application.Services.GuidedCreation.GenerationOptions;
+using DetailedGenerationProgress = AIBookAuthorPro.Application.Services.GuidedCreation.DetailedGenerationProgress;
 
 namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
 
@@ -46,7 +50,7 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
     public async Task<Result<GenerationSession>> StartFullGenerationAsync(
         BookBlueprint blueprint,
         GenerationOptions options,
-        IProgress<GenerationProgress>? progress = null,
+        IProgress<DetailedGenerationProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
         if (blueprint == null)
@@ -72,13 +76,13 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
                 Status = GenerationSessionStatus.InProgress,
                 StartedAt = DateTime.UtcNow,
                 Configuration = config,
-                TotalChapters = blueprint.ChapterBlueprints?.Count ?? 0,
-                GeneratedChapters = new List<GeneratedChapter>()
+                TotalChapters = blueprint.Structure.Chapters?.Count ?? 0,
+                Chapters = new List<GeneratedChapter>()
             };
 
             _sessions[session.Id] = session;
 
-            var chapterBlueprints = blueprint.ChapterBlueprints?
+            var chapterBlueprints = blueprint.Structure.Chapters?
                 .OrderBy(c => c.ChapterNumber)
                 .ToList() ?? new List<ChapterBlueprint>();
 
@@ -110,7 +114,7 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
                 }
 
                 var progressPercent = (double)session.CompletedChapters / session.TotalChapters * 100;
-                progress?.Report(new GenerationProgress
+                progress?.Report(new DetailedGenerationProgress
                 {
                     OverallPercentage = progressPercent,
                     CurrentChapter = chapterNumber,
@@ -118,31 +122,31 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
                     CurrentOperation = $"Generating Chapter {chapterNumber}: {chapterBlueprint.Title}",
                     Status = GenerationProgressStatus.Generating,
                     ElapsedTime = stopwatch.Elapsed,
-                    WordsGenerated = session.TotalWordsGenerated
+                    WordsGenerated = session.GeneratedWordCount
                 });
 
                 var chapterResult = await GenerateChapterInternalAsync(
-                    chapterNumber, blueprint, session.GeneratedChapters, config, cancellationToken);
+                    chapterNumber, blueprint, session.Chapters, config, cancellationToken);
 
                 if (chapterResult.IsFailure)
                 {
                     _logger.LogWarning("Failed to generate Chapter {Chapter}: {Error}",
                         chapterNumber, chapterResult.Error);
 
-                    session.GeneratedChapters.Add(new GeneratedChapter
+                    session.Chapters.Add(new GeneratedChapter
                     {
                         ChapterNumber = chapterNumber,
                         Title = chapterBlueprint.Title,
                         Status = ChapterGenerationStatus.Failed,
                         FailureReason = chapterResult.Error
                     });
-                    session.FailedChapters++;
+                    session.FailedChapters.Add(chapterNumber);
                 }
                 else
                 {
-                    session.GeneratedChapters.Add(chapterResult.Value!);
+                    session.Chapters.Add(chapterResult.Value!);
                     session.CompletedChapters++;
-                    session.TotalWordsGenerated += chapterResult.Value!.WordCount;
+                    session.GeneratedWordCount += chapterResult.Value!.WordCount;
                 }
 
                 session.CurrentChapter = chapterNumber;
@@ -152,17 +156,17 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
             stopwatch.Stop();
             session.CompletedAt = DateTime.UtcNow;
             session.Status = _isCancelled ? GenerationSessionStatus.Cancelled :
-                            session.FailedChapters > 0 ? GenerationSessionStatus.CompletedWithErrors :
+                            session.FailedChapters.Count > 0 ? GenerationSessionStatus.CompletedWithErrors :
                             GenerationSessionStatus.Completed;
 
-            if (session.GeneratedChapters.Any(c => c.QualityReport != null))
+            if (session.Chapters.Any(c => c.QualityReport != null))
             {
-                session.AverageQualityScore = session.GeneratedChapters
+                session.AverageQualityScore = session.Chapters
                     .Where(c => c.QualityReport != null)
                     .Average(c => c.QualityReport!.OverallScore);
             }
 
-            progress?.Report(new GenerationProgress
+            progress?.Report(new DetailedGenerationProgress
             {
                 OverallPercentage = 100,
                 CurrentChapter = session.TotalChapters,
@@ -170,11 +174,11 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
                 CurrentOperation = "Generation complete",
                 Status = GenerationProgressStatus.Complete,
                 ElapsedTime = stopwatch.Elapsed,
-                WordsGenerated = session.TotalWordsGenerated
+                WordsGenerated = session.GeneratedWordCount
             });
 
             _logger.LogInformation("Book generation completed: {Completed}/{Total} chapters, {Words:N0} words",
-                session.CompletedChapters, session.TotalChapters, session.TotalWordsGenerated);
+                session.CompletedChapters, session.TotalChapters, session.GeneratedWordCount);
 
             return Result<GenerationSession>.Success(session);
         }
@@ -203,7 +207,7 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
         return await GenerateChapterInternalAsync(
             chapterNumber,
             session.Blueprint,
-            session.GeneratedChapters,
+            session.Chapters,
             session.Configuration ?? new GenerationConfiguration(),
             cancellationToken);
     }
@@ -222,7 +226,7 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
     /// <inheritdoc />
     public Task<Result<GenerationSession>> ResumeGenerationAsync(
         Guid sessionId,
-        IProgress<GenerationProgress>? progress = null,
+        IProgress<DetailedGenerationProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
         lock (_stateLock)
@@ -260,8 +264,8 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
         if (!_sessions.TryGetValue(sessionId, out var session))
             return Result<GeneratedChapter>.Failure("Session not found");
 
-        var existingIndex = session.GeneratedChapters.FindIndex(c => c.ChapterNumber == chapterNumber);
-        var previousChapters = session.GeneratedChapters
+        var existingIndex = session.Chapters.FindIndex(c => c.ChapterNumber == chapterNumber);
+        var previousChapters = session.Chapters
             .Where(c => c.ChapterNumber < chapterNumber)
             .ToList();
 
@@ -274,7 +278,7 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
 
         if (result.IsSuccess && existingIndex >= 0)
         {
-            session.GeneratedChapters[existingIndex] = result.Value!;
+            session.Chapters[existingIndex] = result.Value!;
         }
 
         return result;
@@ -289,7 +293,7 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
         if (!_sessions.TryGetValue(sessionId, out var session))
             return Task.FromResult(Result.Failure("Session not found"));
 
-        var chapter = session.GeneratedChapters.FirstOrDefault(c => c.ChapterNumber == chapterNumber);
+        var chapter = session.Chapters.FirstOrDefault(c => c.ChapterNumber == chapterNumber);
         if (chapter == null)
             return Task.FromResult(Result.Failure("Chapter not found"));
 
@@ -307,7 +311,7 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
         if (!_sessions.TryGetValue(sessionId, out var session))
             return Result<GeneratedChapter>.Failure("Session not found");
 
-        var chapter = session.GeneratedChapters.FirstOrDefault(c => c.ChapterNumber == chapterNumber);
+        var chapter = session.Chapters.FirstOrDefault(c => c.ChapterNumber == chapterNumber);
         if (chapter == null)
             return Result<GeneratedChapter>.Failure("Chapter not found");
 
@@ -316,26 +320,22 @@ public sealed class BookGenerationOrchestrator : IBookGenerationOrchestrator
 Instructions: {instructions}
 
 Current content:
-{chapter.Content?.Text}
+{chapter.Content}
 
 Provide the revised chapter:";
 
         var result = await _aiService.GenerateAsync(
             prompt,
-            new GenerationOptions { Temperature = 0.6, MaxTokens = (chapter.WordCount * 2) },
+            new CoreGenerationOptions { Temperature = 0.6, MaxTokens = (chapter.WordCount * 2) },
             cancellationToken);
 
         if (result.IsFailure)
             return Result<GeneratedChapter>.Failure(result.Error!);
 
-        chapter.Content = new ChapterContent
-        {
-            Text = result.Value!,
-            FormattedText = result.Value!,
-            Version = (chapter.Content?.Version ?? 0) + 1
-        };
+        chapter.Content = result.Value!;
         chapter.WordCount = CountWords(result.Value!);
         chapter.RevisionCount++;
+        chapter.Version++;
         chapter.Status = ChapterGenerationStatus.Generated;
 
         return Result<GeneratedChapter>.Success(chapter);
@@ -365,14 +365,14 @@ Provide the revised chapter:";
             SessionId = sessionId,
             TotalChapters = session.TotalChapters,
             CompletedChapters = session.CompletedChapters,
-            TotalWordsGenerated = session.TotalWordsGenerated,
+            TotalWordsGenerated = session.GeneratedWordCount,
             AverageQualityScore = session.AverageQualityScore,
             TotalTimeElapsed = (session.CompletedAt ?? DateTime.UtcNow) - session.StartedAt,
-            ChapterStats = session.GeneratedChapters.Select(c => new ChapterStatistics
+            ChapterStats = session.Chapters.Select(c => new ChapterStatistics
             {
                 ChapterNumber = c.ChapterNumber,
                 WordCount = c.WordCount,
-                QualityScore = c.QualityScore,
+                QualityScore = c.QualityScore ?? 0.0,
                 Status = c.Status,
                 IssuesFound = c.QualityReport?.TotalIssueCount ?? 0
             }).ToList()
@@ -395,15 +395,15 @@ Provide the revised chapter:";
 
         try
         {
-            var chapterBlueprint = blueprint.ChapterBlueprints?
+            var chapterBlueprint = blueprint.Structure.Chapters?
                 .FirstOrDefault(c => c.ChapterNumber == chapterNumber);
 
             if (chapterBlueprint == null)
                 return Result<GeneratedChapter>.Failure($"No blueprint for chapter {chapterNumber}");
 
             // Build context
-            var contextResult = await _contextBuilder.BuildContextAsync(
-                chapterNumber, blueprint, previousChapters, config, cancellationToken);
+            var contextResult = await _contextBuilder.BuildChapterContextAsync(
+                blueprint, chapterNumber, previousChapters, new ContextBuildingOptions(), cancellationToken);
 
             if (contextResult.IsFailure)
                 return Result<GeneratedChapter>.Failure($"Context build failed: {contextResult.Error}");
@@ -416,7 +416,7 @@ Provide the revised chapter:";
 
             var generationResponse = await _aiService.GenerateAsync(
                 generationPrompt,
-                new GenerationOptions
+                new CoreGenerationOptions
                 {
                     Temperature = config.AISettings?.Temperature ?? 0.8,
                     MaxTokens = targetTokens,
@@ -435,12 +435,7 @@ Provide the revised chapter:";
                 Id = Guid.NewGuid(),
                 ChapterNumber = chapterNumber,
                 Title = chapterBlueprint.Title,
-                Content = new ChapterContent
-                {
-                    Text = content,
-                    FormattedText = content,
-                    Version = 1
-                },
+                Content = content,
                 WordCount = wordCount,
                 Status = ChapterGenerationStatus.Generated,
                 GeneratedAt = DateTime.UtcNow,
@@ -450,10 +445,10 @@ Provide the revised chapter:";
             // Quality evaluation
             var qualityContext = new QualityEvaluationContext
             {
-                Blueprint = blueprint,
-                CharacterBible = blueprint.CharacterBible,
-                WorldBible = blueprint.WorldBible,
-                StyleGuide = blueprint.StyleGuide,
+                Blueprint = chapterBlueprint,
+                CharacterBible = blueprint.Characters,
+                World = blueprint.World,
+                Style = blueprint.Style,
                 PreviousChapters = previousChapters
             };
 
@@ -463,14 +458,14 @@ Provide the revised chapter:";
             if (qualityResult.IsSuccess)
             {
                 chapter.QualityReport = qualityResult.Value;
-                chapter.QualityScore = qualityResult.Value!.OverallScore;
+                // QualityScore is computed from QualityReport, no need to set it
             }
 
             // Continuity check
             var continuityContext = new ContinuityVerificationContext
             {
-                CharacterBible = blueprint.CharacterBible,
-                WorldBible = blueprint.WorldBible,
+                CharacterBible = blueprint.Characters,
+                World = blueprint.World,
                 PreviousChapters = previousChapters
             };
 
@@ -483,12 +478,16 @@ Provide the revised chapter:";
             }
 
             // Extract character states
-            if (blueprint.CharacterBible != null)
+            if (blueprint.Characters != null)
             {
+                var characterIds = chapterBlueprint.CharacterAppearances?
+                    .Select(ca => ca.CharacterId)
+                    .ToList() ?? new List<Guid>();
+                    
                 var statesResult = await _continuityService.ExtractCharacterStatesAsync(
-                    content, blueprint.CharacterBible, cancellationToken);
+                    content, characterIds, blueprint.Characters, cancellationToken);
 
-                if (statesResult.IsSuccess)
+                if (statesResult.IsSuccess && statesResult.Value != null)
                 {
                     chapter.CharacterStatesAtEnd = statesResult.Value;
                 }
@@ -546,3 +545,6 @@ Now write the complete chapter. Begin:";
 
     #endregion
 }
+
+
+

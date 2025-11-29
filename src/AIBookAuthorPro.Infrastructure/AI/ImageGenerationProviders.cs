@@ -49,8 +49,7 @@ public sealed class DallEImageProvider : IImageGenerationProvider
             _logger.LogDebug("Generating image with DALL-E: {Prompt}", 
                 request.Prompt.Length > 100 ? request.Prompt[..100] + "..." : request.Prompt);
 
-            var settings = await _settingsService.GetSettingsAsync(cancellationToken);
-            var apiKey = settings.OpenAIApiKey;
+            var apiKey = _settingsService.GetApiKey("OpenAI");
 
             if (string.IsNullOrEmpty(apiKey))
             {
@@ -213,8 +212,7 @@ public sealed class StabilityAIImageProvider : IImageGenerationProvider
             _logger.LogDebug("Generating image with Stability AI: {Prompt}", 
                 request.Prompt.Length > 100 ? request.Prompt[..100] + "..." : request.Prompt);
 
-            var settings = await _settingsService.GetSettingsAsync(cancellationToken);
-            var apiKey = settings.StabilityAIApiKey;
+            var apiKey = _settingsService.GetApiKey("StabilityAI");
 
             if (string.IsNullOrEmpty(apiKey))
             {

@@ -19,7 +19,7 @@ public sealed class ChapterBlueprint
     /// <summary>
     /// Chapter number in the book (0 for prologue, -1 for epilogue).
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Display number (may differ from internal number).
@@ -35,7 +35,7 @@ public sealed class ChapterBlueprint
     /// <summary>
     /// Chapter title.
     /// </summary>
-    public required string Title { get; init; }
+    public string Title { get; init; } = string.Empty;
 
     /// <summary>
     /// Alternative titles considered.
@@ -45,44 +45,54 @@ public sealed class ChapterBlueprint
     /// <summary>
     /// Act this chapter belongs to.
     /// </summary>
-    public required int ActNumber { get; init; }
+    public int ActNumber { get; init; }
 
     // ================== CONTENT SPECIFICATION ==================
 
     /// <summary>
     /// Target word count.
     /// </summary>
-    public required int TargetWordCount { get; init; }
+    public int TargetWordCount { get; init; }
 
     /// <summary>
-    /// Minimum acceptable word count.
+    /// Minimum acceptable word count (defaults to 85% of target).
     /// </summary>
-    public int MinWordCount => (int)(TargetWordCount * 0.85);
+    public int MinWordCount { get; init; }
 
     /// <summary>
-    /// Maximum acceptable word count.
+    /// Computed minimum if not set.
     /// </summary>
-    public int MaxWordCount => (int)(TargetWordCount * 1.15);
+    public int EffectiveMinWordCount => MinWordCount > 0 ? MinWordCount : (int)(TargetWordCount * 0.85);
+
+    /// <summary>
+    /// Maximum acceptable word count (defaults to 115% of target).
+    /// </summary>
+    public int MaxWordCount { get; init; }
+
+    /// <summary>
+    /// Computed maximum if not set.
+    /// </summary>
+    public int EffectiveMaxWordCount => MaxWordCount > 0 ? MaxWordCount : (int)(TargetWordCount * 1.15);
 
     /// <summary>
     /// Primary purpose of this chapter.
     /// </summary>
-    public required string Purpose { get; init; }
+    public string Purpose { get; init; } = string.Empty;
 
     /// <summary>
     /// Detailed chapter summary (what happens).
     /// </summary>
-    public required string Summary { get; init; }
+    public string Summary { get; init; } = string.Empty;
 
     /// <summary>
     /// Opening hook - how the chapter should begin.
     /// </summary>
-    public required string OpeningHook { get; init; }
+    public string OpeningHook { get; init; } = string.Empty;
 
     /// <summary>
     /// Closing hook - how the chapter should end.
     /// </summary>
-    public required string ClosingHook { get; init; }
+    public string ClosingHook { get; init; } = string.Empty;
 
     /// <summary>
     /// Key events that must occur.
@@ -101,7 +111,7 @@ public sealed class ChapterBlueprint
     /// <summary>
     /// Point of view for this chapter.
     /// </summary>
-    public required string POV { get; init; }
+    public string POV { get; init; } = string.Empty;
 
     /// <summary>
     /// POV character ID if character-based POV.
@@ -111,17 +121,22 @@ public sealed class ChapterBlueprint
     /// <summary>
     /// Chapter tone.
     /// </summary>
-    public required ChapterTone Tone { get; init; }
+    public ChapterTone Tone { get; init; } = ChapterTone.Serious;
 
     /// <summary>
     /// Pacing intensity.
     /// </summary>
-    public required PacingIntensity Pacing { get; init; }
+    public PacingIntensity Pacing { get; init; } = PacingIntensity.Moderate;
+
+    /// <summary>
+    /// Alias for Pacing (same type name).
+    /// </summary>
+    public PacingIntensity PacingIntensity { get => Pacing; init => Pacing = value; }
 
     /// <summary>
     /// Emotional journey of the chapter.
     /// </summary>
-    public required EmotionalJourney EmotionalArc { get; init; }
+    public EmotionalJourney EmotionalArc { get; init; } = new();
 
     // ================== PLOT ELEMENTS ==================
 
@@ -134,6 +149,11 @@ public sealed class ChapterBlueprint
     /// Plot beats that occur.
     /// </summary>
     public List<string> PlotBeats { get; init; } = new();
+
+    /// <summary>
+    /// Alias for PlotBeats.
+    /// </summary>
+    public List<string> PlotPoints { get => PlotBeats; init => PlotBeats = value; }
 
     /// <summary>
     /// Revelations/discoveries in this chapter.
@@ -153,6 +173,11 @@ public sealed class ChapterBlueprint
     public List<CharacterAppearance> CharacterAppearances { get; init; } = new();
 
     /// <summary>
+    /// Alias for CharacterAppearances.
+    /// </summary>
+    public List<CharacterAppearance> CharactersInChapter { get => CharacterAppearances; init => CharacterAppearances = value; }
+
+    /// <summary>
     /// Character development beats.
     /// </summary>
     public List<CharacterDevelopmentBeat> CharacterBeats { get; init; } = new();
@@ -170,14 +195,19 @@ public sealed class ChapterBlueprint
     public List<Guid> LocationIds { get; init; } = new();
 
     /// <summary>
+    /// Alias for LocationIds.
+    /// </summary>
+    public List<Guid> LocationsUsed { get => LocationIds; init => LocationIds = value; }
+
+    /// <summary>
     /// Timeline position.
     /// </summary>
-    public required TimelinePosition Timeline { get; init; }
+    public TimelinePosition Timeline { get; init; } = new();
 
     /// <summary>
     /// Time of day/atmosphere.
     /// </summary>
-    public required string TimeOfDay { get; init; }
+    public string TimeOfDay { get; init; } = string.Empty;
 
     /// <summary>
     /// Weather/environmental conditions if relevant.
@@ -288,7 +318,12 @@ public sealed record SceneBlueprint
     /// <summary>
     /// Scene number within chapter.
     /// </summary>
-    public required int SceneNumber { get; init; }
+    public int SceneNumber { get; init; }
+
+    /// <summary>
+    /// Alias for SceneNumber.
+    /// </summary>
+    public int Order { get => SceneNumber; init => SceneNumber = value; }
 
     /// <summary>
     /// Scene title/label.
@@ -298,32 +333,42 @@ public sealed record SceneBlueprint
     /// <summary>
     /// Purpose of this scene.
     /// </summary>
-    public required string Purpose { get; init; }
+    public string Purpose { get; init; } = string.Empty;
 
     /// <summary>
     /// Scene summary.
     /// </summary>
-    public required string Summary { get; init; }
+    public string Summary { get; init; } = string.Empty;
 
     /// <summary>
     /// Target word count.
     /// </summary>
-    public required int TargetWordCount { get; init; }
+    public int TargetWordCount { get; init; }
 
     /// <summary>
     /// Scene type.
     /// </summary>
-    public required SceneType Type { get; init; }
+    public SceneType Type { get; init; } = SceneType.Action;
 
     /// <summary>
     /// Location ID.
     /// </summary>
-    public required Guid LocationId { get; init; }
+    public Guid LocationId { get; init; }
+
+    /// <summary>
+    /// Location name (convenience property).
+    /// </summary>
+    public string? Location { get; init; }
 
     /// <summary>
     /// Character IDs present in scene.
     /// </summary>
     public List<Guid> CharacterIds { get; init; } = new();
+
+    /// <summary>
+    /// Character names (convenience property).
+    /// </summary>
+    public List<string> Characters { get; init; } = new();
 
     /// <summary>
     /// POV character for this scene (if different from chapter).
@@ -333,12 +378,12 @@ public sealed record SceneBlueprint
     /// <summary>
     /// Conflict in this scene.
     /// </summary>
-    public required string Conflict { get; init; }
+    public string Conflict { get; init; } = string.Empty;
 
     /// <summary>
     /// Resolution of scene conflict.
     /// </summary>
-    public required string Resolution { get; init; }
+    public string Resolution { get; init; } = string.Empty;
 
     /// <summary>
     /// Sensory details to include.
@@ -353,22 +398,22 @@ public sealed record SceneBlueprint
     /// <summary>
     /// Scene transition type.
     /// </summary>
-    public required string TransitionIn { get; init; }
+    public string TransitionIn { get; init; } = string.Empty;
 
     /// <summary>
     /// Transition out of scene.
     /// </summary>
-    public required string TransitionOut { get; init; }
+    public string TransitionOut { get; init; } = string.Empty;
 
     /// <summary>
     /// Pacing for this scene.
     /// </summary>
-    public required PacingIntensity Pacing { get; init; }
+    public PacingIntensity Pacing { get; init; } = PacingIntensity.Moderate;
 
     /// <summary>
     /// Emotional tone.
     /// </summary>
-    public required ChapterTone Tone { get; init; }
+    public ChapterTone Tone { get; init; } = ChapterTone.Serious;
 
     /// <summary>
     /// Special instructions for this scene.
@@ -384,12 +429,12 @@ public sealed record SensoryDetail
     /// <summary>
     /// Sense (sight, sound, smell, taste, touch).
     /// </summary>
-    public required string Sense { get; init; }
+    public string Sense { get; init; } = string.Empty;
 
     /// <summary>
     /// The detail to include.
     /// </summary>
-    public required string Detail { get; init; }
+    public string Detail { get; init; } = string.Empty;
 
     /// <summary>
     /// Significance/purpose.
@@ -410,7 +455,7 @@ public sealed record DialogueBeat
     /// <summary>
     /// What needs to be communicated.
     /// </summary>
-    public required string Content { get; init; }
+    public string Content { get; init; } = string.Empty;
 
     /// <summary>
     /// Subtext/underlying meaning.
@@ -420,12 +465,12 @@ public sealed record DialogueBeat
     /// <summary>
     /// Emotional tone.
     /// </summary>
-    public required string Tone { get; init; }
+    public string Tone { get; init; } = string.Empty;
 
     /// <summary>
     /// Purpose of this dialogue.
     /// </summary>
-    public required string Purpose { get; init; }
+    public string Purpose { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -436,17 +481,27 @@ public sealed record EmotionalJourney
     /// <summary>
     /// Starting emotional state.
     /// </summary>
-    public required string StartingState { get; init; }
+    public string StartingState { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Alias for StartingState.
+    /// </summary>
+    public string StartingEmotion { get => StartingState; init => StartingState = value; }
 
     /// <summary>
     /// Ending emotional state.
     /// </summary>
-    public required string EndingState { get; init; }
+    public string EndingState { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Alias for EndingState.
+    /// </summary>
+    public string EndingEmotion { get => EndingState; init => EndingState = value; }
 
     /// <summary>
     /// Peak emotional moment.
     /// </summary>
-    public required string PeakMoment { get; init; }
+    public string PeakMoment { get; init; } = string.Empty;
 
     /// <summary>
     /// Low point if any.
@@ -467,22 +522,22 @@ public sealed record PlotThreadReference
     /// <summary>
     /// Plot thread ID.
     /// </summary>
-    public required Guid ThreadId { get; init; }
+    public Guid ThreadId { get; init; }
 
     /// <summary>
     /// Thread name.
     /// </summary>
-    public required string ThreadName { get; init; }
+    public string ThreadName { get; init; } = string.Empty;
 
     /// <summary>
     /// Action taken on this thread (advance, pause, resolve).
     /// </summary>
-    public required string Action { get; init; }
+    public string Action { get; init; } = string.Empty;
 
     /// <summary>
     /// Details of what happens.
     /// </summary>
-    public required string Details { get; init; }
+    public string Details { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -493,7 +548,7 @@ public sealed record Revelation
     /// <summary>
     /// What is revealed.
     /// </summary>
-    public required string Content { get; init; }
+    public string Content { get; init; } = string.Empty;
 
     /// <summary>
     /// Who learns it.
@@ -503,12 +558,12 @@ public sealed record Revelation
     /// <summary>
     /// Impact on the story.
     /// </summary>
-    public required string Impact { get; init; }
+    public string Impact { get; init; } = string.Empty;
 
     /// <summary>
     /// How it's revealed.
     /// </summary>
-    public required string Method { get; init; }
+    public string Method { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -519,22 +574,22 @@ public sealed record CliffhangerDetails
     /// <summary>
     /// Type of cliffhanger.
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// What the cliffhanger is.
     /// </summary>
-    public required string Content { get; init; }
+    public string Content { get; init; } = string.Empty;
 
     /// <summary>
     /// When it's resolved.
     /// </summary>
-    public required int ResolutionChapter { get; init; }
+    public int ResolutionChapter { get; init; }
 
     /// <summary>
     /// Tension level (1-10).
     /// </summary>
-    public required int TensionLevel { get; init; }
+    public int TensionLevel { get; init; }
 }
 
 /// <summary>
@@ -545,17 +600,17 @@ public sealed record CharacterAppearance
     /// <summary>
     /// Character ID.
     /// </summary>
-    public required Guid CharacterId { get; init; }
+    public Guid CharacterId { get; init; }
 
     /// <summary>
     /// Role in this chapter.
     /// </summary>
-    public required string RoleInChapter { get; init; }
+    public string RoleInChapter { get; init; } = string.Empty;
 
     /// <summary>
     /// First scene they appear.
     /// </summary>
-    public required int FirstSceneNumber { get; init; }
+    public int FirstSceneNumber { get; init; }
 
     /// <summary>
     /// Scenes they appear in.
@@ -565,12 +620,12 @@ public sealed record CharacterAppearance
     /// <summary>
     /// Character's goal in this chapter.
     /// </summary>
-    public required string ChapterGoal { get; init; }
+    public string ChapterGoal { get; init; } = string.Empty;
 
     /// <summary>
     /// Emotional state.
     /// </summary>
-    public required string EmotionalState { get; init; }
+    public string EmotionalState { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -581,17 +636,17 @@ public sealed record CharacterDevelopmentBeat
     /// <summary>
     /// Character ID.
     /// </summary>
-    public required Guid CharacterId { get; init; }
+    public Guid CharacterId { get; init; }
 
     /// <summary>
     /// Type of development.
     /// </summary>
-    public required string DevelopmentType { get; init; }
+    public string DevelopmentType { get; init; } = string.Empty;
 
     /// <summary>
     /// Description of the beat.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Scene where this occurs.
@@ -607,22 +662,22 @@ public sealed record CharacterInteraction
     /// <summary>
     /// Character IDs involved.
     /// </summary>
-    public required List<Guid> CharacterIds { get; init; }
+    public List<Guid> CharacterIds { get; init; } = new();
 
     /// <summary>
     /// Nature of interaction.
     /// </summary>
-    public required string Nature { get; init; }
+    public string Nature { get; init; } = string.Empty;
 
     /// <summary>
     /// Outcome/result.
     /// </summary>
-    public required string Outcome { get; init; }
+    public string Outcome { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact on their relationship.
     /// </summary>
-    public required string RelationshipImpact { get; init; }
+    public string RelationshipImpact { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -633,7 +688,7 @@ public sealed record TimelinePosition
     /// <summary>
     /// Story day number (1-based).
     /// </summary>
-    public required int StoryDay { get; init; }
+    public int StoryDay { get; init; }
 
     /// <summary>
     /// Specific date if applicable.
@@ -643,12 +698,12 @@ public sealed record TimelinePosition
     /// <summary>
     /// Relative timing.
     /// </summary>
-    public required string RelativeTiming { get; init; }
+    public string RelativeTiming { get; init; } = string.Empty;
 
     /// <summary>
     /// Duration this chapter covers.
     /// </summary>
-    public required string Duration { get; init; }
+    public string Duration { get; init; } = string.Empty;
 
     /// <summary>
     /// Notes on timeline.
@@ -664,22 +719,22 @@ public sealed record ContinuityRequirement
     /// <summary>
     /// What must be maintained.
     /// </summary>
-    public required string Element { get; init; }
+    public string Element { get; init; } = string.Empty;
 
     /// <summary>
     /// Source chapter.
     /// </summary>
-    public required int SourceChapter { get; init; }
+    public int SourceChapter { get; init; }
 
     /// <summary>
     /// Details.
     /// </summary>
-    public required string Details { get; init; }
+    public string Details { get; init; } = string.Empty;
 
     /// <summary>
     /// Priority level.
     /// </summary>
-    public required ClarificationPriority Priority { get; init; }
+    public ClarificationPriority Priority { get; init; } = ClarificationPriority.Important;
 }
 
 /// <summary>
@@ -695,22 +750,22 @@ public sealed record SetupElement
     /// <summary>
     /// What is being set up.
     /// </summary>
-    public required string Element { get; init; }
+    public string Element { get; init; } = string.Empty;
 
     /// <summary>
     /// How it's introduced.
     /// </summary>
-    public required string Introduction { get; init; }
+    public string Introduction { get; init; } = string.Empty;
 
     /// <summary>
     /// When payoff occurs.
     /// </summary>
-    public required int PayoffChapter { get; init; }
+    public int PayoffChapter { get; init; }
 
     /// <summary>
     /// Type of setup.
     /// </summary>
-    public required SetupPayoffType Type { get; init; }
+    public SetupPayoffType Type { get; init; } = SetupPayoffType.PlotDevice;
 }
 
 /// <summary>
@@ -721,22 +776,22 @@ public sealed record PayoffElement
     /// <summary>
     /// Reference to setup.
     /// </summary>
-    public required Guid SetupId { get; init; }
+    public Guid SetupId { get; init; }
 
     /// <summary>
     /// What is being paid off.
     /// </summary>
-    public required string Element { get; init; }
+    public string Element { get; init; } = string.Empty;
 
     /// <summary>
     /// How it's paid off.
     /// </summary>
-    public required string Payoff { get; init; }
+    public string Payoff { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact level.
     /// </summary>
-    public required int ImpactLevel { get; init; }
+    public int ImpactLevel { get; init; }
 }
 
 /// <summary>
@@ -747,17 +802,17 @@ public sealed record ThemeReference
     /// <summary>
     /// Theme being explored.
     /// </summary>
-    public required string Theme { get; init; }
+    public string Theme { get; init; } = string.Empty;
 
     /// <summary>
     /// How it's explored.
     /// </summary>
-    public required string Exploration { get; init; }
+    public string Exploration { get; init; } = string.Empty;
 
     /// <summary>
     /// Through which element.
     /// </summary>
-    public required string Vehicle { get; init; }
+    public string Vehicle { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -768,7 +823,7 @@ public sealed record GenerationAttempt
     /// <summary>
     /// Attempt number.
     /// </summary>
-    public required int AttemptNumber { get; init; }
+    public int AttemptNumber { get; init; }
 
     /// <summary>
     /// When attempted.
@@ -778,7 +833,7 @@ public sealed record GenerationAttempt
     /// <summary>
     /// Whether successful.
     /// </summary>
-    public required bool Successful { get; init; }
+    public bool Successful { get; init; }
 
     /// <summary>
     /// Word count generated.
@@ -814,12 +869,12 @@ public sealed record TokenUsage
     /// <summary>
     /// Input tokens.
     /// </summary>
-    public required int InputTokens { get; init; }
+    public int InputTokens { get; init; }
 
     /// <summary>
     /// Output tokens.
     /// </summary>
-    public required int OutputTokens { get; init; }
+    public int OutputTokens { get; init; }
 
     /// <summary>
     /// Total tokens.

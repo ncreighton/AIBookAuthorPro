@@ -70,13 +70,13 @@ public class ModelTests
         var parent = new OutlineItem
         {
             Title = "Act I",
-            ItemType = AIBookAuthorPro.Core.Models.OutlineItemType.Act
+            ItemType = AIBookAuthorPro.Core.Enums.OutlineItemType.Act
         };
 
         var child = new OutlineItem
         {
             Title = "Chapter 1",
-            ItemType = AIBookAuthorPro.Core.Models.OutlineItemType.Chapter
+            ItemType = AIBookAuthorPro.Core.Enums.OutlineItemType.Chapter
         };
 
         // Act

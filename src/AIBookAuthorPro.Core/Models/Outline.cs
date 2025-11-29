@@ -4,6 +4,7 @@
 // =============================================================================
 
 using AIBookAuthorPro.Core.Common;
+using AIBookAuthorPro.Core.Enums;
 
 namespace AIBookAuthorPro.Core.Models;
 
@@ -213,40 +214,4 @@ public sealed class OutlineItem : Entity
             _children[i].Order = i + 1;
         }
     }
-}
-
-/// <summary>
-/// Types of outline items.
-/// </summary>
-public enum OutlineItemType
-{
-    /// <summary>
-    /// Major story division (e.g., Act I, Act II, Act III).
-    /// </summary>
-    Act = 0,
-
-    /// <summary>
-    /// Part or section division.
-    /// </summary>
-    Part = 1,
-
-    /// <summary>
-    /// Chapter level item.
-    /// </summary>
-    Chapter = 2,
-
-    /// <summary>
-    /// Scene within a chapter.
-    /// </summary>
-    Scene = 3,
-
-    /// <summary>
-    /// Individual story beat.
-    /// </summary>
-    Beat = 4,
-
-    /// <summary>
-    /// General note or placeholder.
-    /// </summary>
-    Note = 5
 }

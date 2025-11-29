@@ -201,7 +201,7 @@ public partial class PromptAnalysisViewModel : ObservableObject
         DetectedGenre = analysis.DetectedGenre ?? "Unknown";
         TargetAudience = analysis.TargetAudience ?? "General";
         CoreConflict = analysis.CoreConflict ?? "Not identified";
-        Tone = analysis.Tone ?? "Not identified";
+        Tone = analysis.ToneDescriptor ?? "Not identified";
         EstimatedWordCount = analysis.EstimatedWordCount;
         SuggestedStructure = analysis.SuggestedStructure.ToString();
         Confidence = analysis.AnalysisConfidence;
@@ -216,19 +216,19 @@ public partial class PromptAnalysisViewModel : ObservableObject
             ExtractedThemes.Add(theme);
 
         ExtractedCharacters.Clear();
-        foreach (var character in analysis.ExtractedCharacters ?? Enumerable.Empty<ExtractedCharacter>())
+        foreach (var character in analysis.ImpliedCharacters ?? Enumerable.Empty<ExtractedCharacterSeed>())
         {
             ExtractedCharacters.Add(new ExtractedCharacterViewModel
             {
-                Name = character.Name ?? "Unknown",
-                Role = character.Role?.ToString() ?? "Unknown",
+                Name = character.SuggestedName ?? "Unknown",
+                Role = character.Role.ToString(),
                 Description = character.Description ?? "",
-                ArcType = character.ArcType ?? ""
+                ArcType = character.PotentialArc ?? ""
             });
         }
 
         ExtractedLocations.Clear();
-        foreach (var location in analysis.ExtractedLocations ?? Enumerable.Empty<ExtractedLocation>())
+        foreach (var location in analysis.ImpliedLocations ?? Enumerable.Empty<ExtractedLocationSeed>())
         {
             ExtractedLocations.Add(new ExtractedLocationViewModel
             {
@@ -258,8 +258,8 @@ public partial class PromptAnalysisViewModel : ObservableObject
             {
                 Category = suggestion.Category ?? "General",
                 Suggestion = suggestion.Suggestion ?? "",
-                Impact = suggestion.Impact ?? "",
-                Priority = suggestion.Priority
+                Impact = suggestion.ImpactLevel.ToString(),
+                Priority = suggestion.ImpactLevel
             });
         }
 

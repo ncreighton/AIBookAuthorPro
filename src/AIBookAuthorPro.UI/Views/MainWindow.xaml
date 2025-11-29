@@ -97,7 +97,7 @@
                     <!-- Quick Start / Guided Creation Button -->
                     <Button
                         Grid.Row="1"
-                        Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                        Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
                         Command="{Binding StartGuidedCreationCommand}"
                         ToolTip="Start Guided Book Creation (Ctrl+Shift+G)"
                         Margin="12,0,12,16">
@@ -195,7 +195,7 @@
                             Tag="GuidedWizard"
                             ToolTip="Book Creation Wizard">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Wizard" Width="24" Height="24"/>
+                                <materialDesign:PackIcon Kind="AutoFix" Width="24" Height="24"/>
                                 <TextBlock
                                     Text="Wizard"
                                     Margin="16,0,0,0"

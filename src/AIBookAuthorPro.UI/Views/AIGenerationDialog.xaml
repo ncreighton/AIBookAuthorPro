@@ -490,7 +490,7 @@
 
                     <!-- Accept Button -->
                     <Button
-                        Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                        Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
                         Command="{Binding AcceptCommand}"
                         IsEnabled="{Binding CanAccept}"
                         Visibility="{Binding IsComplete, Converter={StaticResource BoolToVisibility}}">

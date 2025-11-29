@@ -16,7 +16,6 @@ using AIBookAuthorPro.UI.Views.GuidedCreation;
 using AIBookAuthorPro.UI.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 
 namespace AIBookAuthorPro.App;
@@ -24,7 +23,7 @@ namespace AIBookAuthorPro.App;
 /// <summary>
 /// Application entry point.
 /// </summary>
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private IServiceProvider _serviceProvider = null!;
     private ILogger<App>? _logger;
@@ -52,6 +51,12 @@ public partial class App : Application
             _logger.LogInformation("AI Book Author Pro starting up...");
             Console.WriteLine("APP: Logger created");
 
+            // Load user settings
+            Console.WriteLine("APP: Loading settings");
+            var settingsService = _serviceProvider.GetRequiredService<ISettingsService>();
+            _ = settingsService.LoadSettingsAsync().GetAwaiter().GetResult();
+            Console.WriteLine("APP: Settings loaded");
+
             // Set up global exception handling
             SetupExceptionHandling();
 
@@ -71,9 +76,21 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"APP ERROR: {ex}");
-            Console.WriteLine($"APP ERROR: {ex}");
-            MessageBox.Show($"Failed to start application:\n\n{ex.Message}\n\n{ex.StackTrace}", 
+            var errorDetails = $"APP ERROR: {ex}\n\nInner Exception: {ex.InnerException}";
+            System.Diagnostics.Debug.WriteLine(errorDetails);
+            Console.WriteLine(errorDetails);
+            
+            // Write error to file for debugging
+            try
+            {
+                var errorPath = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    "AIBookAuthorPro_Error.txt");
+                System.IO.File.WriteAllText(errorPath, errorDetails);
+            }
+            catch { /* ignore file write errors */ }
+            
+            MessageBox.Show($"Failed to start application:\n\n{ex.Message}\n\n{ex.InnerException?.Message}\n\nFull details written to Desktop\\AIBookAuthorPro_Error.txt",
                 "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }

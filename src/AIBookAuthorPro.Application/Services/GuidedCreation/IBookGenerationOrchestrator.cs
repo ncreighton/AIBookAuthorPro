@@ -19,7 +19,7 @@ public interface IBookGenerationOrchestrator
     Task<Result<GenerationSession>> StartFullGenerationAsync(
         BookBlueprint blueprint,
         GenerationOptions options,
-        IProgress<GenerationProgress>? progress = null,
+        IProgress<DetailedGenerationProgress>? progress = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -43,7 +43,7 @@ public interface IBookGenerationOrchestrator
     /// </summary>
     Task<Result<GenerationSession>> ResumeGenerationAsync(
         Guid sessionId,
-        IProgress<GenerationProgress>? progress = null,
+        IProgress<DetailedGenerationProgress>? progress = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -122,9 +122,13 @@ public sealed record ChapterRegenerationOptions
 }
 
 /// <summary>
-/// Generation progress report.
+/// Detailed generation progress report for internal orchestration.
 /// </summary>
-public sealed record GenerationProgress
+/// <remarks>
+/// This is distinct from Core.Models.GuidedCreation.GenerationProgress
+/// which is used for external API progress reporting.
+/// </remarks>
+public sealed record DetailedGenerationProgress
 {
     public GenerationPhase Phase { get; init; }
     public string CurrentOperation { get; init; } = string.Empty;

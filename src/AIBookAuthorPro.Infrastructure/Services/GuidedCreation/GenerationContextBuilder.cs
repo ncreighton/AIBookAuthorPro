@@ -8,6 +8,7 @@ using AIBookAuthorPro.Application.Services.GuidedCreation;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
 using AIBookAuthorPro.Core.Services;
+using CoreGenerationOptions = AIBookAuthorPro.Core.Services.GenerationOptions;
 using Microsoft.Extensions.Logging;
 
 namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
@@ -15,7 +16,7 @@ namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
 /// <summary>
 /// Service for building comprehensive context for chapter generation.
 /// </summary>
-public sealed class GenerationContextBuilder : IGenerationContextBuilder
+public sealed partial class GenerationContextBuilder : IGenerationContextBuilder
 {
     private readonly IAIService _aiService;
     private readonly ILogger<GenerationContextBuilder> _logger;
@@ -46,7 +47,7 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
 
         try
         {
-            var chapterBlueprint = blueprint.ChapterBlueprints?
+            var chapterBlueprint = blueprint.Structure.Chapters?
                 .FirstOrDefault(c => c.ChapterNumber == chapterNumber);
 
             if (chapterBlueprint == null)
@@ -61,39 +62,48 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
             var systemPrompt = await BuildSystemPromptAsync(blueprint, config, cancellationToken);
             var narrativeContext = await BuildNarrativeContextAsync(
                 previousChapters, maxTokens / 3, cancellationToken);
-            var characterContext = BuildCharacterContext(blueprint.CharacterBible, chapterBlueprint);
-            var worldContext = BuildWorldContext(blueprint.WorldBible, chapterBlueprint);
-            var plotContext = BuildPlotContext(blueprint.PlotArchitecture, chapterBlueprint);
-            var styleContext = BuildStyleContext(blueprint.StyleGuide);
+            var characterContext = BuildCharacterContext(blueprint.Characters, chapterBlueprint);
+            var worldContext = BuildWorldContext(blueprint.World, chapterBlueprint);
+            var plotContext = BuildPlotContext(blueprint.Plot, chapterBlueprint);
+            var styleContext = BuildStyleContext(blueprint.Style);
             var chapterInstructions = BuildChapterInstructions(chapterBlueprint, blueprint);
 
             // Extract character states from previous chapters
             var characterStates = ExtractLatestCharacterStates(previousChapters);
 
             // Get relevant setup/payoff tracking
-            var activeSetups = GetActiveSetups(blueprint.PlotArchitecture, chapterNumber);
-            var duePayoffs = GetDuePayoffs(blueprint.PlotArchitecture, chapterNumber);
+            var activeSetups = GetActiveSetups(blueprint.Plot, chapterNumber);
+            var duePayoffs = GetDuePayoffs(blueprint.Plot, chapterNumber);
 
             // Calculate token budget allocation
             var tokenBudget = CalculateTokenBudget(maxTokens);
+
+            // Extract values from Results
+            var systemPromptValue = systemPrompt.IsSuccess ? systemPrompt.Value! : string.Empty;
+            var narrativeContextValue = narrativeContext.IsSuccess ? narrativeContext.Value! : string.Empty;
+            var characterContextValue = characterContext.IsSuccess ? characterContext.Value! : string.Empty;
+            var worldContextValue = worldContext.IsSuccess ? worldContext.Value! : string.Empty;
+            var plotContextValue = plotContext.IsSuccess ? plotContext.Value! : string.Empty;
+            var styleContextValue = styleContext.IsSuccess ? styleContext.Value! : string.Empty;
+            var chapterInstructionsValue = chapterInstructions.IsSuccess ? chapterInstructions.Value! : string.Empty;
+            var tokenBudgetValue = tokenBudget.IsSuccess ? tokenBudget.Value!.TotalAvailable : maxTokens;
 
             var context = new ChapterGenerationContext
             {
                 ChapterNumber = chapterNumber,
                 ChapterBlueprint = chapterBlueprint,
-                Blueprint = blueprint,
-                SystemPrompt = systemPrompt,
-                NarrativeContext = narrativeContext,
-                CharacterContext = characterContext,
-                WorldContext = worldContext,
-                PlotContext = plotContext,
-                StyleContext = styleContext,
-                ChapterInstructions = chapterInstructions,
-                PreviousChapterSummaries = GetChapterSummaries(previousChapters),
+                SystemPrompt = systemPromptValue,
+                NarrativeContext = narrativeContextValue,
+                CharacterContext = characterContextValue,
+                WorldContext = worldContextValue,
+                PlotContext = plotContextValue,
+                StyleContext = styleContextValue,
+                ChapterInstructions = chapterInstructionsValue,
+                PreviousChapterSummaries = GetChapterSummaryStrings(previousChapters),
                 CharacterStates = characterStates,
                 ActiveSetups = activeSetups,
                 DuePayoffs = duePayoffs,
-                TokenBudget = tokenBudget,
+                TokenBudget = tokenBudgetValue,
                 GenerationConfig = config ?? new GenerationConfiguration()
             };
 
@@ -122,24 +132,24 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
         if (blueprint.Identity != null)
         {
             sb.AppendLine($"You are writing \"{blueprint.Identity.Title}\" - {blueprint.Identity.Genre}.");
-            sb.AppendLine($"Premise: {blueprint.Identity.Premise}");
+            sb.AppendLine($"Premise: {blueprint.Identity.ExpandedPremise}");
             sb.AppendLine();
         }
 
         // Style guidelines
-        if (blueprint.StyleGuide != null)
+        if (blueprint.Style != null)
         {
             sb.AppendLine("WRITING STYLE:");
-            if (blueprint.StyleGuide.Voice != null)
+            if (blueprint.Style.Voice != null)
             {
-                sb.AppendLine($"- Voice: {blueprint.StyleGuide.Voice.Description}");
-                sb.AppendLine($"- POV: {blueprint.StyleGuide.Voice.PointOfView}");
-                sb.AppendLine($"- Tense: {blueprint.StyleGuide.Voice.Tense}");
+                sb.AppendLine($"- Voice: {blueprint.Style.Voice.Description}");
+                sb.AppendLine($"- POV: {blueprint.Style.Voice.PointOfView}");
+                sb.AppendLine($"- Tense: {blueprint.Style.Voice.Tense}");
             }
-            if (blueprint.StyleGuide.Prose != null)
+            if (blueprint.Style.Prose != null)
             {
-                sb.AppendLine($"- Sentence style: {blueprint.StyleGuide.Prose.SentenceStyle}");
-                sb.AppendLine($"- Vocabulary level: {blueprint.StyleGuide.Prose.VocabularyLevel}");
+                sb.AppendLine($"- Sentence style: {blueprint.Style.Prose.SentenceStyle}");
+                sb.AppendLine($"- Vocabulary level: {blueprint.Style.Prose.VocabularyLevel}");
             }
             sb.AppendLine();
         }
@@ -195,6 +205,7 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
         {
             var summary = chapter.Summaries?.AISummary ?? 
                          chapter.Summaries?.BriefSummary ?? 
+                         chapter.Summary ??
                          "Events occurred in this chapter.";
             
             sb.AppendLine($"Chapter {chapter.ChapterNumber} ({chapter.Title}):");
@@ -204,9 +215,9 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
 
         // Add the most recent chapter's ending for continuity
         var lastChapter = previousChapters.OrderByDescending(c => c.ChapterNumber).FirstOrDefault();
-        if (lastChapter?.Content?.Text != null)
+        if (!string.IsNullOrEmpty(lastChapter?.Content))
         {
-            var lastParagraphs = GetLastParagraphs(lastChapter.Content.Text, 2);
+            var lastParagraphs = GetLastParagraphs(lastChapter.Content, 2);
             sb.AppendLine("LAST CHAPTER ENDED WITH:");
             sb.AppendLine(lastParagraphs);
             sb.AppendLine();
@@ -218,7 +229,11 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
         var estimatedTokens = _aiService.EstimateTokens(result);
         if (estimatedTokens > maxTokens)
         {
-            result = await CompressContextAsync(result, maxTokens, cancellationToken);
+            var compressResult = await CompressContextAsync(result, maxTokens, cancellationToken);
+            if (compressResult.IsSuccess)
+            {
+                result = compressResult.Value!;
+            }
         }
 
         return Result<string>.Success(result);
@@ -233,18 +248,18 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
             return Result<string>.Success("");
 
         var sb = new StringBuilder();
-        sb.AppendLine("CHARACTERS IN THIS CHAPTER:");
+        sb.AppendLine("CharacterBible IN THIS CHAPTER:");
         sb.AppendLine();
 
-        // Get characters appearing in this chapter
-        var chapterCharacters = chapterBlueprint.CharactersInChapter ?? new List<string>();
+        // Get CharacterBible appearing in this chapter (extract character IDs)
+        var chapterCharacterIds = chapterBlueprint.CharactersInChapter?
+            .Select(ca => ca.CharacterId)
+            .ToList() ?? new List<Guid>();
         
-        // Add main characters relevant to this chapter
+        // Add main CharacterBible relevant to this chapter
         var relevantMains = characterBible.MainCharacters?
-            .Where(c => chapterCharacters.Count == 0 || 
-                       chapterCharacters.Any(cc => 
-                           c.FullName?.Contains(cc, StringComparison.OrdinalIgnoreCase) == true ||
-                           cc.Contains(c.FullName ?? "", StringComparison.OrdinalIgnoreCase)))
+            .Where(c => chapterCharacterIds.Count == 0 || 
+                       chapterCharacterIds.Contains(c.Id))
             .ToList() ?? new List<CharacterProfile>();
 
         foreach (var character in relevantMains.Take(5))
@@ -260,16 +275,16 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
             sb.AppendLine();
         }
 
-        // Add supporting characters briefly
+        // Add supporting CharacterBible briefly
         var relevantSupporting = characterBible.SupportingCharacters?
-            .Where(c => chapterCharacters.Any(cc => 
-                c.FullName?.Contains(cc, StringComparison.OrdinalIgnoreCase) == true))
+            .Where(c => chapterCharacterIds.Count == 0 || 
+                       chapterCharacterIds.Contains(c.Id))
             .Take(3)
             .ToList() ?? new List<CharacterProfile>();
 
         if (relevantSupporting.Any())
         {
-            sb.AppendLine("Supporting characters:");
+            sb.AppendLine("Supporting CharacterBible:");
             foreach (var character in relevantSupporting)
             {
                 sb.AppendLine($"- {character.FullName}: {character.Concept}");
@@ -293,14 +308,12 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
         sb.AppendLine();
 
         // Add locations for this chapter
-        var chapterLocations = chapterBlueprint.LocationsUsed ?? new List<string>();
+        var chapterLocationIds = chapterBlueprint.LocationsUsed ?? new List<Guid>();
         var relevantLocations = worldBible.Locations?
-            .Where(l => chapterLocations.Count == 0 ||
-                       chapterLocations.Any(cl => 
-                           l.Name?.Contains(cl, StringComparison.OrdinalIgnoreCase) == true ||
-                           cl.Contains(l.Name ?? "", StringComparison.OrdinalIgnoreCase)))
+            .Where(l => chapterLocationIds.Count == 0 ||
+                       chapterLocationIds.Contains(l.Id))
             .Take(3)
-            .ToList() ?? new List<Location>();
+            .ToList() ?? new List<LocationProfile>();
 
         foreach (var location in relevantLocations)
         {
@@ -319,13 +332,13 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
             sb.AppendLine("World rules to maintain:");
             foreach (var rule in worldBible.Rules.Take(5))
             {
-                sb.AppendLine($"- {rule.Description}");
+                sb.AppendLine($"- {rule}");
             }
             sb.AppendLine();
         }
 
         // Add magic system if applicable
-        if (worldBible.MagicSystem?.Exists == true)
+        if (worldBible.MagicSystem != null && !string.IsNullOrEmpty(worldBible.MagicSystem.Name))
         {
             sb.AppendLine("Magic system:");
             sb.AppendLine($"  {worldBible.MagicSystem.Description}");
@@ -350,10 +363,10 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
         sb.AppendLine();
 
         // Main conflict
-        if (plotArchitecture.MainConflict != null)
+        if (plotArchitecture.MainPlot != null)
         {
-            sb.AppendLine($"Central conflict: {plotArchitecture.MainConflict.Description}");
-            sb.AppendLine($"Stakes: {plotArchitecture.MainConflict.Stakes}");
+            sb.AppendLine($"Central conflict: {plotArchitecture.MainPlot.CentralConflict}");
+            sb.AppendLine($"Stakes: {plotArchitecture.MainPlot.Stakes}");
             sb.AppendLine();
         }
 
@@ -455,7 +468,7 @@ public sealed class GenerationContextBuilder : IGenerationContextBuilder
             foreach (var scene in chapterBlueprint.Scenes)
             {
                 sb.AppendLine($"  {scene.Order}. {scene.Title}: {scene.Purpose}");
-                sb.AppendLine($"     Location: {scene.Location}, Characters: {string.Join(", ", scene.Characters ?? new List<string>())}");
+                sb.AppendLine($"     Location: {scene.Location}, CharacterBible: {string.Join(", ", scene.Characters ?? new List<string>())}");
             }
         }
 
@@ -526,7 +539,7 @@ Provide only the compressed context, nothing else.";
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.2, MaxTokens = maxTokens },
+                new CoreGenerationOptions { Temperature = 0.2, MaxTokens = maxTokens },
                 cancellationToken);
 
             if (response.IsSuccess && !string.IsNullOrEmpty(response.Value))
@@ -591,10 +604,20 @@ Provide only the compressed context, nothing else.";
             {
                 ChapterNumber = c.ChapterNumber,
                 Title = c.Title ?? $"Chapter {c.ChapterNumber}",
-                Summary = c.Summaries?.AISummary ?? c.Summaries?.BriefSummary ?? "",
+                Summary = c.Summaries?.AISummary ?? c.Summaries?.BriefSummary ?? c.Summary ?? "",
                 KeyEvents = c.Summaries?.KeyEvents ?? new List<string>(),
                 WordCount = c.WordCount
             })
+            .ToList();
+    }
+
+    private static List<string> GetChapterSummaryStrings(List<GeneratedChapter>? chapters)
+    {
+        if (chapters == null) return new List<string>();
+
+        return chapters
+            .OrderBy(c => c.ChapterNumber)
+            .Select(c => c.Summaries?.AISummary ?? c.Summaries?.BriefSummary ?? c.Summary ?? $"Chapter {c.ChapterNumber}")
             .ToList();
     }
 
@@ -615,7 +638,7 @@ Provide only the compressed context, nothing else.";
         if (plotArchitecture?.SetupPayoffs == null)
             return new List<SetupPayoff>();
 
-        return plotArchitecture.SetupPayoffs
+        return plotArchitecture.SetupPayoffs.Items
             .Where(sp => sp.SetupChapter < currentChapter && 
                         (sp.PayoffChapter == null || sp.PayoffChapter >= currentChapter))
             .ToList();
@@ -628,7 +651,7 @@ Provide only the compressed context, nothing else.";
         if (plotArchitecture?.SetupPayoffs == null)
             return new List<SetupPayoff>();
 
-        return plotArchitecture.SetupPayoffs
+        return plotArchitecture.SetupPayoffs.Items
             .Where(sp => sp.PayoffChapter == currentChapter)
             .ToList();
     }
@@ -647,3 +670,104 @@ public class ChapterSummary
     public List<string> KeyEvents { get; set; } = new();
     public int WordCount { get; set; }
 }
+
+// Additional interface implementations added for compatibility
+public partial class GenerationContextBuilder
+{
+    /// <inheritdoc />
+    public Task<Result<ChapterGenerationContext>> BuildChapterContextAsync(
+        BookBlueprint blueprint,
+        int chapterNumber,
+        List<GeneratedChapter> previousChapters,
+        ContextBuildingOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        // Delegate to existing BuildContextAsync method
+        return BuildContextAsync(chapterNumber, blueprint, previousChapters, 
+            new GenerationConfiguration(), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<Result<SceneGenerationContext>> BuildSceneContextAsync(
+        ChapterGenerationContext chapterContext,
+        int sceneNumber,
+        List<GeneratedScene> previousScenes,
+        CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(Result<SceneGenerationContext>.Success(new SceneGenerationContext
+        {
+            ChapterContext = chapterContext,
+            SceneNumber = sceneNumber,
+            PreviousSceneContent = previousScenes?.Select(s => s.Content ?? string.Empty).ToList() ?? new()
+        }));
+    }
+
+    /// <inheritdoc />
+    public Task<Result<string>> BuildCharacterContextAsync(
+        List<Guid> characterIds,
+        CharacterBible characterBible,
+        List<CharacterStateSnapshot> currentStates,
+        CancellationToken cancellationToken = default)
+    {
+        var sb = new StringBuilder();
+        if (characterBible?.MainCharacters != null)
+        {
+            foreach (var character in characterBible.MainCharacters.Where(c => characterIds.Contains(c.Id)))
+            {
+                sb.AppendLine($"Character: {character.FullName}");
+                sb.AppendLine($"Role: {character.Role}");
+            }
+        }
+        return Task.FromResult(Result<string>.Success(sb.ToString()));
+    }
+
+    /// <inheritdoc />
+    public Task<Result<string>> BuildLocationContextAsync(
+        List<Guid> locationIds,
+        WorldBible worldBible,
+        CancellationToken cancellationToken = default)
+    {
+        var sb = new StringBuilder();
+        if (worldBible?.Locations != null)
+        {
+            foreach (var location in worldBible.Locations.Where(l => locationIds.Contains(l.Id)))
+            {
+                sb.AppendLine($"Location: {location.Name}");
+                sb.AppendLine($"Description: {location.Description}");
+            }
+        }
+        return Task.FromResult(Result<string>.Success(sb.ToString()));
+    }
+
+    /// <inheritdoc />
+    public Task<Result<string>> BuildPlotContextAsync(
+        ChapterBlueprint chapterBlueprint,
+        PlotArchitecture plotArchitecture,
+        CancellationToken cancellationToken = default)
+    {
+        var context = $"Chapter Purpose: {chapterBlueprint.Purpose}";
+        return Task.FromResult(Result<string>.Success(context));
+    }
+
+    /// <inheritdoc />
+    public Task<Result<string>> BuildStyleContextAsync(
+        StyleGuide styleGuide,
+        ChapterTone chapterTone,
+        CancellationToken cancellationToken = default)
+    {
+        var style = styleGuide?.Voice?.Description ?? "Standard narrative voice";
+        return Task.FromResult(Result<string>.Success(style));
+    }
+
+    /// <inheritdoc />
+    public int EstimateTokens(string content)
+    {
+        if (string.IsNullOrEmpty(content)) return 0;
+        // Rough estimate: ~4 CharacterBible per token
+        return content.Length / 4;
+    }
+}
+
+
+
+

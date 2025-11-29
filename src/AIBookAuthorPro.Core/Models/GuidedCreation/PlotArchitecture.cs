@@ -18,7 +18,12 @@ public sealed record PlotArchitecture
     /// <summary>
     /// Main plot definition.
     /// </summary>
-    public required MainPlot MainPlot { get; init; }
+    public MainPlot MainPlot { get; init; } = new();
+
+    /// <summary>
+    /// Main conflict description (convenience property).
+    /// </summary>
+    public string MainConflict => MainPlot?.CentralConflict ?? string.Empty;
 
     /// <summary>
     /// All subplots.
@@ -28,7 +33,7 @@ public sealed record PlotArchitecture
     /// <summary>
     /// Thematic structure.
     /// </summary>
-    public required ThematicStructure ThematicStructure { get; init; }
+    public ThematicStructure ThematicStructure { get; init; } = new();
 
     /// <summary>
     /// Plot twists.
@@ -43,7 +48,7 @@ public sealed record PlotArchitecture
     /// <summary>
     /// Setup and payoff tracker.
     /// </summary>
-    public required SetupPayoffTracker SetupPayoffs { get; init; }
+    public SetupPayoffTracker SetupPayoffs { get; init; } = new();
 
     /// <summary>
     /// All plot threads.
@@ -53,7 +58,7 @@ public sealed record PlotArchitecture
     /// <summary>
     /// Tension map.
     /// </summary>
-    public required TensionMap TensionMap { get; init; }
+    public TensionMap TensionMap { get; init; } = new();
 }
 
 /// <summary>
@@ -64,62 +69,62 @@ public sealed record MainPlot
     /// <summary>
     /// Plot type (e.g., "Quest", "Revenge", "Rags to Riches").
     /// </summary>
-    public required string PlotType { get; init; }
+    public string PlotType { get; init; } = string.Empty;
 
     /// <summary>
     /// Central conflict.
     /// </summary>
-    public required string CentralConflict { get; init; }
+    public string CentralConflict { get; init; } = string.Empty;
 
     /// <summary>
     /// Stakes description.
     /// </summary>
-    public required string Stakes { get; init; }
+    public string Stakes { get; init; } = string.Empty;
 
     /// <summary>
     /// Stakes escalation through the story.
     /// </summary>
-    public required string StakesEscalation { get; init; }
+    public string StakesEscalation { get; init; } = string.Empty;
 
     /// <summary>
     /// The dramatic question.
     /// </summary>
-    public required string DramaticQuestion { get; init; }
+    public string DramaticQuestion { get; init; } = string.Empty;
 
     /// <summary>
     /// Inciting incident.
     /// </summary>
-    public required PlotPoint IncitingIncident { get; init; }
+    public PlotPoint IncitingIncident { get; init; } = new();
 
     /// <summary>
     /// First plot point / break into Act 2.
     /// </summary>
-    public required PlotPoint FirstPlotPoint { get; init; }
+    public PlotPoint FirstPlotPoint { get; init; } = new();
 
     /// <summary>
     /// Midpoint.
     /// </summary>
-    public required PlotPoint Midpoint { get; init; }
+    public PlotPoint Midpoint { get; init; } = new();
 
     /// <summary>
     /// Second plot point / break into Act 3.
     /// </summary>
-    public required PlotPoint SecondPlotPoint { get; init; }
+    public PlotPoint SecondPlotPoint { get; init; } = new();
 
     /// <summary>
     /// All is lost / dark night.
     /// </summary>
-    public required PlotPoint DarkNight { get; init; }
+    public PlotPoint DarkNight { get; init; } = new();
 
     /// <summary>
     /// Climax.
     /// </summary>
-    public required PlotPoint Climax { get; init; }
+    public PlotPoint Climax { get; init; } = new();
 
     /// <summary>
     /// Resolution.
     /// </summary>
-    public required PlotPoint Resolution { get; init; }
+    public PlotPoint Resolution { get; init; } = new();
 
     /// <summary>
     /// All major plot beats.
@@ -129,7 +134,7 @@ public sealed record MainPlot
     /// <summary>
     /// Antagonistic force.
     /// </summary>
-    public required AntagonisticForce AntagonisticForce { get; init; }
+    public AntagonisticForce AntagonisticForce { get; init; } = new();
 }
 
 /// <summary>
@@ -140,27 +145,27 @@ public sealed record PlotPoint
     /// <summary>
     /// Name of this plot point.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter where this occurs.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Description of what happens.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Why this matters.
     /// </summary>
-    public required string Significance { get; init; }
+    public string Significance { get; init; } = string.Empty;
 
     /// <summary>
     /// Emotional impact.
     /// </summary>
-    public required string EmotionalImpact { get; init; }
+    public string EmotionalImpact { get; init; } = string.Empty;
 
     /// <summary>
     /// Characters involved.
@@ -175,7 +180,7 @@ public sealed record PlotPoint
     /// <summary>
     /// What changes as a result.
     /// </summary>
-    public required string Consequences { get; init; }
+    public string Consequences { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -186,32 +191,32 @@ public sealed record PlotBeat
     /// <summary>
     /// Beat order.
     /// </summary>
-    public required int Order { get; init; }
+    public int Order { get; init; }
 
     /// <summary>
     /// Beat name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Percentage point in book.
     /// </summary>
-    public required double PercentagePoint { get; init; }
+    public double PercentagePoint { get; init; }
 
     /// <summary>
     /// Emotional impact.
     /// </summary>
-    public required string EmotionalImpact { get; init; }
+    public string EmotionalImpact { get; init; } = string.Empty;
 
     /// <summary>
     /// Characters involved.
@@ -226,7 +231,7 @@ public sealed record PlotBeat
     /// <summary>
     /// Beat type.
     /// </summary>
-    public required string BeatType { get; init; }
+    public string BeatType { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -237,12 +242,12 @@ public sealed record AntagonisticForce
     /// <summary>
     /// Type (person, nature, society, self, supernatural).
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Character ID if applicable.
@@ -252,7 +257,7 @@ public sealed record AntagonisticForce
     /// <summary>
     /// Goals of the antagonistic force.
     /// </summary>
-    public required string Goals { get; init; }
+    public string Goals { get; init; } = string.Empty;
 
     /// <summary>
     /// Methods used.
@@ -272,7 +277,7 @@ public sealed record AntagonisticForce
     /// <summary>
     /// How they escalate.
     /// </summary>
-    public required string Escalation { get; init; }
+    public string Escalation { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -288,32 +293,32 @@ public sealed record Subplot
     /// <summary>
     /// Subplot name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Type (romance, mystery, character development, etc.).
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Central conflict.
     /// </summary>
-    public required string Conflict { get; init; }
+    public string Conflict { get; init; } = string.Empty;
 
     /// <summary>
     /// Stakes.
     /// </summary>
-    public required string Stakes { get; init; }
+    public string Stakes { get; init; } = string.Empty;
 
     /// <summary>
     /// How it connects to main plot.
     /// </summary>
-    public required string MainPlotConnection { get; init; }
+    public string MainPlotConnection { get; init; } = string.Empty;
 
     /// <summary>
     /// Characters involved.
@@ -323,12 +328,17 @@ public sealed record Subplot
     /// <summary>
     /// Starting chapter.
     /// </summary>
-    public required int StartChapter { get; init; }
+    public int StartChapter { get; init; }
 
     /// <summary>
     /// Ending chapter.
     /// </summary>
-    public required int EndChapter { get; init; }
+    public int EndChapter { get; init; }
+
+    /// <summary>
+    /// Current status of the subplot.
+    /// </summary>
+    public SubplotStatus Status { get; init; } = SubplotStatus.Active;
 
     /// <summary>
     /// Key beats.
@@ -338,12 +348,12 @@ public sealed record Subplot
     /// <summary>
     /// Resolution.
     /// </summary>
-    public required string Resolution { get; init; }
+    public string Resolution { get; init; } = string.Empty;
 
     /// <summary>
     /// Thematic purpose.
     /// </summary>
-    public required string ThematicPurpose { get; init; }
+    public string ThematicPurpose { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -354,22 +364,22 @@ public sealed record ThematicStructure
     /// <summary>
     /// Central theme.
     /// </summary>
-    public required string CentralTheme { get; init; }
+    public string CentralTheme { get; init; } = string.Empty;
 
     /// <summary>
     /// Theme statement (the argument the book makes).
     /// </summary>
-    public required string ThemeStatement { get; init; }
+    public string ThemeStatement { get; init; } = string.Empty;
 
     /// <summary>
     /// Counter-argument explored.
     /// </summary>
-    public required string CounterArgument { get; init; }
+    public string CounterArgument { get; init; } = string.Empty;
 
     /// <summary>
     /// How the theme is proven.
     /// </summary>
-    public required string ThemeProof { get; init; }
+    public string ThemeProof { get; init; } = string.Empty;
 
     /// <summary>
     /// Thematic elements.
@@ -390,17 +400,17 @@ public sealed record ThematicElement
     /// <summary>
     /// Element type (motif, symbol, recurring image).
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Element.
     /// </summary>
-    public required string Element { get; init; }
+    public string Element { get; init; } = string.Empty;
 
     /// <summary>
     /// Meaning.
     /// </summary>
-    public required string Meaning { get; init; }
+    public string Meaning { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapters where it appears.
@@ -421,22 +431,22 @@ public sealed record ThematicMirror
     /// <summary>
     /// First element.
     /// </summary>
-    public required string ElementA { get; init; }
+    public string ElementA { get; init; } = string.Empty;
 
     /// <summary>
     /// Second element.
     /// </summary>
-    public required string ElementB { get; init; }
+    public string ElementB { get; init; } = string.Empty;
 
     /// <summary>
     /// How they contrast.
     /// </summary>
-    public required string Contrast { get; init; }
+    public string Contrast { get; init; } = string.Empty;
 
     /// <summary>
     /// Thematic purpose.
     /// </summary>
-    public required string Purpose { get; init; }
+    public string Purpose { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -452,27 +462,27 @@ public sealed record PlotTwist
     /// <summary>
     /// Twist name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Type (revelation, reversal, etc.).
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter where revealed.
     /// </summary>
-    public required int RevealChapter { get; init; }
+    public int RevealChapter { get; init; }
 
     /// <summary>
     /// The twist itself.
     /// </summary>
-    public required string Twist { get; init; }
+    public string Twist { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact on story.
     /// </summary>
-    public required string Impact { get; init; }
+    public string Impact { get; init; } = string.Empty;
 
     /// <summary>
     /// Setup chapters (foreshadowing).
@@ -487,7 +497,7 @@ public sealed record PlotTwist
     /// <summary>
     /// Emotional response expected.
     /// </summary>
-    public required string EmotionalResponse { get; init; }
+    public string EmotionalResponse { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -498,17 +508,17 @@ public sealed record TwistSetup
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// The setup.
     /// </summary>
-    public required string Setup { get; init; }
+    public string Setup { get; init; } = string.Empty;
 
     /// <summary>
     /// How subtle it should be.
     /// </summary>
-    public required string Subtlety { get; init; }
+    public string Subtlety { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -524,22 +534,22 @@ public sealed record MysteryElement
     /// <summary>
     /// The mystery question.
     /// </summary>
-    public required string Question { get; init; }
+    public string Question { get; init; } = string.Empty;
 
     /// <summary>
     /// The answer.
     /// </summary>
-    public required string Answer { get; init; }
+    public string Answer { get; init; } = string.Empty;
 
     /// <summary>
     /// When introduced.
     /// </summary>
-    public required int IntroductionChapter { get; init; }
+    public int IntroductionChapter { get; init; }
 
     /// <summary>
     /// When resolved.
     /// </summary>
-    public required int ResolutionChapter { get; init; }
+    public int ResolutionChapter { get; init; }
 
     /// <summary>
     /// Clues planted.
@@ -560,17 +570,17 @@ public sealed record MysteryClue
     /// <summary>
     /// The clue.
     /// </summary>
-    public required string Clue { get; init; }
+    public string Clue { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// How obvious.
     /// </summary>
-    public required string Obviousness { get; init; }
+    public string Obviousness { get; init; } = string.Empty;
 
     /// <summary>
     /// Who discovers it.
@@ -587,6 +597,11 @@ public sealed record SetupPayoffTracker
     /// All setup/payoff pairs.
     /// </summary>
     public List<SetupPayoffPair> Pairs { get; init; } = new();
+
+    /// <summary>
+    /// Items in the tracker (for compatibility).
+    /// </summary>
+    public List<SetupPayoff> Items { get; init; } = new();
 
     /// <summary>
     /// Orphaned setups (need payoff).
@@ -612,42 +627,42 @@ public sealed record SetupPayoffPair
     /// <summary>
     /// Element being set up.
     /// </summary>
-    public required string Element { get; init; }
+    public string Element { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Type of setup.
     /// </summary>
-    public required SetupPayoffType Type { get; init; }
+    public SetupPayoffType Type { get; init; } = SetupPayoffType.PlotDevice;
 
     /// <summary>
     /// Setup chapter.
     /// </summary>
-    public required int SetupChapter { get; init; }
+    public int SetupChapter { get; init; }
 
     /// <summary>
     /// Setup description.
     /// </summary>
-    public required string SetupDescription { get; init; }
+    public string SetupDescription { get; init; } = string.Empty;
 
     /// <summary>
     /// Payoff chapter.
     /// </summary>
-    public required int PayoffChapter { get; init; }
+    public int PayoffChapter { get; init; }
 
     /// <summary>
     /// Payoff description.
     /// </summary>
-    public required string PayoffDescription { get; init; }
+    public string PayoffDescription { get; init; } = string.Empty;
 
     /// <summary>
     /// Importance level.
     /// </summary>
-    public required int ImportanceLevel { get; init; }
+    public int ImportanceLevel { get; init; }
 }
 
 /// <summary>
@@ -663,27 +678,27 @@ public sealed record PlotThread
     /// <summary>
     /// Thread name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Thread type (main, subplot, character, mystery).
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Starting chapter.
     /// </summary>
-    public required int StartChapter { get; init; }
+    public int StartChapter { get; init; }
 
     /// <summary>
     /// Ending chapter.
     /// </summary>
-    public required int EndChapter { get; init; }
+    public int EndChapter { get; init; }
 
     /// <summary>
     /// Chapter appearances.
@@ -693,7 +708,7 @@ public sealed record PlotThread
     /// <summary>
     /// Resolution.
     /// </summary>
-    public required string Resolution { get; init; }
+    public string Resolution { get; init; } = string.Empty;
 
     /// <summary>
     /// Related characters.
@@ -709,17 +724,17 @@ public sealed record ThreadAppearance
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Action (advance, pause, resolve).
     /// </summary>
-    public required string Action { get; init; }
+    public string Action { get; init; } = string.Empty;
 
     /// <summary>
     /// Details.
     /// </summary>
-    public required string Details { get; init; }
+    public string Details { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -730,7 +745,7 @@ public sealed record TensionMap
     /// <summary>
     /// Description of tension strategy.
     /// </summary>
-    public required string Strategy { get; init; }
+    public string Strategy { get; init; } = string.Empty;
 
     /// <summary>
     /// Tension levels by chapter.
@@ -756,27 +771,27 @@ public sealed record ChapterTensionLevel
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Start level (1-10).
     /// </summary>
-    public required int StartLevel { get; init; }
+    public int StartLevel { get; init; }
 
     /// <summary>
     /// End level.
     /// </summary>
-    public required int EndLevel { get; init; }
+    public int EndLevel { get; init; }
 
     /// <summary>
     /// Peak level.
     /// </summary>
-    public required int PeakLevel { get; init; }
+    public int PeakLevel { get; init; }
 
     /// <summary>
     /// Tension type.
     /// </summary>
-    public required string TensionType { get; init; }
+    public string TensionType { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -787,22 +802,22 @@ public sealed record TensionPeakEvent
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Event.
     /// </summary>
-    public required string Event { get; init; }
+    public string Event { get; init; } = string.Empty;
 
     /// <summary>
     /// Tension level (1-10).
     /// </summary>
-    public required int Level { get; init; }
+    public int Level { get; init; }
 
     /// <summary>
     /// Type of tension.
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -813,20 +828,20 @@ public sealed record RecoveryMoment
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Purpose.
     /// </summary>
-    public required string Purpose { get; init; }
+    public string Purpose { get; init; } = string.Empty;
 
     /// <summary>
     /// Content.
     /// </summary>
-    public required string Content { get; init; }
+    public string Content { get; init; } = string.Empty;
 
     /// <summary>
     /// Duration (approximate word count).
     /// </summary>
-    public required int ApproximateWordCount { get; init; }
+    public int ApproximateWordCount { get; init; }
 }

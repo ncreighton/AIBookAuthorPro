@@ -23,6 +23,11 @@ public sealed class GenerationRequest
     public string UserPrompt { get; set; } = string.Empty;
 
     /// <summary>
+    /// Alias for UserPrompt for backwards compatibility.
+    /// </summary>
+    public string Prompt { get => UserPrompt; set => UserPrompt = value; }
+
+    /// <summary>
     /// Gets or sets the AI provider to use.
     /// </summary>
     public AIProviderType Provider { get; set; } = AIProviderType.Claude;

@@ -245,6 +245,22 @@ public sealed class ProjectService : IProjectService
     }
 
     /// <inheritdoc />
+    public Task<Result<Project>> GetProjectAsync(Guid projectId, CancellationToken cancellationToken = default)
+    {
+        if (_currentProject?.Id == projectId)
+        {
+            return Task.FromResult(Result<Project>.Success(_currentProject));
+        }
+        return Task.FromResult(Result<Project>.Failure($"Project with ID {projectId} not found or not loaded."));
+    }
+
+    /// <inheritdoc />
+    public Task<Result> SaveProjectAsync(Project project, CancellationToken cancellationToken = default)
+    {
+        return SaveAsync(project, project.FilePath, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<Result> CloseProjectAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -577,6 +593,9 @@ public sealed class ProjectService : IProjectService
 internal sealed class ChapterContent
 {
     public string? Content { get; set; }
+    public string? Text { get; set; }
+    public string? FormattedText { get; set; }
+    public int Version { get; set; }
     public List<Scene> Scenes { get; set; } = new();
 }
 

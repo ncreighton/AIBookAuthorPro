@@ -8,6 +8,7 @@ using AIBookAuthorPro.Application.Services.GuidedCreation;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
 using AIBookAuthorPro.Core.Services;
+using CoreGenerationOptions = AIBookAuthorPro.Core.Services.GenerationOptions;
 using Microsoft.Extensions.Logging;
 
 namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
@@ -48,42 +49,50 @@ public sealed class QualityEvaluationService : IQualityEvaluationService
             var allIssues = new List<QualityIssue>();
 
             // Evaluate each dimension
-            var narrativeResult = await EvaluateNarrativeQualityAsync(chapter.Content?.Text ?? "", blueprint, cancellationToken);
+            var narrativeResult = await EvaluateNarrativeQualityAsync(
+                chapter.Content ?? "", context.Style ?? new StyleGuide(), cancellationToken);
             if (narrativeResult.IsSuccess)
             {
                 dimensionScores.Add(narrativeResult.Value!);
                 allIssues.AddRange(ExtractIssuesFromDimension(narrativeResult.Value!, "Narrative"));
             }
 
-            var characterResult = await EvaluateCharacterConsistencyAsync(chapter.Content?.Text ?? "", context, cancellationToken);
+            var characterIds = blueprint.CharacterAppearances?.Select(c => c.CharacterId).ToList() ?? new List<Guid>();
+            var characterResult = await EvaluateCharacterConsistencyAsync(
+                chapter.Content ?? "", characterIds, context.CharacterBible ?? new CharacterBible(), cancellationToken);
             if (characterResult.IsSuccess)
             {
                 dimensionScores.Add(characterResult.Value!);
                 allIssues.AddRange(ExtractIssuesFromDimension(characterResult.Value!, "Character"));
             }
 
-            var plotResult = await EvaluatePlotAdherenceAsync(chapter.Content?.Text ?? "", blueprint, context, cancellationToken);
+            var plotResult = await EvaluatePlotAdherenceAsync(
+                chapter.Content ?? "", blueprint, context.PlotArchitecture ?? new PlotArchitecture(), cancellationToken);
             if (plotResult.IsSuccess)
             {
                 dimensionScores.Add(plotResult.Value!);
                 allIssues.AddRange(ExtractIssuesFromDimension(plotResult.Value!, "Plot"));
             }
 
-            var styleResult = await EvaluateStyleConsistencyAsync(chapter.Content?.Text ?? "", context, cancellationToken);
+            var styleResult = await EvaluateStyleConsistencyAsync(
+                chapter.Content ?? "", context.Style ?? new StyleGuide(), context.PreviousChapters ?? new List<GeneratedChapter>(), cancellationToken);
             if (styleResult.IsSuccess)
             {
                 dimensionScores.Add(styleResult.Value!);
                 allIssues.AddRange(ExtractIssuesFromDimension(styleResult.Value!, "Style"));
             }
 
-            var pacingResult = await EvaluatePacingAsync(chapter.Content?.Text ?? "", blueprint, cancellationToken);
+            var pacingResult = await EvaluatePacingAsync(
+                chapter.Content ?? "", blueprint.PacingIntensity, cancellationToken);
             if (pacingResult.IsSuccess)
             {
                 dimensionScores.Add(pacingResult.Value!);
                 allIssues.AddRange(ExtractIssuesFromDimension(pacingResult.Value!, "Pacing"));
             }
 
-            var dialogueResult = await EvaluateDialogueAsync(chapter.Content?.Text ?? "", context, cancellationToken);
+            var dialogueResult = await EvaluateDialogueAsync(
+                chapter.Content ?? "", characterIds, context.CharacterBible ?? new CharacterBible(), 
+                context.Style?.Dialogue ?? new DialogueGuidelines(), cancellationToken);
             if (dialogueResult.IsSuccess)
             {
                 dimensionScores.Add(dialogueResult.Value!);
@@ -112,20 +121,18 @@ public sealed class QualityEvaluationService : IQualityEvaluationService
                 EvaluatedAt = DateTime.UtcNow,
                 OverallScore = overallScore,
                 Verdict = verdict,
-                NarrativeQuality = dimensionScores.FirstOrDefault(d => d.DimensionName == "Narrative") ?? CreateDefaultDimension("Narrative"),
-                CharacterConsistency = dimensionScores.FirstOrDefault(d => d.DimensionName == "Character") ?? CreateDefaultDimension("Character"),
-                PlotAdherence = dimensionScores.FirstOrDefault(d => d.DimensionName == "Plot") ?? CreateDefaultDimension("Plot"),
-                StyleConsistency = dimensionScores.FirstOrDefault(d => d.DimensionName == "Style") ?? CreateDefaultDimension("Style"),
-                PacingQuality = dimensionScores.FirstOrDefault(d => d.DimensionName == "Pacing") ?? CreateDefaultDimension("Pacing"),
-                DialogueQuality = dimensionScores.FirstOrDefault(d => d.DimensionName == "Dialogue") ?? CreateDefaultDimension("Dialogue"),
+                NarrativeQuality = dimensionScores.FirstOrDefault(d => d.Dimension == "Narrative") ?? CreateDefaultDimension("Narrative"),
+                CharacterConsistency = dimensionScores.FirstOrDefault(d => d.Dimension == "Character") ?? CreateDefaultDimension("Character"),
+                PlotAdherence = dimensionScores.FirstOrDefault(d => d.Dimension == "Plot") ?? CreateDefaultDimension("Plot"),
+                StyleConsistency = dimensionScores.FirstOrDefault(d => d.Dimension == "Style") ?? CreateDefaultDimension("Style"),
+                PacingQuality = dimensionScores.FirstOrDefault(d => d.Dimension == "Pacing") ?? CreateDefaultDimension("Pacing"),
+                DialogueQuality = dimensionScores.FirstOrDefault(d => d.Dimension == "Dialogue") ?? CreateDefaultDimension("Dialogue"),
                 DescriptionQuality = CreateDefaultDimension("Description", 75),
                 EmotionalImpact = CreateDefaultDimension("Emotional", 75),
                 ContinuityAccuracy = CreateDefaultDimension("Continuity", 80),
                 Readability = CreateDefaultDimension("Readability", 80),
                 Issues = allIssues,
-                CriticalIssueCount = criticalCount,
-                MajorIssueCount = majorCount,
-                MinorIssueCount = minorCount,
+                // CriticalIssueCount, MajorIssueCount, MinorIssueCount are computed from Issues
                 ImprovementSuggestions = suggestions,
                 AutoRevisionRecommended = shouldAutoRevise
             };
@@ -159,7 +166,7 @@ public sealed class QualityEvaluationService : IQualityEvaluationService
     /// <inheritdoc />
     public async Task<Result<DimensionScore>> EvaluateNarrativeQualityAsync(
         string content,
-        ChapterBlueprint blueprint,
+        StyleGuide styleGuide,
         CancellationToken cancellationToken = default)
     {
         var prompt = $@"Evaluate the narrative quality of this chapter content.
@@ -176,17 +183,17 @@ Evaluate on these criteria (0-100):
 
 Respond in JSON:
 {{
-  "score": 0-100,
-  "strengths": ["strength1"],
-  "weaknesses": ["weakness1"],
-  "explanation": "detailed explanation"
+  ""score"": 0-100,
+  ""strengths"": [""strength1""],
+  ""weaknesses"": [""weakness1""],
+  ""explanation"": ""detailed explanation""
 }}";
 
         try
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -204,11 +211,12 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<DimensionScore>> EvaluateCharacterConsistencyAsync(
         string content,
-        QualityEvaluationContext context,
+        List<Guid> characters,
+        CharacterBible characterBible,
         CancellationToken cancellationToken = default)
     {
-        var characterContext = context.CharacterBible != null
-            ? $"Characters: {string.Join(", ", context.CharacterBible.MainCharacters?.Select(c => c.FullName) ?? Array.Empty<string>())}"
+        var characterContext = characterBible != null
+            ? $"Characters: {string.Join(", ", characterBible.MainCharacters?.Select(c => c.FullName) ?? Array.Empty<string>())}"
             : "";
 
         var prompt = $@"Evaluate character consistency in this chapter.
@@ -227,17 +235,17 @@ Evaluate:
 
 Respond in JSON:
 {{
-  "score": 0-100,
-  "strengths": ["strength1"],
-  "weaknesses": ["weakness1"],
-  "explanation": "detailed explanation"
+  ""score"": 0-100,
+  ""strengths"": [""strength1""],
+  ""weaknesses"": [""weakness1""],
+  ""explanation"": ""detailed explanation""
 }}";
 
         try
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -256,13 +264,13 @@ Respond in JSON:
     public async Task<Result<DimensionScore>> EvaluatePlotAdherenceAsync(
         string content,
         ChapterBlueprint blueprint,
-        QualityEvaluationContext context,
+        PlotArchitecture plotArchitecture,
         CancellationToken cancellationToken = default)
     {
         var plotContext = $@"Chapter should include:
 - Purpose: {blueprint.Purpose}
-- Key elements: {string.Join(", ", blueprint.MustInclude ?? Array.Empty<string>())}
-- Should avoid: {string.Join(", ", blueprint.MustAvoid ?? Array.Empty<string>())}";
+- Key elements: {string.Join(", ", blueprint.MustInclude ?? new List<string>())}
+- Should avoid: {string.Join(", ", blueprint.MustAvoid ?? new List<string>())}";
 
         var prompt = $@"Evaluate plot adherence in this chapter.
 
@@ -280,17 +288,17 @@ Evaluate:
 
 Respond in JSON:
 {{
-  "score": 0-100,
-  "strengths": ["strength1"],
-  "weaknesses": ["weakness1"],
-  "explanation": "detailed explanation"
+  ""score"": 0-100,
+  ""strengths"": [""strength1""],
+  ""weaknesses"": [""weakness1""],
+  ""explanation"": ""detailed explanation""
 }}";
 
         try
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -308,11 +316,12 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<DimensionScore>> EvaluateStyleConsistencyAsync(
         string content,
-        QualityEvaluationContext context,
+        StyleGuide styleGuide,
+        List<GeneratedChapter> previousChapters,
         CancellationToken cancellationToken = default)
     {
-        var styleContext = context.StyleGuide != null
-            ? $"Voice: {context.StyleGuide.Voice?.Description ?? "Not specified"}"
+        var styleContext = styleGuide != null
+            ? $"Voice: {styleGuide.Voice?.Description ?? "Not specified"}"
             : "";
 
         var prompt = $@"Evaluate style consistency in this chapter.
@@ -331,17 +340,17 @@ Evaluate:
 
 Respond in JSON:
 {{
-  "score": 0-100,
-  "strengths": ["strength1"],
-  "weaknesses": ["weakness1"],
-  "explanation": "detailed explanation"
+  ""score"": 0-100,
+  ""strengths"": [""strength1""],
+  ""weaknesses"": [""weakness1""],
+  ""explanation"": ""detailed explanation""
 }}";
 
         try
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -359,10 +368,10 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<DimensionScore>> EvaluatePacingAsync(
         string content,
-        ChapterBlueprint blueprint,
+        PacingIntensity expectedPacing,
         CancellationToken cancellationToken = default)
     {
-        var pacingContext = $"Expected pacing: {blueprint.PacingIntensity}";
+        var pacingContext = $"Expected pacing: {expectedPacing}";
 
         var prompt = $@"Evaluate pacing in this chapter.
 
@@ -380,17 +389,17 @@ Evaluate:
 
 Respond in JSON:
 {{
-  "score": 0-100,
-  "strengths": ["strength1"],
-  "weaknesses": ["weakness1"],
-  "explanation": "detailed explanation"
+  ""score"": 0-100,
+  ""strengths"": [""strength1""],
+  ""weaknesses"": [""weakness1""],
+  ""explanation"": ""detailed explanation""
 }}";
 
         try
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -408,7 +417,9 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<DimensionScore>> EvaluateDialogueAsync(
         string content,
-        QualityEvaluationContext context,
+        List<Guid> characters,
+        CharacterBible characterBible,
+        DialogueGuidelines dialogueGuidelines,
         CancellationToken cancellationToken = default)
     {
         var prompt = $@"Evaluate dialogue quality in this chapter.
@@ -425,17 +436,17 @@ Evaluate:
 
 Respond in JSON:
 {{
-  "score": 0-100,
-  "strengths": ["strength1"],
-  "weaknesses": ["weakness1"],
-  "explanation": "detailed explanation"
+  ""score"": 0-100,
+  ""strengths"": [""strength1""],
+  ""weaknesses"": [""weakness1""],
+  ""explanation"": ""detailed explanation""
 }}";
 
         try
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -516,7 +527,7 @@ Provide only the corrected text, nothing else.";
                 {
                     var response = await _aiService.GenerateAsync(
                         fixPrompt,
-                        new GenerationOptions { Temperature = 0.2, MaxTokens = 500 },
+                        new CoreGenerationOptions { Temperature = 0.2, MaxTokens = 500 },
                         cancellationToken);
 
                     if (response.IsSuccess && !string.IsNullOrEmpty(response.Value))
@@ -553,23 +564,21 @@ Provide only the corrected text, nothing else.";
 
     /// <inheritdoc />
     public async Task<Result<QualityComparisonResult>> CompareQualityAsync(
-        string originalContent,
-        string revisedContent,
-        ComprehensiveQualityReport originalReport,
+        GeneratedChapter original,
+        GeneratedChapter revised,
         CancellationToken cancellationToken = default)
     {
         // Simple comparison based on re-evaluation
         // In production, would do full re-evaluation
         var scoreDelta = 5; // Assume some improvement
+        var originalScore = original.QualityReport?.OverallScore ?? 70;
 
-        return Result<QualityComparisonResult>.Success(new QualityComparisonResult
+        return await Task.FromResult(Result<QualityComparisonResult>.Success(new QualityComparisonResult
         {
-            OriginalScore = originalReport.OverallScore,
-            RevisedScore = originalReport.OverallScore + scoreDelta,
-            ScoreDelta = scoreDelta,
-            IsImprovement = scoreDelta > 0,
+            OriginalScore = originalScore,
+            RevisedScore = originalScore + scoreDelta,
             Recommendation = scoreDelta > 0 ? "Keep revised version" : "Consider further revisions"
-        });
+        }));
     }
 
     #region Private Helper Methods
@@ -696,8 +705,8 @@ Provide only the corrected text, nothing else.";
         {
             suggestions.Add(new ImprovementSuggestion
             {
-                Category = dim.DimensionName,
-                Suggestion = $"Focus on improving {dim.DimensionName.ToLower()} quality",
+                Category = dim.Dimension,
+                Suggestion = $"Focus on improving {dim.Dimension.ToLower()} quality",
                 ExpectedImpact = $"+{Math.Min(20, 100 - dim.Score)} points potential",
                 Priority = dim.Score < 60 ? 10 : dim.Score < 70 ? 7 : 5
             });
@@ -708,3 +717,6 @@ Provide only the corrected text, nothing else.";
 
     #endregion
 }
+
+
+

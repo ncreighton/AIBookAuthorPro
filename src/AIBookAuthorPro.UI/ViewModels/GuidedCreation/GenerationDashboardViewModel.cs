@@ -156,7 +156,7 @@ public partial class GenerationDashboardViewModel : ObservableObject
         {
             AddActivityLog("Generation started", "AutoAwesome");
 
-            var progress = new Progress<GenerationProgress>(UpdateProgress);
+            var progress = new Progress<DetailedGenerationProgress>(UpdateProgress);
 
             var result = await _orchestrator.StartFullGenerationAsync(
                 Blueprint,
@@ -231,7 +231,7 @@ public partial class GenerationDashboardViewModel : ObservableObject
 
         try
         {
-            var progress = new Progress<GenerationProgress>(UpdateProgress);
+            var progress = new Progress<DetailedGenerationProgress>(UpdateProgress);
 
             var result = await _orchestrator.ResumeGenerationAsync(
                 Session.Id, progress, _generationCts.Token);
@@ -293,8 +293,8 @@ public partial class GenerationDashboardViewModel : ObservableObject
             {
                 chapterVm.Status = "Regenerated";
                 chapterVm.StatusColor = "#4CAF50";
-                chapterVm.QualityScore = result.Value!.QualityScore;
-                chapterVm.WordCount = result.Value.Metrics?.WordCount ?? 0;
+                chapterVm.QualityScore = result.Value!.QualityScore ?? 0;
+                chapterVm.WordCount = result.Value.WordCount;
                 AddActivityLog($"Chapter {chapterNumber} regenerated successfully", "CheckCircle");
             }
             else
@@ -397,15 +397,15 @@ public partial class GenerationDashboardViewModel : ObservableObject
 
     #region Private Methods
 
-    private void UpdateProgress(GenerationProgress progress)
+    private void UpdateProgress(DetailedGenerationProgress progress)
     {
-        OverallProgress = progress.OverallProgress;
-        CurrentChapterNumber = progress.CurrentChapter;
+        OverallProgress = progress.OverallPercentage;
+        CurrentChapterNumber = progress.CurrentChapter ?? 0;
         CurrentOperation = progress.CurrentOperation;
         WordsGenerated = progress.WordsGenerated;
         ElapsedTime = progress.ElapsedTime;
-        EstimatedRemaining = progress.EstimatedRemaining;
-        AverageQualityScore = progress.AverageQualityScore;
+        EstimatedRemaining = progress.EstimatedRemaining ?? TimeSpan.Zero;
+        AverageQualityScore = progress.AverageQualityScore ?? 0;
         EstimatedCost = progress.CostSoFar;
         StatusMessage = progress.CurrentOperation;
 
@@ -420,21 +420,6 @@ public partial class GenerationDashboardViewModel : ObservableObject
 
         // Mark completed chapters
         CompletedChapters = ChapterProgress.Count(c => c.IsComplete || c.IsApproved);
-
-        // Update live preview if streaming
-        if (!string.IsNullOrEmpty(progress.RecentActivities?.LastOrDefault()?.Description))
-        {
-            // Could show latest chunk in live preview
-        }
-
-        // Add activity log entries
-        foreach (var activity in progress.RecentActivities ?? Enumerable.Empty<ActivityLogEntry>())
-        {
-            if (!ActivityLog.Any(a => a.Timestamp == activity.Timestamp))
-            {
-                AddActivityLog(activity.Description, GetIconForActivity(activity.Type));
-            }
-        }
 
         // Notify computed properties
         OnPropertyChanged(nameof(ProgressText));

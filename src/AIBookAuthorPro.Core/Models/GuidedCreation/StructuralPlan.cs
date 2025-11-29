@@ -18,22 +18,27 @@ public sealed record StructuralPlan
     /// <summary>
     /// Structure template being used.
     /// </summary>
-    public required StructureTemplate Template { get; init; }
+    public StructureTemplate Template { get; init; } = StructureTemplate.ThreeAct;
 
     /// <summary>
     /// Total word count target.
     /// </summary>
-    public required int TotalWordCountTarget { get; init; }
+    public int TotalWordCountTarget { get; init; }
+
+    /// <summary>
+    /// Alias for TotalWordCountTarget.
+    /// </summary>
+    public int TotalTargetWordCount { get => TotalWordCountTarget; init => TotalWordCountTarget = value; }
 
     /// <summary>
     /// Total chapter count.
     /// </summary>
-    public required int ChapterCount { get; init; }
+    public int ChapterCount { get; init; }
 
     /// <summary>
     /// Point of view configuration.
     /// </summary>
-    public required string PointOfView { get; init; }
+    public string PointOfView { get; init; } = "Third Person Limited";
 
     /// <summary>
     /// Multiple POV characters if applicable.
@@ -43,7 +48,7 @@ public sealed record StructuralPlan
     /// <summary>
     /// Tense (past/present).
     /// </summary>
-    public required string Tense { get; init; }
+    public string Tense { get; init; } = "Past";
 
     /// <summary>
     /// Act definitions.
@@ -58,7 +63,17 @@ public sealed record StructuralPlan
     /// <summary>
     /// Pacing strategy map.
     /// </summary>
-    public required PacingMap PacingStrategy { get; init; }
+    public PacingMap PacingStrategy { get; init; } = new();
+
+    /// <summary>
+    /// Alias for PacingStrategy.
+    /// </summary>
+    public PacingMap Pacing { get => PacingStrategy; init => PacingStrategy = value; }
+
+    /// <summary>
+    /// Another alias for PacingStrategy.
+    /// </summary>
+    public PacingMap PacingMap { get => PacingStrategy; init => PacingStrategy = value; }
 
     /// <summary>
     /// Prologue if planned.
@@ -89,52 +104,57 @@ public sealed record ActDefinition
     /// <summary>
     /// Act number.
     /// </summary>
-    public required int ActNumber { get; init; }
+    public int ActNumber { get; init; }
 
     /// <summary>
     /// Act name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Purpose of this act.
     /// </summary>
-    public required string Purpose { get; init; }
+    public string Purpose { get; init; } = string.Empty;
 
     /// <summary>
     /// Percentage of total book.
     /// </summary>
-    public required double PercentageOfBook { get; init; }
+    public double PercentageOfBook { get; init; }
 
     /// <summary>
     /// Target word count for this act.
     /// </summary>
-    public required int TargetWordCount { get; init; }
+    public int TargetWordCount { get; init; }
 
     /// <summary>
     /// First chapter number in this act.
     /// </summary>
-    public required int StartChapter { get; init; }
+    public int StartChapter { get; init; }
 
     /// <summary>
     /// Last chapter number in this act.
     /// </summary>
-    public required int EndChapter { get; init; }
+    public int EndChapter { get; init; }
+
+    /// <summary>
+    /// Chapter definitions in this act.
+    /// </summary>
+    public List<ChapterDefinition> Chapters { get; init; } = new();
 
     /// <summary>
     /// Description of emotional arc.
     /// </summary>
-    public required string EmotionalArc { get; init; }
+    public string EmotionalArc { get; init; } = string.Empty;
 
     /// <summary>
     /// Starting emotional state.
     /// </summary>
-    public required string EmotionalStart { get; init; }
+    public string EmotionalStart { get; init; } = string.Empty;
 
     /// <summary>
     /// Ending emotional state.
     /// </summary>
-    public required string EmotionalEnd { get; init; }
+    public string EmotionalEnd { get; init; } = string.Empty;
 
     /// <summary>
     /// Key story beats in this act.
@@ -144,12 +164,12 @@ public sealed record ActDefinition
     /// <summary>
     /// Major turning point in/ending this act.
     /// </summary>
-    public required string TurningPoint { get; init; }
+    public string TurningPoint { get; init; } = string.Empty;
 
     /// <summary>
     /// Primary tension/conflict driver.
     /// </summary>
-    public required string PrimaryTension { get; init; }
+    public string PrimaryTension { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -160,27 +180,27 @@ public sealed record StoryBeat
     /// <summary>
     /// Beat name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Beat description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter where this beat occurs.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Approximate percentage point in the book.
     /// </summary>
-    public required double PercentagePoint { get; init; }
+    public double PercentagePoint { get; init; }
 
     /// <summary>
     /// Emotional impact expected.
     /// </summary>
-    public required string EmotionalImpact { get; init; }
+    public string EmotionalImpact { get; init; } = string.Empty;
 
     /// <summary>
     /// Is this a mandatory structural beat?
@@ -196,12 +216,17 @@ public sealed record PacingMap
     /// <summary>
     /// Overall pacing style.
     /// </summary>
-    public required NarrativePacing OverallPacing { get; init; }
+    public NarrativePacing OverallPacing { get; init; } = NarrativePacing.Moderate;
 
     /// <summary>
     /// Description of pacing strategy.
     /// </summary>
-    public required string Strategy { get; init; }
+    public string Strategy { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Alias for Strategy.
+    /// </summary>
+    public string Description { get => Strategy; init => Strategy = value; }
 
     /// <summary>
     /// Pacing points throughout the book.
@@ -227,17 +252,17 @@ public sealed record PacingPoint
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Intensity level (1-10).
     /// </summary>
-    public required int Intensity { get; init; }
+    public int Intensity { get; init; }
 
     /// <summary>
     /// Description of pacing at this point.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -248,7 +273,7 @@ public sealed record TensionPeak
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Scene within chapter.
@@ -258,17 +283,17 @@ public sealed record TensionPeak
     /// <summary>
     /// Type of peak (action, emotional, revelation).
     /// </summary>
-    public required string PeakType { get; init; }
+    public string PeakType { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Intensity (1-10).
     /// </summary>
-    public required int Intensity { get; init; }
+    public int Intensity { get; init; }
 }
 
 /// <summary>
@@ -279,15 +304,15 @@ public sealed record BreatherMoment
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Purpose of this breather.
     /// </summary>
-    public required string Purpose { get; init; }
+    public string Purpose { get; init; } = string.Empty;
 
     /// <summary>
     /// What happens during this moment.
     /// </summary>
-    public required string Content { get; init; }
+    public string Content { get; init; } = string.Empty;
 }

@@ -14,8 +14,12 @@ public enum GuidedCreationStep
     Welcome,
     /// <summary>Seed prompt input.</summary>
     SeedPrompt,
+    /// <summary>Prompt entry (alias for SeedPrompt).</summary>
+    PromptEntry = SeedPrompt,
     /// <summary>Prompt analysis.</summary>
     Analysis,
+    /// <summary>Prompt analysis (alias).</summary>
+    PromptAnalysis = Analysis,
     /// <summary>Creative brief expansion.</summary>
     BriefExpansion,
     /// <summary>Clarification questions.</summary>
@@ -24,16 +28,32 @@ public enum GuidedCreationStep
     BlueprintGeneration,
     /// <summary>Blueprint review.</summary>
     BlueprintReview,
+    /// <summary>Character editor.</summary>
+    CharacterEditor,
+    /// <summary>World editor.</summary>
+    WorldEditor,
+    /// <summary>Plot editor.</summary>
+    PlotEditor,
+    /// <summary>Style editor.</summary>
+    StyleEditor,
+    /// <summary>Structure editor.</summary>
+    StructureEditor,
     /// <summary>Configuration setup.</summary>
     Configuration,
+    /// <summary>Settings confirmation (alias).</summary>
+    SettingsConfirmation = Configuration,
     /// <summary>Generation in progress.</summary>
     Generation,
     /// <summary>Review and editing.</summary>
     Review,
+    /// <summary>Review and refine (alias).</summary>
+    ReviewAndRefine = Review,
     /// <summary>Export and completion.</summary>
     Export,
     /// <summary>Completed.</summary>
-    Completed
+    Completed,
+    /// <summary>Completion (alias).</summary>
+    Completion = Completed
 }
 
 /// <summary>
@@ -68,8 +88,14 @@ public sealed class GuidedCreationWizardSession
     /// <summary>Clarification questions.</summary>
     public List<ClarificationQuestion>? Clarifications { get; set; }
 
+    /// <summary>Required clarifications (alias for Clarifications).</summary>
+    public List<ClarificationQuestion>? RequiredClarifications { get => Clarifications; set => Clarifications = value; }
+
     /// <summary>User responses to clarifications.</summary>
     public Dictionary<Guid, string> ClarificationResponses { get; init; } = new();
+
+    /// <summary>Alias for StartedAt.</summary>
+    public DateTime CreatedAt { get => StartedAt; }
 
     /// <summary>Generated book blueprint.</summary>
     public BookBlueprint? Blueprint { get; set; }
@@ -91,6 +117,9 @@ public sealed class GuidedCreationWizardSession
 
     /// <summary>Progress percentage (0-100).</summary>
     public double ProgressPercentage { get; set; }
+
+    /// <summary>When the session was completed.</summary>
+    public DateTime? CompletedAt { get; set; }
 
     /// <summary>Calculates progress percentage based on current step.</summary>
     public void UpdateProgress()
@@ -140,13 +169,13 @@ public sealed record ClarificationQuestion
     public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>The question text.</summary>
-    public required string Question { get; init; }
+    public string Question { get; init; } = string.Empty;
 
     /// <summary>Why this question matters.</summary>
-    public required string Rationale { get; init; }
+    public string Rationale { get; init; } = string.Empty;
 
     /// <summary>Category of question.</summary>
-    public required ClarificationCategory Category { get; init; }
+    public ClarificationCategory Category { get; init; } = ClarificationCategory.Plot;
 
     /// <summary>Priority level.</summary>
     public ClarificationPriority Priority { get; init; } = ClarificationPriority.Important;
@@ -193,16 +222,22 @@ public enum ClarificationCategory
 public sealed record WizardProgressSummary
 {
     /// <summary>Current step.</summary>
-    public required GuidedCreationStep CurrentStep { get; init; }
+    public GuidedCreationStep CurrentStep { get; init; } = GuidedCreationStep.Welcome;
 
     /// <summary>Total steps.</summary>
     public int TotalSteps { get; init; } = 12;
 
     /// <summary>Current step number (1-based).</summary>
-    public required int CurrentStepNumber { get; init; }
+    public int CurrentStepNumber { get; init; }
+
+    /// <summary>Current step index (0-based).</summary>
+    public int CurrentStepIndex { get => CurrentStepNumber - 1; }
 
     /// <summary>Progress percentage.</summary>
-    public required double ProgressPercentage { get; init; }
+    public double ProgressPercentage { get; init; }
+
+    /// <summary>Alias for ProgressPercentage.</summary>
+    public double OverallProgressPercentage { get => ProgressPercentage; init => ProgressPercentage = value; }
 
     /// <summary>Steps completed.</summary>
     public List<GuidedCreationStep> CompletedSteps { get; init; } = new();
@@ -214,10 +249,28 @@ public sealed record WizardProgressSummary
     public TimeSpan? EstimatedTimeRemaining { get; init; }
 
     /// <summary>Time elapsed.</summary>
-    public required TimeSpan TimeElapsed { get; init; }
+    public TimeSpan TimeElapsed { get; init; } = TimeSpan.Zero;
+
+    /// <summary>Alias for TimeElapsed.</summary>
+    public TimeSpan TimeSpentSoFar { get => TimeElapsed; init => TimeElapsed = value; }
+
+    /// <summary>Whether analysis result is available.</summary>
+    public bool HasAnalysisResult { get; init; }
+
+    /// <summary>Whether blueprint is available.</summary>
+    public bool HasBlueprint { get; init; }
+
+    /// <summary>Whether blueprint is approved.</summary>
+    public bool IsBlueprintApproved { get; init; }
+
+    /// <summary>Whether generation session exists.</summary>
+    public bool HasGenerationSession { get; init; }
+
+    /// <summary>Generation progress details.</summary>
+    public GenerationProgress? GenerationProgress { get; init; }
 
     /// <summary>Status message.</summary>
-    public required string StatusMessage { get; init; }
+    public string StatusMessage { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -226,13 +279,13 @@ public sealed record WizardProgressSummary
 public sealed record BlueprintGenerationProgress
 {
     /// <summary>Current phase.</summary>
-    public required string Phase { get; init; }
+    public string Phase { get; init; } = string.Empty;
 
     /// <summary>Progress percentage (0-100).</summary>
-    public required double Percentage { get; init; }
+    public double Percentage { get; init; }
 
     /// <summary>Status message.</summary>
-    public required string Message { get; init; }
+    public string Message { get; init; } = string.Empty;
 
     /// <summary>Components completed.</summary>
     public List<string> CompletedComponents { get; init; } = new();
@@ -247,10 +300,10 @@ public sealed record BlueprintGenerationProgress
 public sealed record GenerationProgress
 {
     /// <summary>Current chapter number.</summary>
-    public required int CurrentChapter { get; init; }
+    public int CurrentChapter { get; init; }
 
     /// <summary>Total chapters.</summary>
-    public required int TotalChapters { get; init; }
+    public int TotalChapters { get; init; }
 
     /// <summary>Current scene within chapter.</summary>
     public int? CurrentScene { get; init; }
@@ -259,13 +312,13 @@ public sealed record GenerationProgress
     public int? TotalScenes { get; init; }
 
     /// <summary>Overall progress percentage.</summary>
-    public required double OverallPercentage { get; init; }
+    public double OverallPercentage { get; init; }
 
     /// <summary>Chapter progress percentage.</summary>
-    public required double ChapterPercentage { get; init; }
+    public double ChapterPercentage { get; init; }
 
     /// <summary>Status message.</summary>
-    public required string Message { get; init; }
+    public string Message { get; init; } = string.Empty;
 
     /// <summary>Words generated so far.</summary>
     public int WordsGenerated { get; init; }
@@ -277,7 +330,7 @@ public sealed record GenerationProgress
     public TimeSpan? EstimatedTimeRemaining { get; init; }
 
     /// <summary>Current generation phase.</summary>
-    public required GenerationPhase Phase { get; init; }
+    public GenerationPhase Phase { get; init; } = GenerationPhase.Initialization;
 }
 
 /// <summary>
@@ -286,13 +339,13 @@ public sealed record GenerationProgress
 public sealed record ChapterSummary
 {
     /// <summary>Chapter number.</summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>Chapter title.</summary>
-    public required string Title { get; init; }
+    public string Title { get; init; } = string.Empty;
 
     /// <summary>Brief summary.</summary>
-    public required string Summary { get; init; }
+    public string Summary { get; init; } = string.Empty;
 
     /// <summary>Key events.</summary>
     public List<string> KeyEvents { get; init; } = new();
@@ -319,16 +372,19 @@ public sealed record SetupPayoff
     public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>Type of setup/payoff.</summary>
-    public required SetupPayoffType Type { get; init; }
+    public SetupPayoffType Type { get; init; } = SetupPayoffType.PlotDevice;
 
     /// <summary>Description.</summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>Chapter where setup occurs.</summary>
-    public required int SetupChapter { get; init; }
+    public int SetupChapter { get; init; }
 
     /// <summary>Expected payoff chapter.</summary>
     public int? ExpectedPayoffChapter { get; init; }
+
+    /// <summary>Payoff chapter alias (returns Expected or Actual).</summary>
+    public int? PayoffChapter { get => ActualPayoffChapter ?? ExpectedPayoffChapter; }
 
     /// <summary>Actual payoff chapter (if resolved).</summary>
     public int? ActualPayoffChapter { get; init; }
@@ -366,13 +422,13 @@ public interface IPipelineStep
 public sealed class PipelineContext
 {
     /// <summary>Chapter being generated.</summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>Book blueprint.</summary>
-    public required BookBlueprint Blueprint { get; init; }
+    public BookBlueprint Blueprint { get; init; } = new();
 
     /// <summary>Chapter blueprint.</summary>
-    public required ChapterBlueprint ChapterBlueprint { get; init; }
+    public ChapterBlueprint ChapterBlueprint { get; init; } = new();
 
     /// <summary>Generated content (built up through pipeline).</summary>
     public string GeneratedContent { get; set; } = string.Empty;
@@ -382,6 +438,21 @@ public sealed class PipelineContext
 
     /// <summary>Metadata.</summary>
     public Dictionary<string, object> Metadata { get; init; } = new();
+
+    /// <summary>Character context string.</summary>
+    public string CharacterContext { get; set; } = string.Empty;
+
+    /// <summary>Narrative context string.</summary>
+    public string NarrativeContext { get; set; } = string.Empty;
+
+    /// <summary>Chapter-specific instructions.</summary>
+    public string ChapterInstructions { get; set; } = string.Empty;
+
+    /// <summary>System prompt for generation.</summary>
+    public string SystemPrompt { get; set; } = string.Empty;
+
+    /// <summary>Previously generated chapters in this session.</summary>
+    public List<GeneratedChapter> PreviousChapters { get; set; } = new();
 }
 
 /// <summary>
@@ -390,7 +461,10 @@ public sealed class PipelineContext
 public sealed record PipelineStepResult
 {
     /// <summary>Whether step succeeded.</summary>
-    public required bool Success { get; init; }
+    public bool Success { get; init; }
+
+    /// <summary>Name of the step that produced this result.</summary>
+    public string StepName { get; init; } = string.Empty;
 
     /// <summary>Error message if failed.</summary>
     public string? ErrorMessage { get; init; }
@@ -419,17 +493,59 @@ public sealed record PipelineStepResult
 public sealed record PipelineProgress
 {
     /// <summary>Current step name.</summary>
-    public required string CurrentStep { get; init; }
+    public string CurrentStep { get; init; } = string.Empty;
 
     /// <summary>Step number (1-based).</summary>
-    public required int StepNumber { get; init; }
+    public int StepNumber { get; init; }
 
     /// <summary>Total steps.</summary>
-    public required int TotalSteps { get; init; }
+    public int TotalSteps { get; init; }
 
     /// <summary>Progress percentage.</summary>
-    public required double Percentage { get; init; }
+    public double Percentage { get; init; }
 
     /// <summary>Status message.</summary>
-    public required string Message { get; init; }
+    public string Message { get; init; } = string.Empty;
+}
+
+/// <summary>
+/// Container for chapter summaries.
+/// </summary>
+public sealed record ChapterSummaries
+{
+    /// <summary>List of summaries for each chapter.</summary>
+    public List<ChapterSummary> Summaries { get; init; } = new();
+
+    /// <summary>Overall plot summary so far.</summary>
+    public string PlotSummary { get; init; } = string.Empty;
+
+    /// <summary>AI-generated summary.</summary>
+    public string AISummary { get; init; } = string.Empty;
+
+    /// <summary>Brief one-line summary.</summary>
+    public string BriefSummary { get; init; } = string.Empty;
+
+    /// <summary>Key events in the chapter.</summary>
+    public List<string> KeyEvents { get; init; } = new();
+}
+
+/// <summary>
+/// Simple chapter definition for structural planning.
+/// </summary>
+public sealed record ChapterDefinition
+{
+    /// <summary>Chapter number.</summary>
+    public int ChapterNumber { get; init; }
+
+    /// <summary>Chapter title.</summary>
+    public string Title { get; init; } = string.Empty;
+
+    /// <summary>Chapter purpose.</summary>
+    public string Purpose { get; init; } = string.Empty;
+
+    /// <summary>Target word count.</summary>
+    public int TargetWordCount { get; init; }
+
+    /// <summary>Key beats in this chapter.</summary>
+    public List<string> KeyBeats { get; init; } = new();
 }

@@ -546,7 +546,7 @@
                                         <TextBlock FontSize="18">
                                             <Run Text="{Binding CoverWidthInches, StringFormat='{}{0:F2}'}"/>
                                             <Run Text=" × "/>
-                                            <Run Text="{Binding CoverHeightInches, StringFormat='{}{0:F2}'} inches"/>
+                                            <Run Text="{Binding CoverHeightInches, StringFormat='{}{0:F2} inches'}"/>
                                         </TextBlock>
                                     </StackPanel>
                                 </materialDesign:Card>

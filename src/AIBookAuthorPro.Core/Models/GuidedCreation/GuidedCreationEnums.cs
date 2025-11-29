@@ -148,6 +148,8 @@ public enum ChapterGenerationStatus
     Generated,
     /// <summary>Being reviewed by user or AI.</summary>
     InReview,
+    /// <summary>Needs review.</summary>
+    NeedsReview,
     /// <summary>Approved and finalized.</summary>
     Approved,
     /// <summary>Needs revision based on feedback.</summary>
@@ -256,16 +258,37 @@ public enum GenerationSessionStatus
     Initializing,
     /// <summary>Actively generating content.</summary>
     Running,
+    /// <summary>In progress - same as Running.</summary>
+    InProgress = Running,
     /// <summary>Temporarily paused by user.</summary>
     Paused,
     /// <summary>Waiting for user review/input.</summary>
     WaitingForReview,
     /// <summary>All content successfully generated.</summary>
     Completed,
+    /// <summary>Completed but with some errors.</summary>
+    CompletedWithErrors,
     /// <summary>Generation encountered an unrecoverable error.</summary>
     Failed,
     /// <summary>Cancelled by user.</summary>
     Cancelled
+}
+
+/// <summary>
+/// Subplot status.
+/// </summary>
+public enum SubplotStatus
+{
+    /// <summary>Not yet started.</summary>
+    NotStarted,
+    /// <summary>Currently active.</summary>
+    Active,
+    /// <summary>Temporarily dormant.</summary>
+    Dormant,
+    /// <summary>Resolved/completed.</summary>
+    Resolved,
+    /// <summary>Abandoned.</summary>
+    Abandoned
 }
 
 /// <summary>
@@ -353,6 +376,8 @@ public enum ClarificationPriority
 {
     /// <summary>Must answer before proceeding.</summary>
     Critical,
+    /// <summary>Required - same as Critical.</summary>
+    Required = Critical,
     /// <summary>Important for quality but can use defaults.</summary>
     Important,
     /// <summary>Optional, can infer from context.</summary>

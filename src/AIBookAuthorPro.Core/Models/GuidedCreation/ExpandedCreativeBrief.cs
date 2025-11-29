@@ -19,12 +19,22 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Reference to the seed prompt.
     /// </summary>
-    public required Guid SeedPromptId { get; init; }
+    public Guid SeedPromptId { get; init; }
+
+    /// <summary>
+    /// Alias for SeedPromptId.
+    /// </summary>
+    public Guid PromptId { get => SeedPromptId; init => SeedPromptId = value; }
 
     /// <summary>
     /// Reference to the analysis result.
     /// </summary>
-    public required Guid AnalysisResultId { get; init; }
+    public Guid AnalysisResultId { get; init; }
+
+    /// <summary>
+    /// Alias for AnalysisResultId.
+    /// </summary>
+    public Guid AnalysisId { get => AnalysisResultId; init => AnalysisResultId = value; }
 
     /// <summary>
     /// When this brief was created.
@@ -36,7 +46,7 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Working title for the book.
     /// </summary>
-    public required string WorkingTitle { get; init; }
+    public string WorkingTitle { get; init; } = string.Empty;
 
     /// <summary>
     /// Alternative title options.
@@ -63,34 +73,39 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Expanded premise (1-2 paragraphs).
     /// </summary>
-    public required string ExpandedPremise { get; init; }
+    public string ExpandedPremise { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Alias for ExpandedPremise.
+    /// </summary>
+    public string Premise { get => ExpandedPremise; init => ExpandedPremise = value; }
 
     /// <summary>
     /// One-sentence logline.
     /// </summary>
-    public required string Logline { get; init; }
+    public string Logline { get; init; } = string.Empty;
 
     /// <summary>
     /// Elevator pitch (30 seconds).
     /// </summary>
-    public required string ElevatorPitch { get; init; }
+    public string ElevatorPitch { get; init; } = string.Empty;
 
     /// <summary>
     /// Back cover blurb.
     /// </summary>
-    public required string BackCoverBlurb { get; init; }
+    public string BackCoverBlurb { get; init; } = string.Empty;
 
     /// <summary>
     /// Extended synopsis (1-2 pages).
     /// </summary>
-    public required string ExtendedSynopsis { get; init; }
+    public string ExtendedSynopsis { get; init; } = string.Empty;
 
     // ================== GENRE & MARKET ==================
 
     /// <summary>
     /// Primary genre.
     /// </summary>
-    public required string PrimaryGenre { get; init; }
+    public string PrimaryGenre { get; init; } = string.Empty;
 
     /// <summary>
     /// Sub-genres.
@@ -122,12 +137,12 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Detailed audience description.
     /// </summary>
-    public required string TargetAudienceDescription { get; init; }
+    public string TargetAudienceDescription { get; init; } = string.Empty;
 
     /// <summary>
     /// Age range.
     /// </summary>
-    public required AudienceAgeRange AgeRange { get; init; }
+    public AudienceAgeRange AgeRange { get; init; } = AudienceAgeRange.Adult;
 
     /// <summary>
     /// Reader expectations for this genre/audience.
@@ -144,7 +159,7 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Central theme with exploration notes.
     /// </summary>
-    public required ThemeDefinition CentralTheme { get; init; }
+    public ThemeDefinition CentralTheme { get; init; } = new();
 
     /// <summary>
     /// Secondary themes.
@@ -166,7 +181,7 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Overall tone description.
     /// </summary>
-    public required string ToneDescription { get; init; }
+    public string ToneDescription { get; init; } = string.Empty;
 
     /// <summary>
     /// Mood keywords.
@@ -176,7 +191,7 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Prose style description.
     /// </summary>
-    public required string ProseStyleDescription { get; init; }
+    public string ProseStyleDescription { get; init; } = string.Empty;
 
     /// <summary>
     /// Narrative voice characteristics.
@@ -186,51 +201,51 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Dialogue style notes.
     /// </summary>
-    public required string DialogueStyle { get; init; }
+    public string DialogueStyle { get; init; } = string.Empty;
 
     /// <summary>
     /// Pacing strategy.
     /// </summary>
-    public required NarrativePacing PacingStrategy { get; init; }
+    public NarrativePacing PacingStrategy { get; init; } = NarrativePacing.Moderate;
 
     // ================== STRUCTURAL PLAN ==================
 
     /// <summary>
     /// Chosen structure template.
     /// </summary>
-    public required StructureTemplate StructureTemplate { get; init; }
+    public StructureTemplate StructureTemplate { get; init; } = StructureTemplate.ThreeAct;
 
     /// <summary>
     /// Target word count.
     /// </summary>
-    public required int TargetWordCount { get; init; }
+    public int TargetWordCount { get; init; }
 
     /// <summary>
     /// Planned chapter count.
     /// </summary>
-    public required int PlannedChapterCount { get; init; }
+    public int PlannedChapterCount { get; init; }
 
     /// <summary>
     /// Average chapter length target.
     /// </summary>
-    public required int AverageChapterLength { get; init; }
+    public int AverageChapterLength { get; init; }
 
     /// <summary>
     /// Point of view.
     /// </summary>
-    public required string PointOfView { get; init; }
+    public string PointOfView { get; init; } = string.Empty;
 
     /// <summary>
     /// Tense (past/present).
     /// </summary>
-    public required string Tense { get; init; }
+    public string Tense { get; init; } = string.Empty;
 
     // ================== CONFLICT FRAMEWORK ==================
 
     /// <summary>
     /// Central conflict definition.
     /// </summary>
-    public required ConflictFramework CentralConflict { get; init; }
+    public ConflictFramework CentralConflict { get; init; } = new();
 
     /// <summary>
     /// Secondary conflicts.
@@ -242,37 +257,37 @@ public sealed record ExpandedCreativeBrief
     /// <summary>
     /// Opening hook concept.
     /// </summary>
-    public required string OpeningHook { get; init; }
+    public string OpeningHook { get; init; } = string.Empty;
 
     /// <summary>
     /// Inciting incident description.
     /// </summary>
-    public required string IncitingIncident { get; init; }
+    public string IncitingIncident { get; init; } = string.Empty;
 
     /// <summary>
     /// Midpoint turn description.
     /// </summary>
-    public required string MidpointTurn { get; init; }
+    public string MidpointTurn { get; init; } = string.Empty;
 
     /// <summary>
     /// Dark night/low point description.
     /// </summary>
-    public required string DarkNightOfSoul { get; init; }
+    public string DarkNightOfSoul { get; init; } = string.Empty;
 
     /// <summary>
     /// Climax description.
     /// </summary>
-    public required string Climax { get; init; }
+    public string Climax { get; init; } = string.Empty;
 
     /// <summary>
     /// Resolution description.
     /// </summary>
-    public required string Resolution { get; init; }
+    public string Resolution { get; init; } = string.Empty;
 
     /// <summary>
     /// Ending type (happy, bittersweet, tragic, open).
     /// </summary>
-    public required string EndingType { get; init; }
+    public string EndingType { get; init; } = string.Empty;
 
     // ================== RESEARCH REQUIREMENTS ==================
 
@@ -307,12 +322,12 @@ public sealed record ThemeDefinition
     /// <summary>
     /// Theme statement.
     /// </summary>
-    public required string Theme { get; init; }
+    public string Theme { get; init; } = string.Empty;
 
     /// <summary>
     /// How the theme should be explored.
     /// </summary>
-    public required string Exploration { get; init; }
+    public string Exploration { get; init; } = string.Empty;
 
     /// <summary>
     /// Key scenes where theme appears.
@@ -343,12 +358,12 @@ public sealed record MotifDefinition
     /// <summary>
     /// The motif element.
     /// </summary>
-    public required string Motif { get; init; }
+    public string Motif { get; init; } = string.Empty;
 
     /// <summary>
     /// What it represents.
     /// </summary>
-    public required string Meaning { get; init; }
+    public string Meaning { get; init; } = string.Empty;
 
     /// <summary>
     /// Where it should appear.
@@ -369,12 +384,12 @@ public sealed record SymbolDefinition
     /// <summary>
     /// The symbol.
     /// </summary>
-    public required string Symbol { get; init; }
+    public string Symbol { get; init; } = string.Empty;
 
     /// <summary>
     /// What it symbolizes.
     /// </summary>
-    public required string Symbolism { get; init; }
+    public string Symbolism { get; init; } = string.Empty;
 
     /// <summary>
     /// Key appearances.
@@ -390,12 +405,12 @@ public sealed record GenreTrope
     /// <summary>
     /// Trope name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description of the trope.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// How to use or subvert it.
@@ -416,32 +431,32 @@ public sealed record ConflictFramework
     /// <summary>
     /// Type of conflict.
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Description of the conflict.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// What's at stake.
     /// </summary>
-    public required string Stakes { get; init; }
+    public string Stakes { get; init; } = string.Empty;
 
     /// <summary>
     /// Source of the conflict.
     /// </summary>
-    public required string Source { get; init; }
+    public string Source { get; init; } = string.Empty;
 
     /// <summary>
     /// How it escalates.
     /// </summary>
-    public required string Escalation { get; init; }
+    public string Escalation { get; init; } = string.Empty;
 
     /// <summary>
     /// How it resolves.
     /// </summary>
-    public required string Resolution { get; init; }
+    public string Resolution { get; init; } = string.Empty;
 
     /// <summary>
     /// Characters involved.
@@ -457,17 +472,17 @@ public sealed record ResearchRequirement
     /// <summary>
     /// Topic to research.
     /// </summary>
-    public required string Topic { get; init; }
+    public string Topic { get; init; } = string.Empty;
 
     /// <summary>
     /// Why it's needed.
     /// </summary>
-    public required string Reason { get; init; }
+    public string Reason { get; init; } = string.Empty;
 
     /// <summary>
     /// Priority level.
     /// </summary>
-    public required ClarificationPriority Priority { get; init; }
+    public ClarificationPriority Priority { get; init; } = ClarificationPriority.Important;
 
     /// <summary>
     /// Suggested resources.

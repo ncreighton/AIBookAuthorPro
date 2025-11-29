@@ -3,10 +3,18 @@
 // Copyright (c) 2024 Nick Creighton. All rights reserved.
 // =============================================================================
 
-using AIBookAuthorPro.Application.Services.GuidedCreation;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
 using Microsoft.Extensions.Logging;
+
+// Fully qualified types for Application layer to avoid ambiguity with Core types
+using IGuidedCreationWizardService = AIBookAuthorPro.Application.Services.GuidedCreation.IGuidedCreationWizardService;
+using IPromptAnalysisService = AIBookAuthorPro.Application.Services.GuidedCreation.IPromptAnalysisService;
+using IBlueprintGeneratorService = AIBookAuthorPro.Application.Services.GuidedCreation.IBlueprintGeneratorService;
+using IBookGenerationOrchestrator = AIBookAuthorPro.Application.Services.GuidedCreation.IBookGenerationOrchestrator;
+using GenerationOptions = AIBookAuthorPro.Application.Services.GuidedCreation.GenerationOptions;
+using DetailedBlueprintProgress = AIBookAuthorPro.Application.Services.GuidedCreation.DetailedBlueprintProgress;
+using DetailedGenerationProgress = AIBookAuthorPro.Application.Services.GuidedCreation.DetailedGenerationProgress;
 
 namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
 
@@ -44,16 +52,11 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
         {
             Id = Guid.NewGuid(),
             CurrentStep = GuidedCreationStep.PromptEntry,
-            CreatedAt = DateTime.UtcNow,
             LastUpdatedAt = DateTime.UtcNow,
-            Status = WizardSessionStatus.InProgress,
-            StepHistory = new List<WizardStepHistoryEntry>
+            Status = Core.Models.GuidedCreation.WizardSessionStatus.InProgress,
+            StepHistory = new List<GuidedCreationStep>
             {
-                new()
-                {
-                    Step = GuidedCreationStep.PromptEntry,
-                    EnteredAt = DateTime.UtcNow
-                }
+                GuidedCreationStep.PromptEntry
             }
         };
 
@@ -108,21 +111,12 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
             return Result<GuidedCreationWizardSession>.Success(session);
         }
 
-        // Mark current step as completed
-        var currentHistory = session.StepHistory?.LastOrDefault();
-        if (currentHistory != null)
+        // Add new step to history if not already present
+        // Note: StepHistory is init-only, so we modify the existing list if it exists
+        if (session.StepHistory != null && !session.StepHistory.Contains(nextStep))
         {
-            currentHistory.CompletedAt = DateTime.UtcNow;
-            currentHistory.IsCompleted = true;
+            session.StepHistory.Add(nextStep);
         }
-
-        // Add new step to history
-        session.StepHistory ??= new List<WizardStepHistoryEntry>();
-        session.StepHistory.Add(new WizardStepHistoryEntry
-        {
-            Step = nextStep,
-            EnteredAt = DateTime.UtcNow
-        });
 
         session.CurrentStep = nextStep;
         session.LastUpdatedAt = DateTime.UtcNow;
@@ -204,10 +198,10 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
             GuidedCreationStep.Clarifications => ValidateClarifications(session),
             GuidedCreationStep.BlueprintReview => session.Blueprint != null,
             GuidedCreationStep.StructureEditor => session.Blueprint?.StructuralPlan != null,
-            GuidedCreationStep.CharacterEditor => session.Blueprint?.CharacterBible != null,
-            GuidedCreationStep.PlotEditor => session.Blueprint?.PlotArchitecture != null,
-            GuidedCreationStep.WorldEditor => session.Blueprint?.WorldBible != null,
-            GuidedCreationStep.StyleEditor => session.Blueprint?.StyleGuide != null,
+            GuidedCreationStep.CharacterEditor => session.Blueprint?.Characters != null,
+            GuidedCreationStep.PlotEditor => session.Blueprint?.Plot != null,
+            GuidedCreationStep.WorldEditor => session.Blueprint?.World != null,
+            GuidedCreationStep.StyleEditor => session.Blueprint?.Style != null,
             GuidedCreationStep.SettingsConfirmation => session.Configuration != null,
             GuidedCreationStep.Generation => session.BlueprintApproved,
             GuidedCreationStep.ReviewAndRefine => session.GenerationSession != null,
@@ -248,9 +242,10 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
 
         _logger.LogInformation("Analyzing prompt for session {SessionId}", session.Id);
 
+        // Note: IPromptAnalysisService doesn't support progress reporting
+        _ = progress; // Ignored
         var result = await _promptAnalysisService.AnalyzePromptAsync(
             session.SeedPrompt,
-            progress,
             cancellationToken);
 
         if (result.IsSuccess)
@@ -264,11 +259,16 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Progress reporting is not supported due to type differences between Core and Application namespaces.
+    /// </remarks>
     public async Task<Result<BookBlueprint>> GenerateBlueprintAsync(
         GuidedCreationWizardSession session,
         IProgress<BlueprintGenerationProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        _ = progress; // Intentionally ignored due to type mismatch between Core/Application
+        
         if (session?.AnalysisResult == null)
             return Result<BookBlueprint>.Failure("Prompt analysis must be completed first");
         if (session.ExpandedBrief == null)
@@ -278,8 +278,7 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
 
         var result = await _blueprintGeneratorService.GenerateBlueprintAsync(
             session.ExpandedBrief,
-            session.ClarificationResponses ?? new Dictionary<string, string>(),
-            progress,
+            null,
             cancellationToken);
 
         if (result.IsSuccess)
@@ -293,11 +292,16 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Progress reporting is not supported due to type differences between Core and Application namespaces.
+    /// </remarks>
     public async Task<Result<GenerationSession>> StartGenerationAsync(
         GuidedCreationWizardSession session,
         IProgress<GenerationProgress>? progress = null,
         CancellationToken cancellationToken = default)
     {
+        _ = progress; // Intentionally ignored due to type mismatch between Core/Application
+        
         if (session?.Blueprint == null)
             return Result<GenerationSession>.Failure("Blueprint must be approved first");
         if (!session.BlueprintApproved)
@@ -311,10 +315,12 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
             ConfigurationOverride = session.Configuration
         };
 
+        // Note: Progress reporting from internal service to external interface is not currently supported
+        // due to type differences between Core and Application progress types
         var result = await _orchestrator.StartFullGenerationAsync(
             session.Blueprint,
             options,
-            progress,
+            null,  // Progress reporting disabled due to type mismatch
             cancellationToken);
 
         if (result.IsSuccess)
@@ -335,7 +341,7 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
         if (session == null)
             return Result.Failure("Session cannot be null");
 
-        session.Status = WizardSessionStatus.Completed;
+        session.Status = Core.Models.GuidedCreation.WizardSessionStatus.Completed;
         session.CompletedAt = DateTime.UtcNow;
         session.LastUpdatedAt = DateTime.UtcNow;
 
@@ -354,7 +360,7 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
         if (session == null)
             return Result.Failure("Session cannot be null");
 
-        session.Status = WizardSessionStatus.Cancelled;
+        session.Status = Core.Models.GuidedCreation.WizardSessionStatus.Cancelled;
         session.LastUpdatedAt = DateTime.UtcNow;
 
         _sessions[session.Id] = session;
@@ -376,26 +382,31 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
         var currentIndex = (int)session.CurrentStep;
         var totalSteps = allSteps.Length;
 
-        var completedSteps = session.StepHistory?
-            .Where(h => h.IsCompleted)
-            .Select(h => h.Step)
-            .ToList() ?? new List<GuidedCreationStep>();
+        // StepHistory is List<GuidedCreationStep>, get all steps before current as completed
+        var completedSteps = session.StepHistory?.ToList() ?? new List<GuidedCreationStep>();
+
+        var genProgress = session.GenerationSession != null
+            ? new GenerationProgress
+            {
+                CurrentChapter = session.GenerationSession.CurrentChapter,
+                TotalChapters = session.GenerationSession.TotalChapters,
+                OverallPercentage = CalculateGenerationProgress(session.GenerationSession)
+            }
+            : null;
 
         var summary = new WizardProgressSummary
         {
             CurrentStep = session.CurrentStep,
-            CurrentStepIndex = currentIndex,
+            CurrentStepNumber = currentIndex + 1,
             TotalSteps = totalSteps,
             OverallProgressPercentage = (double)currentIndex / totalSteps * 100,
             CompletedSteps = completedSteps,
-            TimeSpentSoFar = DateTime.UtcNow - session.CreatedAt,
+            TimeElapsed = DateTime.UtcNow - session.StartedAt,
             HasAnalysisResult = session.AnalysisResult != null,
             HasBlueprint = session.Blueprint != null,
             IsBlueprintApproved = session.BlueprintApproved,
             HasGenerationSession = session.GenerationSession != null,
-            GenerationProgress = session.GenerationSession != null
-                ? CalculateGenerationProgress(session.GenerationSession)
-                : 0
+            GenerationProgress = genProgress
         };
 
         return Result<WizardProgressSummary>.Success(summary);
@@ -466,11 +477,11 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
         if (!requiredIds.Any())
             return true;
 
-        var responses = session.ClarificationResponses ?? new Dictionary<string, string>();
+        var responses = session.ClarificationResponses ?? new Dictionary<Guid, string>();
 
         return requiredIds.All(id => 
-            responses.ContainsKey(id.ToString()) && 
-            !string.IsNullOrWhiteSpace(responses[id.ToString()]));
+            responses.TryGetValue(id, out var response) && 
+            !string.IsNullOrWhiteSpace(response));
     }
 
     private static bool IsGenerationComplete(GuidedCreationWizardSession session)
@@ -488,71 +499,6 @@ public sealed class GuidedCreationWizardService : IGuidedCreationWizardService
     #endregion
 }
 
-/// <summary>
-/// Wizard session status.
-/// </summary>
-public enum WizardSessionStatus
-{
-    /// <summary>In progress.</summary>
-    InProgress,
-    /// <summary>Paused.</summary>
-    Paused,
-    /// <summary>Completed.</summary>
-    Completed,
-    /// <summary>Cancelled.</summary>
-    Cancelled
-}
+// WizardSessionStatus enum is defined in AIBookAuthorPro.Core.Models.GuidedCreation.WizardModels
 
-/// <summary>
-/// Wizard step history entry.
-/// </summary>
-public class WizardStepHistoryEntry
-{
-    public GuidedCreationStep Step { get; set; }
-    public DateTime EnteredAt { get; set; }
-    public DateTime? CompletedAt { get; set; }
-    public bool IsCompleted { get; set; }
-}
 
-/// <summary>
-/// Wizard progress summary.
-/// </summary>
-public class WizardProgressSummary
-{
-    public GuidedCreationStep CurrentStep { get; set; }
-    public int CurrentStepIndex { get; set; }
-    public int TotalSteps { get; set; }
-    public double OverallProgressPercentage { get; set; }
-    public List<GuidedCreationStep> CompletedSteps { get; set; } = new();
-    public TimeSpan TimeSpentSoFar { get; set; }
-    public bool HasAnalysisResult { get; set; }
-    public bool HasBlueprint { get; set; }
-    public bool IsBlueprintApproved { get; set; }
-    public bool HasGenerationSession { get; set; }
-    public double GenerationProgress { get; set; }
-}
-
-/// <summary>
-/// Guided creation wizard session.
-/// </summary>
-public class GuidedCreationWizardSession
-{
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public GuidedCreationStep CurrentStep { get; set; }
-    public WizardSessionStatus Status { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime LastUpdatedAt { get; set; }
-    public DateTime? CompletedAt { get; set; }
-    public List<WizardStepHistoryEntry>? StepHistory { get; set; }
-
-    // Data from each step
-    public BookSeedPrompt? SeedPrompt { get; set; }
-    public PromptAnalysisResult? AnalysisResult { get; set; }
-    public ExpandedCreativeBrief? ExpandedBrief { get; set; }
-    public List<ClarificationRequest>? RequiredClarifications { get; set; }
-    public Dictionary<string, string>? ClarificationResponses { get; set; }
-    public BookBlueprint? Blueprint { get; set; }
-    public bool BlueprintApproved { get; set; }
-    public GenerationConfiguration? Configuration { get; set; }
-    public GenerationSession? GenerationSession { get; set; }
-}

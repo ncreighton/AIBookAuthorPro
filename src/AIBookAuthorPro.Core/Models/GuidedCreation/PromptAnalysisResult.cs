@@ -19,7 +19,12 @@ public sealed record PromptAnalysisResult
     /// <summary>
     /// Reference to the original prompt.
     /// </summary>
-    public required Guid SeedPromptId { get; init; }
+    public Guid SeedPromptId { get; init; }
+
+    /// <summary>
+    /// Alias for SeedPromptId.
+    /// </summary>
+    public Guid PromptId { get => SeedPromptId; init => SeedPromptId = value; }
 
     /// <summary>
     /// When this analysis was generated.
@@ -31,17 +36,22 @@ public sealed record PromptAnalysisResult
     /// <summary>
     /// The distilled core concept of the book.
     /// </summary>
-    public required string CoreConcept { get; init; }
+    public string CoreConcept { get; init; } = string.Empty;
 
     /// <summary>
     /// One-sentence logline capturing the essence.
     /// </summary>
-    public required string Logline { get; init; }
+    public string Logline { get; init; } = string.Empty;
 
     /// <summary>
     /// Primary genre classification.
     /// </summary>
-    public required string PrimaryGenre { get; init; }
+    public string PrimaryGenre { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Alias for PrimaryGenre.
+    /// </summary>
+    public string DetectedGenre { get => PrimaryGenre; init => PrimaryGenre = value; }
 
     /// <summary>
     /// Secondary/sub-genre classifications.
@@ -51,19 +61,24 @@ public sealed record PromptAnalysisResult
     /// <summary>
     /// Detailed target audience description.
     /// </summary>
-    public required string TargetAudience { get; init; }
+    public string TargetAudience { get; init; } = string.Empty;
 
     /// <summary>
     /// Age range classification.
     /// </summary>
-    public required AudienceAgeRange AgeRange { get; init; }
+    public AudienceAgeRange AgeRange { get; init; } = AudienceAgeRange.Adult;
+
+    /// <summary>
+    /// Alias for AgeRange.
+    /// </summary>
+    public AudienceAgeRange AudienceAgeRange { get => AgeRange; init => AgeRange = value; }
 
     // ================== NARRATIVE ELEMENTS ==================
 
     /// <summary>
     /// The central theme of the book.
     /// </summary>
-    public required string CentralTheme { get; init; }
+    public string CentralTheme { get; init; } = string.Empty;
 
     /// <summary>
     /// Supporting/secondary themes.
@@ -71,14 +86,24 @@ public sealed record PromptAnalysisResult
     public List<string> SecondaryThemes { get; init; } = new();
 
     /// <summary>
+    /// Alias for SecondaryThemes.
+    /// </summary>
+    public List<string> ExtractedThemes { get => SecondaryThemes; init => SecondaryThemes = value; }
+
+    /// <summary>
     /// Overall tone description.
     /// </summary>
-    public required string ToneDescriptor { get; init; }
+    public string ToneDescriptor { get; init; } = string.Empty;
 
     /// <summary>
     /// Suggested pacing style.
     /// </summary>
-    public required NarrativePacing SuggestedPacing { get; init; }
+    public NarrativePacing SuggestedPacing { get; init; } = NarrativePacing.Moderate;
+
+    /// <summary>
+    /// Alias for SuggestedPacing.
+    /// </summary>
+    public NarrativePacing Pacing { get => SuggestedPacing; init => SuggestedPacing = value; }
 
     /// <summary>
     /// Identified narrative hooks.
@@ -90,32 +115,37 @@ public sealed record PromptAnalysisResult
     /// </summary>
     public List<ConflictElement> IdentifiedConflicts { get; init; } = new();
 
+    /// <summary>
+    /// Core conflict description.
+    /// </summary>
+    public string CoreConflict { get; init; } = string.Empty;
+
     // ================== STRUCTURAL RECOMMENDATIONS ==================
 
     /// <summary>
     /// Recommended book length category.
     /// </summary>
-    public required BookLengthCategory RecommendedLength { get; init; }
+    public BookLengthCategory RecommendedLength { get; init; } = BookLengthCategory.Novella;
 
     /// <summary>
     /// Estimated total word count.
     /// </summary>
-    public required int EstimatedWordCount { get; init; }
+    public int EstimatedWordCount { get; init; }
 
     /// <summary>
     /// Recommended number of chapters.
     /// </summary>
-    public required int RecommendedChapterCount { get; init; }
+    public int RecommendedChapterCount { get; init; }
 
     /// <summary>
     /// Suggested structure template.
     /// </summary>
-    public required StructureTemplate SuggestedStructure { get; init; }
+    public StructureTemplate SuggestedStructure { get; init; } = StructureTemplate.ThreeAct;
 
     /// <summary>
     /// Explanation for structure recommendation.
     /// </summary>
-    public required string StructureRationale { get; init; }
+    public string StructureRationale { get; init; } = string.Empty;
 
     /// <summary>
     /// Alternative structures that could work.
@@ -139,7 +169,7 @@ public sealed record PromptAnalysisResult
     /// <summary>
     /// World-building requirements analysis.
     /// </summary>
-    public required WorldBuildingRequirements WorldRequirements { get; init; }
+    public WorldBuildingRequirements WorldRequirements { get; init; } = new();
 
     /// <summary>
     /// Key locations implied by the prompt.
@@ -151,14 +181,19 @@ public sealed record PromptAnalysisResult
     /// <summary>
     /// Market positioning analysis.
     /// </summary>
-    public required MarketPositioning MarketAnalysis { get; init; }
+    public MarketPositioning MarketAnalysis { get; init; } = new();
 
     // ================== CONFIDENCE SCORES ==================
 
     /// <summary>
     /// Confidence levels for the analysis.
     /// </summary>
-    public required AnalysisConfidence Confidence { get; init; }
+    public AnalysisConfidence Confidence { get; init; } = new();
+
+    /// <summary>
+    /// Alias for Confidence.
+    /// </summary>
+    public AnalysisConfidence AnalysisConfidence { get => Confidence; init => Confidence = value; }
 
     // ================== CLARIFICATIONS NEEDED ==================
 
@@ -166,6 +201,11 @@ public sealed record PromptAnalysisResult
     /// Questions that need user clarification.
     /// </summary>
     public List<ClarificationRequest> ClarificationsNeeded { get; init; } = new();
+
+    /// <summary>
+    /// Alias for ClarificationsNeeded.
+    /// </summary>
+    public List<ClarificationRequest> ClarificationRequests { get => ClarificationsNeeded; init => ClarificationsNeeded = value; }
 
     // ================== AI SUGGESTIONS ==================
 
@@ -188,17 +228,17 @@ public sealed record ConflictElement
     /// <summary>
     /// Type of conflict (e.g., "Person vs Person", "Person vs Self").
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Description of the conflict.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Potential stakes involved.
     /// </summary>
-    public required string Stakes { get; init; }
+    public string Stakes { get; init; } = string.Empty;
 
     /// <summary>
     /// How central this conflict is to the story (0-1).
@@ -214,12 +254,12 @@ public sealed record StructureAlternative
     /// <summary>
     /// The alternative structure template.
     /// </summary>
-    public required StructureTemplate Template { get; init; }
+    public StructureTemplate Template { get; init; } = StructureTemplate.ThreeAct;
 
     /// <summary>
     /// Why this could work for the story.
     /// </summary>
-    public required string Rationale { get; init; }
+    public string Rationale { get; init; } = string.Empty;
 
     /// <summary>
     /// Suitability score (0-100).
@@ -235,17 +275,17 @@ public sealed record ExtractedCharacterSeed
     /// <summary>
     /// Suggested name or placeholder.
     /// </summary>
-    public required string SuggestedName { get; init; }
+    public string SuggestedName { get; init; } = string.Empty;
 
     /// <summary>
     /// Identified role in the story.
     /// </summary>
-    public required CharacterRole Role { get; init; }
+    public CharacterRole Role { get; init; } = CharacterRole.Supporting;
 
     /// <summary>
     /// Brief description based on prompt.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Suggested archetype.
@@ -276,17 +316,17 @@ public sealed record SuggestedArchetype
     /// <summary>
     /// The archetype name.
     /// </summary>
-    public required string ArchetypeName { get; init; }
+    public string ArchetypeName { get; init; } = string.Empty;
 
     /// <summary>
     /// Why this archetype would fit.
     /// </summary>
-    public required string Rationale { get; init; }
+    public string Rationale { get; init; } = string.Empty;
 
     /// <summary>
     /// Suggested role.
     /// </summary>
-    public required CharacterRole SuggestedRole { get; init; }
+    public CharacterRole SuggestedRole { get; init; } = CharacterRole.Supporting;
 
     /// <summary>
     /// Examples from popular fiction.
@@ -302,17 +342,17 @@ public sealed record WorldBuildingRequirements
     /// <summary>
     /// Complexity level (1-10).
     /// </summary>
-    public required int ComplexityLevel { get; init; }
+    public int ComplexityLevel { get; init; }
 
     /// <summary>
     /// Setting type (e.g., "Contemporary", "Historical", "Fantasy").
     /// </summary>
-    public required string SettingType { get; init; }
+    public string SettingType { get; init; } = string.Empty;
 
     /// <summary>
     /// Time period or era.
     /// </summary>
-    public required string TimePeriod { get; init; }
+    public string TimePeriod { get; init; } = string.Empty;
 
     /// <summary>
     /// Whether a magic/power system is needed.
@@ -353,22 +393,22 @@ public sealed record ExtractedLocationSeed
     /// <summary>
     /// Suggested name for the location.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Type of location.
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Description from prompt.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Significance to the story.
     /// </summary>
-    public required string Significance { get; init; }
+    public string Significance { get; init; } = string.Empty;
 
     /// <summary>
     /// Atmosphere/mood of the location.
@@ -404,7 +444,7 @@ public sealed record MarketPositioning
     /// <summary>
     /// Suggested positioning statement.
     /// </summary>
-    public required string PositioningStatement { get; init; }
+    public string PositioningStatement { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -415,17 +455,17 @@ public sealed record ComparableTitle
     /// <summary>
     /// Title of the comparable work.
     /// </summary>
-    public required string Title { get; init; }
+    public string Title { get; init; } = string.Empty;
 
     /// <summary>
     /// Author of the work.
     /// </summary>
-    public required string Author { get; init; }
+    public string Author { get; init; } = string.Empty;
 
     /// <summary>
     /// Why it's comparable.
     /// </summary>
-    public required string ComparisonReason { get; init; }
+    public string ComparisonReason { get; init; } = string.Empty;
 
     /// <summary>
     /// What to learn from it.
@@ -471,7 +511,7 @@ public sealed record AnalysisConfidence
     /// <summary>
     /// Explanation of confidence levels.
     /// </summary>
-    public required string ConfidenceExplanation { get; init; }
+    public string ConfidenceExplanation { get; init; } = string.Empty;
 
     /// <summary>
     /// Factors that reduced confidence.
@@ -492,22 +532,22 @@ public sealed record ClarificationRequest
     /// <summary>
     /// Category of the clarification.
     /// </summary>
-    public required string Category { get; init; }
+    public string Category { get; init; } = string.Empty;
 
     /// <summary>
     /// The question to ask.
     /// </summary>
-    public required string Question { get; init; }
+    public string Question { get; init; } = string.Empty;
 
     /// <summary>
     /// Priority level.
     /// </summary>
-    public required ClarificationPriority Priority { get; init; }
+    public ClarificationPriority Priority { get; init; } = ClarificationPriority.Important;
 
     /// <summary>
     /// Why this clarification is needed.
     /// </summary>
-    public required string Rationale { get; init; }
+    public string Rationale { get; init; } = string.Empty;
 
     /// <summary>
     /// Suggested options if applicable.
@@ -538,17 +578,17 @@ public sealed record EnhancementSuggestion
     /// <summary>
     /// Category of enhancement.
     /// </summary>
-    public required string Category { get; init; }
+    public string Category { get; init; } = string.Empty;
 
     /// <summary>
     /// The suggestion.
     /// </summary>
-    public required string Suggestion { get; init; }
+    public string Suggestion { get; init; } = string.Empty;
 
     /// <summary>
     /// Why this would improve the book.
     /// </summary>
-    public required string Rationale { get; init; }
+    public string Rationale { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact level (1-10).
@@ -569,12 +609,12 @@ public sealed record IdentifiedChallenge
     /// <summary>
     /// The challenge description.
     /// </summary>
-    public required string Challenge { get; init; }
+    public string Challenge { get; init; } = string.Empty;
 
     /// <summary>
     /// Category of challenge.
     /// </summary>
-    public required string Category { get; init; }
+    public string Category { get; init; } = string.Empty;
 
     /// <summary>
     /// Potential mitigation strategies.

@@ -38,7 +38,7 @@ public sealed record CharacterBible
     /// <summary>
     /// Character arc map showing all arcs.
     /// </summary>
-    public required CharacterArcMap ArcMap { get; init; }
+    public CharacterArcMap ArcMap { get; init; } = new();
 
     /// <summary>
     /// Character groups/factions.
@@ -64,12 +64,12 @@ public sealed class CharacterProfile
     /// <summary>
     /// Full name.
     /// </summary>
-    public required string FullName { get; init; }
+    public string FullName { get; init; } = string.Empty;
 
     /// <summary>
     /// Preferred name (how they're usually referred to).
     /// </summary>
-    public required string PreferredName { get; init; }
+    public string PreferredName { get; init; } = string.Empty;
 
     /// <summary>
     /// Aliases, nicknames, titles.
@@ -79,64 +79,74 @@ public sealed class CharacterProfile
     /// <summary>
     /// Role in the story.
     /// </summary>
-    public required CharacterRole Role { get; init; }
+    public CharacterRole Role { get; init; } = CharacterRole.Supporting;
 
     /// <summary>
     /// Character archetype.
     /// </summary>
-    public required string Archetype { get; init; }
+    public string Archetype { get; init; } = string.Empty;
 
     /// <summary>
     /// One-line character concept.
     /// </summary>
-    public required string Concept { get; init; }
+    public string Concept { get; init; } = string.Empty;
 
     // ================== PHYSICAL DESCRIPTION ==================
 
     /// <summary>
     /// Physical description.
     /// </summary>
-    public required PhysicalDescription Physical { get; init; }
+    public PhysicalDescription Physical { get; init; } = new();
 
     // ================== PSYCHOLOGICAL PROFILE ==================
 
     /// <summary>
     /// Psychological profile.
     /// </summary>
-    public required PsychologicalProfile Psychology { get; init; }
+    public PsychologicalProfile Psychology { get; init; } = new();
 
     // ================== BACKGROUND ==================
 
     /// <summary>
     /// Character background.
     /// </summary>
-    public required CharacterBackground Background { get; init; }
+    public CharacterBackground Background { get; init; } = new();
 
     // ================== VOICE & MANNERISMS ==================
 
     /// <summary>
     /// Voice and speaking patterns.
     /// </summary>
-    public required CharacterVoice Voice { get; init; }
+    public CharacterVoice Voice { get; init; } = new();
+
+    /// <summary>
+    /// Speech pattern alias (from Voice).
+    /// </summary>
+    public string? SpeechPattern { get => Voice.SpeakingStyle; }
+
+    /// <summary>
+    /// Core traits alias (from Psychology).
+    /// </summary>
+    public List<string> CoreTraits { get => Psychology.CoreTraits ?? new List<string>(); }
 
     // ================== CHARACTER ARC ==================
 
     /// <summary>
     /// Character arc definition.
     /// </summary>
-    public required CharacterArc Arc { get; init; }
+    public CharacterArc Arc { get; init; } = new();
 
     // ================== STORY FUNCTION ==================
 
     /// <summary>
     /// Function in the story.
     /// </summary>
-    public required string StoryFunction { get; init; }
+    public string StoryFunction { get; init; } = string.Empty;
 
     /// <summary>
     /// Thematic significance.
     /// </summary>
-    public required string ThematicRole { get; init; }
+    public string ThematicRole { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapters this character appears in.
@@ -146,14 +156,14 @@ public sealed class CharacterProfile
     /// <summary>
     /// First introduction chapter.
     /// </summary>
-    public required int IntroductionChapter { get; init; }
+    public int IntroductionChapter { get; init; }
 
     // ================== WRITING GUIDELINES ==================
 
     /// <summary>
     /// Guidelines for writing this character.
     /// </summary>
-    public required CharacterWritingGuidelines WritingGuidelines { get; init; }
+    public CharacterWritingGuidelines WritingGuidelines { get; init; } = new();
 
     // ================== RELATIONSHIPS ==================
 
@@ -176,37 +186,37 @@ public sealed record PhysicalDescription
     /// <summary>
     /// Age or apparent age.
     /// </summary>
-    public required string Age { get; init; }
+    public string Age { get; init; } = string.Empty;
 
     /// <summary>
     /// Gender.
     /// </summary>
-    public required string Gender { get; init; }
+    public string Gender { get; init; } = string.Empty;
 
     /// <summary>
     /// Height description.
     /// </summary>
-    public required string Height { get; init; }
+    public string Height { get; init; } = string.Empty;
 
     /// <summary>
     /// Build/body type.
     /// </summary>
-    public required string Build { get; init; }
+    public string Build { get; init; } = string.Empty;
 
     /// <summary>
     /// Hair description.
     /// </summary>
-    public required string Hair { get; init; }
+    public string Hair { get; init; } = string.Empty;
 
     /// <summary>
     /// Eye description.
     /// </summary>
-    public required string Eyes { get; init; }
+    public string Eyes { get; init; } = string.Empty;
 
     /// <summary>
     /// Skin description.
     /// </summary>
-    public required string Skin { get; init; }
+    public string Skin { get; init; } = string.Empty;
 
     /// <summary>
     /// Distinguishing features.
@@ -216,17 +226,17 @@ public sealed record PhysicalDescription
     /// <summary>
     /// Typical clothing/style.
     /// </summary>
-    public required string TypicalAttire { get; init; }
+    public string TypicalAttire { get; init; } = string.Empty;
 
     /// <summary>
     /// How they carry themselves.
     /// </summary>
-    public required string Bearing { get; init; }
+    public string Bearing { get; init; } = string.Empty;
 
     /// <summary>
     /// First impression they give.
     /// </summary>
-    public required string FirstImpression { get; init; }
+    public string FirstImpression { get; init; } = string.Empty;
 
     /// <summary>
     /// Physical quirks or habits.
@@ -282,12 +292,12 @@ public sealed record PsychologicalProfile
     /// <summary>
     /// Moral alignment.
     /// </summary>
-    public required string MoralAlignment { get; init; }
+    public string MoralAlignment { get; init; } = string.Empty;
 
     /// <summary>
     /// Emotional patterns.
     /// </summary>
-    public required string EmotionalPatterns { get; init; }
+    public string EmotionalPatterns { get; init; } = string.Empty;
 
     /// <summary>
     /// Coping mechanisms.
@@ -302,7 +312,7 @@ public sealed record PsychologicalProfile
     /// <summary>
     /// Motivations.
     /// </summary>
-    public required string PrimaryMotivation { get; init; }
+    public string PrimaryMotivation { get; init; } = string.Empty;
 
     /// <summary>
     /// Secondary motivations.
@@ -318,27 +328,27 @@ public sealed record CharacterBackground
     /// <summary>
     /// Birthplace.
     /// </summary>
-    public required string Birthplace { get; init; }
+    public string Birthplace { get; init; } = string.Empty;
 
     /// <summary>
     /// Family background.
     /// </summary>
-    public required string FamilyBackground { get; init; }
+    public string FamilyBackground { get; init; } = string.Empty;
 
     /// <summary>
     /// Social class.
     /// </summary>
-    public required string SocialClass { get; init; }
+    public string SocialClass { get; init; } = string.Empty;
 
     /// <summary>
     /// Education.
     /// </summary>
-    public required string Education { get; init; }
+    public string Education { get; init; } = string.Empty;
 
     /// <summary>
     /// Occupation/profession.
     /// </summary>
-    public required string Occupation { get; init; }
+    public string Occupation { get; init; } = string.Empty;
 
     /// <summary>
     /// Key life events.
@@ -368,7 +378,7 @@ public sealed record CharacterBackground
     /// <summary>
     /// Current living situation.
     /// </summary>
-    public required string CurrentSituation { get; init; }
+    public string CurrentSituation { get; init; } = string.Empty;
 
     /// <summary>
     /// Important possessions.
@@ -389,17 +399,17 @@ public sealed record LifeEvent
     /// <summary>
     /// When it happened.
     /// </summary>
-    public required string When { get; init; }
+    public string When { get; init; } = string.Empty;
 
     /// <summary>
     /// What happened.
     /// </summary>
-    public required string What { get; init; }
+    public string What { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact on the character.
     /// </summary>
-    public required string Impact { get; init; }
+    public string Impact { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -410,7 +420,7 @@ public sealed record CharacterSecret
     /// <summary>
     /// The secret.
     /// </summary>
-    public required string Secret { get; init; }
+    public string Secret { get; init; } = string.Empty;
 
     /// <summary>
     /// Who knows about it.
@@ -420,7 +430,7 @@ public sealed record CharacterSecret
     /// <summary>
     /// Impact if revealed.
     /// </summary>
-    public required string RevealImpact { get; init; }
+    public string RevealImpact { get; init; } = string.Empty;
 
     /// <summary>
     /// When/if revealed in story.
@@ -436,12 +446,12 @@ public sealed record CharacterVoice
     /// <summary>
     /// Speaking style description.
     /// </summary>
-    public required string SpeakingStyle { get; init; }
+    public string SpeakingStyle { get; init; } = string.Empty;
 
     /// <summary>
     /// Vocabulary level.
     /// </summary>
-    public required string VocabularyLevel { get; init; }
+    public string VocabularyLevel { get; init; } = string.Empty;
 
     /// <summary>
     /// Accent or dialect.
@@ -476,7 +486,7 @@ public sealed record CharacterVoice
     /// <summary>
     /// Non-verbal communication style.
     /// </summary>
-    public required string NonVerbalStyle { get; init; }
+    public string NonVerbalStyle { get; init; } = string.Empty;
 
     /// <summary>
     /// Physical mannerisms.
@@ -486,7 +496,7 @@ public sealed record CharacterVoice
     /// <summary>
     /// Internal thought patterns (for POV).
     /// </summary>
-    public required string ThoughtPatterns { get; init; }
+    public string ThoughtPatterns { get; init; } = string.Empty;
 
     /// <summary>
     /// Sample dialogue lines.
@@ -502,62 +512,72 @@ public sealed record CharacterArc
     /// <summary>
     /// Arc type (positive, negative, flat, etc.).
     /// </summary>
-    public required string ArcType { get; init; }
+    public string ArcType { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Type alias for ArcType.
+    /// </summary>
+    public string Type { get => ArcType; init => ArcType = value; }
+
+    /// <summary>
+    /// Current phase in the arc.
+    /// </summary>
+    public string CurrentPhase { get; init; } = string.Empty;
 
     /// <summary>
     /// Starting state.
     /// </summary>
-    public required string StartingState { get; init; }
+    public string StartingState { get; init; } = string.Empty;
 
     /// <summary>
     /// Ending state.
     /// </summary>
-    public required string EndingState { get; init; }
+    public string EndingState { get; init; } = string.Empty;
 
     /// <summary>
     /// Internal conflict.
     /// </summary>
-    public required string InternalConflict { get; init; }
+    public string InternalConflict { get; init; } = string.Empty;
 
     /// <summary>
     /// External conflict.
     /// </summary>
-    public required string ExternalConflict { get; init; }
+    public string ExternalConflict { get; init; } = string.Empty;
 
     /// <summary>
     /// What they want (external goal).
     /// </summary>
-    public required string Want { get; init; }
+    public string Want { get; init; } = string.Empty;
 
     /// <summary>
     /// What they need (internal growth).
     /// </summary>
-    public required string Need { get; init; }
+    public string Need { get; init; } = string.Empty;
 
     /// <summary>
     /// Primary flaw.
     /// </summary>
-    public required string Flaw { get; init; }
+    public string Flaw { get; init; } = string.Empty;
 
     /// <summary>
     /// Emotional wound.
     /// </summary>
-    public required string Wound { get; init; }
+    public string Wound { get; init; } = string.Empty;
 
     /// <summary>
     /// The lie they believe.
     /// </summary>
-    public required string LieTheyBelieve { get; init; }
+    public string LieTheyBelieve { get; init; } = string.Empty;
 
     /// <summary>
     /// The truth they learn.
     /// </summary>
-    public required string TruthTheyLearn { get; init; }
+    public string TruthTheyLearn { get; init; } = string.Empty;
 
     /// <summary>
     /// Ghost/backstory event.
     /// </summary>
-    public required string Ghost { get; init; }
+    public string Ghost { get; init; } = string.Empty;
 
     /// <summary>
     /// Arc milestones.
@@ -578,27 +598,27 @@ public sealed record ArcMilestone
     /// <summary>
     /// Chapter where this occurs.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Emotional state at this point.
     /// </summary>
-    public required string EmotionalState { get; init; }
+    public string EmotionalState { get; init; } = string.Empty;
 
     /// <summary>
     /// What triggers this milestone.
     /// </summary>
-    public required string Trigger { get; init; }
+    public string Trigger { get; init; } = string.Empty;
 
     /// <summary>
     /// Result of this milestone.
     /// </summary>
-    public required string Result { get; init; }
+    public string Result { get; init; } = string.Empty;
 
     /// <summary>
     /// Progress toward truth (0-100).
@@ -614,17 +634,17 @@ public sealed record TransformationMoment
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// What changes.
     /// </summary>
-    public required string Change { get; init; }
+    public string Change { get; init; } = string.Empty;
 
     /// <summary>
     /// How it manifests.
     /// </summary>
-    public required string Manifestation { get; init; }
+    public string Manifestation { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -676,27 +696,27 @@ public sealed record CharacterRelationship
     /// <summary>
     /// Other character ID.
     /// </summary>
-    public required Guid OtherCharacterId { get; init; }
+    public Guid OtherCharacterId { get; init; }
 
     /// <summary>
     /// Relationship type.
     /// </summary>
-    public required string RelationshipType { get; init; }
+    public string RelationshipType { get; init; } = string.Empty;
 
     /// <summary>
     /// How they feel about the other.
     /// </summary>
-    public required string Feelings { get; init; }
+    public string Feelings { get; init; } = string.Empty;
 
     /// <summary>
     /// History of the relationship.
     /// </summary>
-    public required string History { get; init; }
+    public string History { get; init; } = string.Empty;
 
     /// <summary>
     /// Current status.
     /// </summary>
-    public required string CurrentStatus { get; init; }
+    public string CurrentStatus { get; init; } = string.Empty;
 
     /// <summary>
     /// Tension/conflict in the relationship.
@@ -706,7 +726,7 @@ public sealed record CharacterRelationship
     /// <summary>
     /// How relationship evolves during story.
     /// </summary>
-    public required string Evolution { get; init; }
+    public string Evolution { get; init; } = string.Empty;
 
     /// <summary>
     /// Key moments in their relationship.
@@ -722,17 +742,17 @@ public sealed record RelationshipMoment
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// What happens.
     /// </summary>
-    public required string Event { get; init; }
+    public string Event { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact on relationship.
     /// </summary>
-    public required string Impact { get; init; }
+    public string Impact { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -743,17 +763,17 @@ public sealed record CharacterRelationshipWeb
     /// <summary>
     /// Name of this web/group.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Character IDs in this web.
     /// </summary>
-    public required List<Guid> CharacterIds { get; init; }
+    public List<Guid> CharacterIds { get; init; } = new();
 
     /// <summary>
     /// Description of group dynamics.
     /// </summary>
-    public required string Dynamics { get; init; }
+    public string Dynamics { get; init; } = string.Empty;
 
     /// <summary>
     /// Central tension.
@@ -763,7 +783,7 @@ public sealed record CharacterRelationshipWeb
     /// <summary>
     /// How dynamics evolve.
     /// </summary>
-    public required string Evolution { get; init; }
+    public string Evolution { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -774,7 +794,7 @@ public sealed record CharacterArcMap
     /// <summary>
     /// Description of how arcs interweave.
     /// </summary>
-    public required string InterweaveDescription { get; init; }
+    public string InterweaveDescription { get; init; } = string.Empty;
 
     /// <summary>
     /// Parallel arcs.
@@ -795,17 +815,17 @@ public sealed record ParallelArc
     /// <summary>
     /// Character IDs with parallel arcs.
     /// </summary>
-    public required List<Guid> CharacterIds { get; init; }
+    public List<Guid> CharacterIds { get; init; } = new();
 
     /// <summary>
     /// How they parallel.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Thematic purpose.
     /// </summary>
-    public required string ThematicPurpose { get; init; }
+    public string ThematicPurpose { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -816,22 +836,22 @@ public sealed record ArcIntersection
     /// <summary>
     /// Chapter.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Characters involved.
     /// </summary>
-    public required List<Guid> CharacterIds { get; init; }
+    public List<Guid> CharacterIds { get; init; } = new();
 
     /// <summary>
     /// Nature of intersection.
     /// </summary>
-    public required string Nature { get; init; }
+    public string Nature { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact on each arc.
     /// </summary>
-    public required string Impact { get; init; }
+    public string Impact { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -842,12 +862,12 @@ public sealed record CharacterGroup
     /// <summary>
     /// Group name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Group description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Member IDs.
@@ -867,7 +887,7 @@ public sealed record CharacterGroup
     /// <summary>
     /// Internal dynamics.
     /// </summary>
-    public required string InternalDynamics { get; init; }
+    public string InternalDynamics { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -899,12 +919,12 @@ public sealed record CulturalNamingPattern
     /// <summary>
     /// Culture/region.
     /// </summary>
-    public required string Culture { get; init; }
+    public string Culture { get; init; } = string.Empty;
 
     /// <summary>
     /// Pattern description.
     /// </summary>
-    public required string Pattern { get; init; }
+    public string Pattern { get; init; } = string.Empty;
 
     /// <summary>
     /// Example names.

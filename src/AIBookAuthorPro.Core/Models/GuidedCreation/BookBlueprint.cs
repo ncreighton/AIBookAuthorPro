@@ -19,17 +19,22 @@ public sealed class BookBlueprint
     /// <summary>
     /// Reference to the seed prompt.
     /// </summary>
-    public required Guid SeedPromptId { get; init; }
+    public Guid SeedPromptId { get; init; }
 
     /// <summary>
     /// Reference to the analysis result.
     /// </summary>
-    public required Guid AnalysisResultId { get; init; }
+    public Guid AnalysisResultId { get; init; }
 
     /// <summary>
     /// Reference to the creative brief.
     /// </summary>
-    public required Guid CreativeBriefId { get; init; }
+    public Guid CreativeBriefId { get; init; }
+
+    /// <summary>
+    /// Alias for CreativeBriefId.
+    /// </summary>
+    public Guid BriefId { get => CreativeBriefId; init => CreativeBriefId = value; }
 
     /// <summary>
     /// Current status of the blueprint.
@@ -66,56 +71,81 @@ public sealed class BookBlueprint
     /// <summary>
     /// Book identity information.
     /// </summary>
-    public required BookIdentity Identity { get; init; }
+    public BookIdentity Identity { get; init; } = new();
 
     // ================== STRUCTURAL PLAN ==================
 
     /// <summary>
     /// Complete structural plan for the book.
     /// </summary>
-    public required StructuralPlan Structure { get; init; }
+    public StructuralPlan Structure { get; init; } = new();
+
+    /// <summary>
+    /// Alias for Structure.
+    /// </summary>
+    public StructuralPlan StructuralPlan { get => Structure; init => Structure = value; }
 
     // ================== CHARACTER BIBLE ==================
 
     /// <summary>
     /// Complete character bible.
     /// </summary>
-    public required CharacterBible Characters { get; init; }
+    public CharacterBible Characters { get; init; } = new();
+
+    /// <summary>
+    /// Alias for Characters.
+    /// </summary>
+    public CharacterBible CharacterBible { get => Characters; init => Characters = value; }
+
+    /// <summary>
+    /// Convenience property for chapter blueprints (from Structure).
+    /// </summary>
+    public List<ChapterBlueprint>? ChapterBlueprints => Structure?.Chapters;
+
+    /// <summary>
+    /// Alias for ChapterBlueprints.
+    /// </summary>
+    public List<ChapterBlueprint>? Chapters => ChapterBlueprints;
 
     // ================== WORLD BIBLE ==================
 
     /// <summary>
     /// Complete world bible.
     /// </summary>
-    public required WorldBible World { get; init; }
+    public WorldBible World { get; init; } = new();
 
     // ================== PLOT ARCHITECTURE ==================
 
     /// <summary>
     /// Complete plot architecture.
     /// </summary>
-    public required PlotArchitecture Plot { get; init; }
+    public PlotArchitecture Plot { get; init; } = new();
 
     // ================== STYLE GUIDE ==================
 
     /// <summary>
     /// Complete style guide.
     /// </summary>
-    public required StyleGuide Style { get; init; }
+    public StyleGuide Style { get; init; } = new();
 
     // ================== GENERATION CONFIGURATION ==================
 
     /// <summary>
     /// Configuration for the generation process.
     /// </summary>
-    public required GenerationConfiguration GenerationConfig { get; init; }
+    public GenerationConfiguration GenerationConfig { get; init; } = new();
+
+    /// <summary>
+    /// Alias for GenerationConfig.
+    /// </summary>
+    public GenerationConfiguration Configuration { get => GenerationConfig; init => GenerationConfig = value; }
 
     // ================== QUALITY GATES ==================
 
     /// <summary>
     /// Quality gate configuration.
     /// </summary>
-    public required QualityGateConfiguration QualityGates { get; init; }
+    public QualityGateConfiguration QualityGates { get; init; } = new();
 
     // ================== TRACKING ==================
 
@@ -138,7 +168,12 @@ public sealed record BookIdentity
     /// <summary>
     /// Working title.
     /// </summary>
-    public required string WorkingTitle { get; init; }
+    public string WorkingTitle { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Title alias for WorkingTitle.
+    /// </summary>
+    public string Title { get => WorkingTitle; init => WorkingTitle = value; }
 
     /// <summary>
     /// Alternative titles considered.
@@ -153,27 +188,37 @@ public sealed record BookIdentity
     /// <summary>
     /// One-paragraph premise.
     /// </summary>
-    public required string Premise { get; init; }
+    public string Premise { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Expanded premise alias.
+    /// </summary>
+    public string ExpandedPremise { get => Premise; init => Premise = value; }
+
+    /// <summary>
+    /// Target word count.
+    /// </summary>
+    public int TargetWordCount { get; init; }
 
     /// <summary>
     /// One-sentence logline.
     /// </summary>
-    public required string Logline { get; init; }
+    public string Logline { get; init; } = string.Empty;
 
     /// <summary>
     /// Back cover blurb.
     /// </summary>
-    public required string BackCoverBlurb { get; init; }
+    public string BackCoverBlurb { get; init; } = string.Empty;
 
     /// <summary>
     /// Extended synopsis.
     /// </summary>
-    public required string Synopsis { get; init; }
+    public string Synopsis { get; init; } = string.Empty;
 
     /// <summary>
     /// Primary genre.
     /// </summary>
-    public required string Genre { get; init; }
+    public string Genre { get; init; } = string.Empty;
 
     /// <summary>
     /// Sub-genres.
@@ -193,12 +238,12 @@ public sealed record BookIdentity
     /// <summary>
     /// Target audience description.
     /// </summary>
-    public required string TargetAudience { get; init; }
+    public string TargetAudience { get; init; } = string.Empty;
 
     /// <summary>
     /// Age range classification.
     /// </summary>
-    public required AudienceAgeRange AgeRange { get; init; }
+    public AudienceAgeRange AgeRange { get; init; } = AudienceAgeRange.Adult;
 
     /// <summary>
     /// Content warnings.
@@ -219,12 +264,12 @@ public sealed record SeriesInfo
     /// <summary>
     /// Series name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Book number in series.
     /// </summary>
-    public required int BookNumber { get; init; }
+    public int BookNumber { get; init; }
 
     /// <summary>
     /// Planned total books.
@@ -250,7 +295,7 @@ public sealed record BlueprintRevision
     /// <summary>
     /// Revision number.
     /// </summary>
-    public required int RevisionNumber { get; init; }
+    public int RevisionNumber { get; init; }
 
     /// <summary>
     /// When revision was made.
@@ -260,7 +305,7 @@ public sealed record BlueprintRevision
     /// <summary>
     /// What was changed.
     /// </summary>
-    public required string ChangeDescription { get; init; }
+    public string ChangeDescription { get; init; } = string.Empty;
 
     /// <summary>
     /// Specific sections modified.
@@ -286,7 +331,7 @@ public sealed record BlueprintAnnotation
     /// <summary>
     /// Section this annotation applies to.
     /// </summary>
-    public required string Section { get; init; }
+    public string Section { get; init; } = string.Empty;
 
     /// <summary>
     /// Specific element ID if applicable.
@@ -296,7 +341,7 @@ public sealed record BlueprintAnnotation
     /// <summary>
     /// The note content.
     /// </summary>
-    public required string Note { get; init; }
+    public string Note { get; init; } = string.Empty;
 
     /// <summary>
     /// When this was created.

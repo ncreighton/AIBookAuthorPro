@@ -8,6 +8,7 @@ using AIBookAuthorPro.Application.Services.GuidedCreation;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
 using AIBookAuthorPro.Core.Services;
+using CoreGenerationOptions = AIBookAuthorPro.Core.Services.GenerationOptions;
 using Microsoft.Extensions.Logging;
 
 namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
@@ -39,7 +40,7 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
         if (prompt == null)
             return Result<PromptAnalysisResult>.Failure("Prompt cannot be null");
 
-        _logger.LogInformation("Analyzing prompt: {PromptLength} characters", prompt.RawPrompt.Length);
+        _logger.LogInformation("Analyzing prompt: {PromptLength} CharacterBible", prompt.RawPrompt.Length);
 
         try
         {
@@ -54,7 +55,7 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
             
             var response = await _aiService.GenerateAsync(
                 analysisPrompt,
-                new GenerationOptions
+                new CoreGenerationOptions
                 {
                     Temperature = 0.3,
                     MaxTokens = 4000,
@@ -71,7 +72,7 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
             var result = ParseAnalysisResponse(response.Value!, prompt.Id);
             
             _logger.LogInformation("Analysis complete. Genre: {Genre}, Confidence: {Confidence}",
-                result.DetectedGenre, result.AnalysisConfidence.GenreConfidence);
+                result.DetectedGenre, result.Confidence.GenreConfidence);
 
             return Result<PromptAnalysisResult>.Success(result);
         }
@@ -107,7 +108,7 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
             
             var response = await _aiService.GenerateAsync(
                 expansionPrompt,
-                new GenerationOptions
+                new CoreGenerationOptions
                 {
                     Temperature = 0.7,
                     MaxTokens = 6000,
@@ -160,7 +161,7 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
             }
 
             // Generate additional clarifications based on low confidence areas
-            if (analysis.AnalysisConfidence.GenreConfidence < 0.7)
+            if (analysis.Confidence.GenreConfidence < 0.7)
             {
                 clarifications.Add(new ClarificationRequest
                 {
@@ -175,17 +176,17 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
                 });
             }
 
-            if (analysis.AnalysisConfidence.CharacterConfidence < 0.6)
+            if (analysis.Confidence.CharacterConfidence < 0.6)
             {
                 clarifications.Add(new ClarificationRequest
                 {
                     Question = "Can you tell me more about your main character? What drives them?",
-                    Category = "Characters",
+                    Category = "CharacterBible",
                     Priority = ClarificationPriority.Important
                 });
             }
 
-            if (analysis.AnalysisConfidence.StructureConfidence < 0.5)
+            if (analysis.Confidence.StructureConfidence < 0.5)
             {
                 clarifications.Add(new ClarificationRequest
                 {
@@ -229,7 +230,7 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
             issues.Add(new PromptValidationIssue
             {
                 Type = "Length",
-                Message = $"Prompt is too short. Minimum {MinimumPromptLength} characters required.",
+                Message = $"Prompt is too short. Minimum {MinimumPromptLength} CharacterBible required.",
                 Severity = ClarificationPriority.Critical
             });
         }
@@ -274,14 +275,14 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
         var suggestions = analysis.EnhancementSuggestions?.ToList() ?? new List<EnhancementSuggestion>();
 
         // Add confidence-based suggestions
-        if (analysis.AnalysisConfidence.WorldBuildingConfidence < 0.5)
+        if (analysis.Confidence.WorldBuildingConfidence < 0.5)
         {
             suggestions.Add(new EnhancementSuggestion
             {
                 Category = "World Building",
                 Suggestion = "Consider adding details about the setting - time period, location, or unique world elements.",
-                Impact = "Helps create a more immersive and consistent world.",
-                Priority = 3
+                Rationale = "Helps create a more immersive and consistent world.",
+                ImpactLevel = 3
             });
         }
 
@@ -305,7 +306,7 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
             
             var response = await _aiService.GenerateAsync(
                 extractionPrompt,
-                new GenerationOptions
+                new CoreGenerationOptions
                 {
                     Temperature = 0.2,
                     MaxTokens = 2000
@@ -324,7 +325,7 @@ public sealed class PromptAnalysisService : IPromptAnalysisService
                 SubmittedAt = DateTime.UtcNow
             };
 
-            _logger.LogInformation("Extracted prompt: {Length} characters", seedPrompt.RawPrompt.Length);
+            _logger.LogInformation("Extracted prompt: {Length} CharacterBible", seedPrompt.RawPrompt.Length);
 
             return Result<BookSeedPrompt>.Success(seedPrompt);
         }
@@ -353,62 +354,62 @@ Analyze the following book concept and extract all implicit and explicit element
 
 Provide a comprehensive analysis in JSON format with the following structure:
 {{
-  "detectedGenre": "primary genre",
-  "subGenres": ["list of sub-genres"],
-  "targetAudience": "description of target readers",
-  "audienceAgeRange": "Children|MiddleGrade|YoungAdult|NewAdult|Adult|AllAges",
-  "estimatedWordCount": number,
-  "suggestedStructure": "ThreeAct|HerosJourney|SevenPoint|SaveTheCat|etc",
-  "extractedThemes": ["theme1", "theme2"],
-  "coreConflict": "description of central conflict",
-  "tone": "description of overall tone",
-  "pacing": "Slow|Moderate|Fast|Variable",
-  "extractedCharacters": [
+  ""detectedGenre"": ""primary genre"",
+  ""subGenres"": [""list of sub-genres""],
+  ""targetAudience"": ""description of target readers"",
+  ""audienceAgeRange"": ""Children|MiddleGrade|YoungAdult|NewAdult|Adult|AllAges"",
+  ""estimatedWordCount"": number,
+  ""suggestedStructure"": ""ThreeAct|HerosJourney|SevenPoint|SaveTheCat|etc"",
+  ""extractedThemes"": [""theme1"", ""theme2""],
+  ""coreConflict"": ""description of central conflict"",
+  ""tone"": ""description of overall tone"",
+  ""pacing"": ""Slow|Moderate|Fast|Variable"",
+  ""extractedCharacters"": [
     {{
-      "name": "character name or placeholder",
-      "role": "Protagonist|Antagonist|Supporting|etc",
-      "description": "brief description",
-      "arcType": "arc description"
+      ""name"": ""character name or placeholder"",
+      ""role"": ""Protagonist|Antagonist|Supporting|etc"",
+      ""description"": ""brief description"",
+      ""arcType"": ""arc description""
     }}
   ],
-  "extractedLocations": [
+  ""extractedLocations"": [
     {{
-      "name": "location name",
-      "type": "location type",
-      "significance": "why it matters"
+      ""name"": ""location name"",
+      ""type"": ""location type"",
+      ""significance"": ""why it matters""
     }}
   ],
-  "worldBuildingRequirements": ["requirement1", "requirement2"],
-  "researchRequirements": ["research topic 1", "research topic 2"],
-  "marketAnalysis": {{
-    "comparableAuthors": ["author1", "author2"],
-    "marketTrends": "analysis of current market",
-    "uniqueSellingPoints": ["usp1", "usp2"]
+  ""worldBuildingRequirements"": [""requirement1"", ""requirement2""],
+  ""researchRequirements"": [""research topic 1"", ""research topic 2""],
+  ""marketAnalysis"": {{
+    ""comparableAuthors"": [""author1"", ""author2""],
+    ""marketTrends"": ""analysis of current market"",
+    ""uniqueSellingPoints"": [""usp1"", ""usp2""]
   }},
-  "analysisConfidence": {{
-    "genreConfidence": 0.0-1.0,
-    "themeConfidence": 0.0-1.0,
-    "structureConfidence": 0.0-1.0,
-    "characterConfidence": 0.0-1.0,
-    "worldBuildingConfidence": 0.0-1.0
+  ""analysisConfidence"": {{
+    ""genreConfidence"": 0.0-1.0,
+    ""themeConfidence"": 0.0-1.0,
+    ""structureConfidence"": 0.0-1.0,
+    ""characterConfidence"": 0.0-1.0,
+    ""worldBuildingConfidence"": 0.0-1.0
   }},
-  "clarificationNeeded": [
+  ""clarificationNeeded"": [
     {{
-      "question": "clarifying question",
-      "category": "category",
-      "priority": "Critical|Important|Optional",
-      "reason": "why this is needed"
+      ""question"": ""clarifying question"",
+      ""category"": ""category"",
+      ""priority"": ""Critical|Important|Optional"",
+      ""reason"": ""why this is needed""
     }}
   ],
-  "enhancementSuggestions": [
+  ""enhancementSuggestions"": [
     {{
-      "category": "category",
-      "suggestion": "suggestion text",
-      "impact": "expected impact",
-      "priority": 1-5
+      ""category"": ""category"",
+      ""suggestion"": ""suggestion text"",
+      ""impact"": ""expected impact"",
+      ""priority"": 1-5
     }}
   ],
-  "identifiedChallenges": ["challenge1", "challenge2"]
+  ""identifiedChallenges"": [""challenge1"", ""challenge2""]
 }}
 
 Provide thorough analysis. Be specific and actionable.";
@@ -433,50 +434,50 @@ Original prompt:
 
 Analysis results:
 - Genre: {analysis.DetectedGenre}
-- Themes: {string.Join(", ", analysis.ExtractedThemes ?? Array.Empty<string>())}
+- Themes: {string.Join(", ", analysis.ExtractedThemes ?? new List<string>())}
 - Target Audience: {analysis.TargetAudience}
 - Core Conflict: {analysis.CoreConflict}
 {clarificationContext}
 
 Create a comprehensive creative brief in JSON format:
 {{
-  "workingTitle": "suggested title",
-  "premise": "2-3 sentence premise",
-  "logline": "single sentence logline",
-  "elevatorPitch": "30-second pitch",
-  "backCoverBlurb": "compelling back cover text",
-  "extendedSynopsis": "detailed 500-word synopsis",
-  "themeDefinitions": [
+  ""workingTitle"": ""suggested title"",
+  ""premise"": ""2-3 sentence premise"",
+  ""logline"": ""single sentence logline"",
+  ""elevatorPitch"": ""30-second pitch"",
+  ""backCoverBlurb"": ""compelling back cover text"",
+  ""extendedSynopsis"": ""detailed 500-word synopsis"",
+  ""themeDefinitions"": [
     {{
-      "theme": "theme name",
-      "definition": "what this theme means in the story",
-      "exploration": "how it will be explored"
+      ""theme"": ""theme name"",
+      ""definition"": ""what this theme means in the story"",
+      ""exploration"": ""how it will be explored""
     }}
   ],
-  "motifs": ["recurring motif 1", "motif 2"],
-  "symbols": [
+  ""motifs"": [""recurring motif 1"", ""motif 2""],
+  ""symbols"": [
     {{
-      "symbol": "symbol name",
-      "meaning": "what it represents"
+      ""symbol"": ""symbol name"",
+      ""meaning"": ""what it represents""
     }}
   ],
-  "genreTropes": {{
-    "embraced": ["trope to use well"],
-    "subverted": ["trope to subvert"],
-    "avoided": ["cliche to avoid"]
+  ""genreTropes"": {{
+    ""embraced"": [""trope to use well""],
+    ""subverted"": [""trope to subvert""],
+    ""avoided"": [""cliche to avoid""]
   }},
-  "conflictFramework": {{
-    "internal": "protagonist internal conflict",
-    "external": "external conflict",
-    "philosophical": "thematic/philosophical conflict",
-    "interpersonal": "relationship conflicts"
+  ""conflictFramework"": {{
+    ""internal"": ""protagonist internal conflict"",
+    ""external"": ""external conflict"",
+    ""philosophical"": ""thematic/philosophical conflict"",
+    ""interpersonal"": ""relationship conflicts""
   }},
-  "emotionalJourney": "description of reader's emotional arc",
-  "researchRequirements": [
+  ""emotionalJourney"": ""description of reader's emotional arc"",
+  ""researchRequirements"": [
     {{
-      "topic": "research topic",
-      "importance": "why needed",
-      "suggestedSources": ["source1"]
+      ""topic"": ""research topic"",
+      ""importance"": ""why needed"",
+      ""suggestedSources"": [""source1""]
     }}
   ]
 }}
@@ -493,7 +494,7 @@ Conversation:
 
 Extract and consolidate the key book concept into a clear, comprehensive prompt that captures:
 - The story premise
-- Main characters mentioned
+- Main CharacterBible mentioned
 - Setting/world details
 - Genre/tone
 - Any specific requirements or preferences
@@ -527,7 +528,7 @@ Provide ONLY the consolidated prompt, no additional commentary.";
                 SuggestedStructure = ParseEnum<StructureTemplate>(root, "suggestedStructure", StructureTemplate.ThreeAct),
                 ExtractedThemes = GetStringArray(root, "extractedThemes"),
                 CoreConflict = root.GetProperty("coreConflict").GetString() ?? "",
-                Tone = root.TryGetProperty("tone", out var t) ? t.GetString() ?? "" : "",
+                ToneDescriptor = root.TryGetProperty("tone", out var t) ? t.GetString() ?? "" : "",
                 Pacing = ParseEnum<NarrativePacing>(root, "pacing", NarrativePacing.Moderate),
                 AnalysisConfidence = ParseConfidence(root),
                 AnalyzedAt = DateTime.UtcNow
@@ -576,8 +577,10 @@ Provide ONLY the consolidated prompt, no additional commentary.";
                 ElevatorPitch = root.TryGetProperty("elevatorPitch", out var ep) ? ep.GetString() ?? "" : "",
                 BackCoverBlurb = root.TryGetProperty("backCoverBlurb", out var bcb) ? bcb.GetString() ?? "" : "",
                 ExtendedSynopsis = root.TryGetProperty("extendedSynopsis", out var es) ? es.GetString() ?? "" : "",
-                Motifs = GetStringArray(root, "motifs"),
-                EmotionalJourney = root.TryGetProperty("emotionalJourney", out var ej) ? ej.GetString() ?? "" : "",
+                Motifs = GetStringArray(root, "motifs").Select(m => new MotifDefinition { Motif = m }).ToList(),
+                MoodKeywords = root.TryGetProperty("emotionalJourney", out var ej) 
+                    ? (ej.ValueKind == JsonValueKind.Array ? GetStringArray(root, "emotionalJourney") : new List<string> { ej.GetString() ?? "" })
+                    : new List<string>(),
                 CreatedAt = DateTime.UtcNow
             };
         }
@@ -666,3 +669,6 @@ Provide ONLY the consolidated prompt, no additional commentary.";
 
     #endregion
 }
+
+
+

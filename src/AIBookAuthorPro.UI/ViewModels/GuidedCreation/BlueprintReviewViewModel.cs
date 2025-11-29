@@ -284,7 +284,7 @@ public partial class BlueprintReviewViewModel : ObservableObject
                 ActNumber = act.ActNumber,
                 Name = act.Name,
                 Purpose = act.Purpose ?? "",
-                PercentageOfBook = act.PercentageOfBook,
+                PercentageOfBook = (int)act.PercentageOfBook,
                 ChapterCount = act.Chapters?.Count ?? 0
             });
         }
@@ -406,7 +406,7 @@ public partial class BlueprintReviewViewModel : ObservableObject
                 Purpose = chapter.Purpose ?? "",
                 TargetWordCount = chapter.TargetWordCount,
                 SceneCount = chapter.Scenes?.Count ?? 0,
-                Pov = chapter.Pov ?? "Third Person",
+                Pov = chapter.POV ?? "Third Person",
                 Tone = chapter.Tone.ToString()
             });
         }

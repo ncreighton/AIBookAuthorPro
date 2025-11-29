@@ -108,7 +108,7 @@ public sealed class NotificationService : INotificationService
             CreatedAt = DateTime.UtcNow
         };
 
-        Application.Current?.Dispatcher.Invoke(() =>
+        System.Windows.Application.Current?.Dispatcher.Invoke(() =>
         {
             _notifications.Add(item);
             NotificationAdded?.Invoke(this, item);
@@ -120,7 +120,7 @@ public sealed class NotificationService : INotificationService
             {
                 Task.Delay(options.Duration.Value).ContinueWith(_ =>
                 {
-                    Application.Current?.Dispatcher.Invoke(() => Dismiss(item.Id));
+                    System.Windows.Application.Current?.Dispatcher.Invoke(() => Dismiss(item.Id));
                 });
             }
         });

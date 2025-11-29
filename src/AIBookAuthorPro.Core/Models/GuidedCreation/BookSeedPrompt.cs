@@ -19,7 +19,7 @@ public sealed record BookSeedPrompt
     /// <summary>
     /// The raw, unprocessed prompt text from the user.
     /// </summary>
-    public required string RawPrompt { get; init; }
+    public string RawPrompt { get; init; } = string.Empty;
 
     /// <summary>
     /// When this prompt was submitted.
@@ -57,6 +57,11 @@ public sealed record BookSeedPrompt
     public Dictionary<string, string> Metadata { get; init; } = new();
 
     /// <summary>
+    /// Additional context or notes from the user.
+    /// </summary>
+    public string? AdditionalContext { get; init; }
+
+    /// <summary>
     /// Reference files or content that inspired this prompt.
     /// </summary>
     public List<PromptReference> References { get; init; } = new();
@@ -90,12 +95,12 @@ public sealed record PromptReference
     /// <summary>
     /// Type of reference (e.g., "Book", "Movie", "Article", "Image").
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Title or name of the reference.
     /// </summary>
-    public required string Title { get; init; }
+    public string Title { get; init; } = string.Empty;
 
     /// <summary>
     /// Description of how this reference relates to the prompt.

@@ -18,7 +18,7 @@ public sealed record WorldBible
     /// <summary>
     /// World overview.
     /// </summary>
-    public required WorldOverview Overview { get; init; }
+    public WorldOverview Overview { get; init; } = new();
 
     /// <summary>
     /// All locations.
@@ -28,12 +28,12 @@ public sealed record WorldBible
     /// <summary>
     /// Time period details.
     /// </summary>
-    public required TimePeriodDetails TimePeriod { get; init; }
+    public TimePeriodDetails TimePeriod { get; init; } = new();
 
     /// <summary>
     /// Story timeline.
     /// </summary>
-    public required StoryTimeline Timeline { get; init; }
+    public StoryTimeline Timeline { get; init; } = new();
 
     /// <summary>
     /// Cultural details.
@@ -49,6 +49,11 @@ public sealed record WorldBible
     /// Magic/power system if applicable.
     /// </summary>
     public MagicSystem? MagicSystem { get; init; }
+
+    /// <summary>
+    /// World rules and constraints.
+    /// </summary>
+    public List<string> Rules { get; init; } = new();
 
     /// <summary>
     /// Technology level and details.
@@ -88,7 +93,7 @@ public sealed record WorldBible
     /// <summary>
     /// Sensory palette for the world.
     /// </summary>
-    public required SensoryPalette SensoryPalette { get; init; }
+    public SensoryPalette SensoryPalette { get; init; } = new();
 }
 
 /// <summary>
@@ -99,27 +104,27 @@ public sealed record WorldOverview
     /// <summary>
     /// World name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// High-level description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Type of world.
     /// </summary>
-    public required string WorldType { get; init; }
+    public string WorldType { get; init; } = string.Empty;
 
     /// <summary>
     /// Scale (city, country, world, universe).
     /// </summary>
-    public required string Scale { get; init; }
+    public string Scale { get; init; } = string.Empty;
 
     /// <summary>
     /// Tone/atmosphere.
     /// </summary>
-    public required string Atmosphere { get; init; }
+    public string Atmosphere { get; init; } = string.Empty;
 
     /// <summary>
     /// Key differentiators from real world.
@@ -129,7 +134,7 @@ public sealed record WorldOverview
     /// <summary>
     /// What makes this world unique.
     /// </summary>
-    public required string UniqueElements { get; init; }
+    public string UniqueElements { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -145,12 +150,12 @@ public sealed class LocationProfile
     /// <summary>
     /// Location name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Type of location.
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Parent location if nested.
@@ -160,17 +165,17 @@ public sealed class LocationProfile
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Significance to the story.
     /// </summary>
-    public required string Significance { get; init; }
+    public string Significance { get; init; } = string.Empty;
 
     /// <summary>
     /// Atmosphere/mood.
     /// </summary>
-    public required string Atmosphere { get; init; }
+    public string Atmosphere { get; init; } = string.Empty;
 
     /// <summary>
     /// Sensory details.
@@ -216,12 +221,12 @@ public sealed record TimePeriodDetails
     /// <summary>
     /// Era name.
     /// </summary>
-    public required string Era { get; init; }
+    public string Era { get; init; } = string.Empty;
 
     /// <summary>
     /// Time period description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Year or date if applicable.
@@ -241,17 +246,17 @@ public sealed record TimePeriodDetails
     /// <summary>
     /// Fashion/dress.
     /// </summary>
-    public required string Fashion { get; init; }
+    public string Fashion { get; init; } = string.Empty;
 
     /// <summary>
     /// Transportation.
     /// </summary>
-    public required string Transportation { get; init; }
+    public string Transportation { get; init; } = string.Empty;
 
     /// <summary>
     /// Communication methods.
     /// </summary>
-    public required string Communication { get; init; }
+    public string Communication { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -262,17 +267,17 @@ public sealed record StoryTimeline
     /// <summary>
     /// Total duration of story.
     /// </summary>
-    public required string TotalDuration { get; init; }
+    public string TotalDuration { get; init; } = string.Empty;
 
     /// <summary>
     /// When story begins.
     /// </summary>
-    public required string StartPoint { get; init; }
+    public string StartPoint { get; init; } = string.Empty;
 
     /// <summary>
     /// When story ends.
     /// </summary>
-    public required string EndPoint { get; init; }
+    public string EndPoint { get; init; } = string.Empty;
 
     /// <summary>
     /// Key timeline events.
@@ -293,22 +298,22 @@ public sealed record TimelineEvent
     /// <summary>
     /// Story day.
     /// </summary>
-    public required int StoryDay { get; init; }
+    public int StoryDay { get; init; }
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter where this occurs.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Significance.
     /// </summary>
-    public required string Significance { get; init; }
+    public string Significance { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -319,22 +324,22 @@ public sealed record TimeJump
     /// <summary>
     /// From chapter.
     /// </summary>
-    public required int FromChapter { get; init; }
+    public int FromChapter { get; init; }
 
     /// <summary>
     /// To chapter.
     /// </summary>
-    public required int ToChapter { get; init; }
+    public int ToChapter { get; init; }
 
     /// <summary>
     /// Duration jumped.
     /// </summary>
-    public required string Duration { get; init; }
+    public string Duration { get; init; } = string.Empty;
 
     /// <summary>
     /// What happens during the gap.
     /// </summary>
-    public required string GapSummary { get; init; }
+    public string GapSummary { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -345,12 +350,12 @@ public sealed record CultureProfile
     /// <summary>
     /// Culture name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Values.
@@ -386,12 +391,12 @@ public sealed record PoliticalStructure
     /// <summary>
     /// System type.
     /// </summary>
-    public required string SystemType { get; init; }
+    public string SystemType { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Power centers.
@@ -417,17 +422,17 @@ public sealed record PowerCenter
     /// <summary>
     /// Name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Type of power.
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Influence level.
     /// </summary>
-    public required string Influence { get; init; }
+    public string Influence { get; init; } = string.Empty;
 
     /// <summary>
     /// Associated characters.
@@ -443,22 +448,22 @@ public sealed record MagicSystem
     /// <summary>
     /// System name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Hardness (hard/soft magic spectrum).
     /// </summary>
-    public required string Hardness { get; init; }
+    public string Hardness { get; init; } = string.Empty;
 
     /// <summary>
     /// Source of magic.
     /// </summary>
-    public required string Source { get; init; }
+    public string Source { get; init; } = string.Empty;
 
     /// <summary>
     /// Rules.
@@ -478,7 +483,7 @@ public sealed record MagicSystem
     /// <summary>
     /// Who can use it.
     /// </summary>
-    public required string Practitioners { get; init; }
+    public string Practitioners { get; init; } = string.Empty;
 
     /// <summary>
     /// Abilities/powers.
@@ -488,7 +493,7 @@ public sealed record MagicSystem
     /// <summary>
     /// Social perception of magic.
     /// </summary>
-    public required string SocialPerception { get; init; }
+    public string SocialPerception { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -499,17 +504,17 @@ public sealed record MagicAbility
     /// <summary>
     /// Ability name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Cost to use.
     /// </summary>
-    public required string Cost { get; init; }
+    public string Cost { get; init; } = string.Empty;
 
     /// <summary>
     /// Limitations.
@@ -525,12 +530,12 @@ public sealed record TechnologyLevel
     /// <summary>
     /// Overall level.
     /// </summary>
-    public required string Level { get; init; }
+    public string Level { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Key technologies.
@@ -551,22 +556,22 @@ public sealed record Technology
     /// <summary>
     /// Name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact on society.
     /// </summary>
-    public required string SocialImpact { get; init; }
+    public string SocialImpact { get; init; } = string.Empty;
 
     /// <summary>
     /// Relevance to story.
     /// </summary>
-    public required string StoryRelevance { get; init; }
+    public string StoryRelevance { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -577,12 +582,12 @@ public sealed record EconomyDetails
     /// <summary>
     /// Economic system.
     /// </summary>
-    public required string System { get; init; }
+    public string System { get; init; } = string.Empty;
 
     /// <summary>
     /// Currency.
     /// </summary>
-    public required string Currency { get; init; }
+    public string Currency { get; init; } = string.Empty;
 
     /// <summary>
     /// Major industries.
@@ -597,7 +602,7 @@ public sealed record EconomyDetails
     /// <summary>
     /// Wealth distribution.
     /// </summary>
-    public required string WealthDistribution { get; init; }
+    public string WealthDistribution { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -608,12 +613,12 @@ public sealed record ReligionProfile
     /// <summary>
     /// Religion name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Beliefs.
@@ -628,7 +633,7 @@ public sealed record ReligionProfile
     /// <summary>
     /// Social role.
     /// </summary>
-    public required string SocialRole { get; init; }
+    public string SocialRole { get; init; } = string.Empty;
 
     /// <summary>
     /// Followers.
@@ -644,27 +649,27 @@ public sealed record HistoricalEvent
     /// <summary>
     /// Event name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// When it happened.
     /// </summary>
-    public required string When { get; init; }
+    public string When { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Impact on present.
     /// </summary>
-    public required string ImpactOnPresent { get; init; }
+    public string ImpactOnPresent { get; init; } = string.Empty;
 
     /// <summary>
     /// Story relevance.
     /// </summary>
-    public required string StoryRelevance { get; init; }
+    public string StoryRelevance { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -696,12 +701,12 @@ public sealed record WorldCreature
     /// <summary>
     /// Name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Story relevance.
@@ -717,12 +722,12 @@ public sealed record WorldRule
     /// <summary>
     /// Rule name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Rule description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Consequences of breaking.
@@ -743,12 +748,12 @@ public sealed record GlossaryEntry
     /// <summary>
     /// Term.
     /// </summary>
-    public required string Term { get; init; }
+    public string Term { get; init; } = string.Empty;
 
     /// <summary>
     /// Definition.
     /// </summary>
-    public required string Definition { get; init; }
+    public string Definition { get; init; } = string.Empty;
 
     /// <summary>
     /// Usage examples.

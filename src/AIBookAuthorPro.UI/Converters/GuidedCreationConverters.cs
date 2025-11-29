@@ -7,56 +7,12 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
+using WpfApplication = System.Windows.Application;
 
 namespace AIBookAuthorPro.UI.Converters;
 
-/// <summary>
-/// Converts boolean to Visibility.
-/// </summary>
-public class BoolToVisibilityConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is bool boolValue)
-        {
-            return boolValue ? Visibility.Visible : Visibility.Collapsed;
-        }
-        return Visibility.Collapsed;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is Visibility visibility)
-        {
-            return visibility == Visibility.Visible;
-        }
-        return false;
-    }
-}
-
-/// <summary>
-/// Converts boolean to inverse Visibility.
-/// </summary>
-public class InverseBoolToVisibilityConverter : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is bool boolValue)
-        {
-            return boolValue ? Visibility.Collapsed : Visibility.Visible;
-        }
-        return Visibility.Visible;
-    }
-
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        if (value is Visibility visibility)
-        {
-            return visibility != Visibility.Visible;
-        }
-        return true;
-    }
-}
+// Note: BoolToVisibilityConverter is defined in BoolToVisibilityConverter.cs
+// Note: InverseBoolToVisibilityConverter is defined in InverseBoolToVisibilityConverter.cs
 
 /// <summary>
 /// Converts string to Visibility (visible if not null or empty).
@@ -119,21 +75,21 @@ public class BoolToColorConverter : IValueConverter
                 var colorKey = boolValue ? parts[0] : parts[1];
                 
                 // Try to find the brush in application resources
-                if (Application.Current.TryFindResource($"MaterialDesign{colorKey}Brush") is Brush brush)
+                if (WpfApplication.Current.TryFindResource($"MaterialDesign{colorKey}Brush") is Brush brush)
                 {
                     return brush;
                 }
-                if (Application.Current.TryFindResource($"{colorKey}HueMidBrush") is Brush brush2)
+                if (WpfApplication.Current.TryFindResource($"{colorKey}HueMidBrush") is Brush brush2)
                 {
                     return brush2;
                 }
             }
 
             return boolValue 
-                ? Application.Current.FindResource("PrimaryHueMidBrush") 
-                : Application.Current.FindResource("MaterialDesignDivider");
+                ? WpfApplication.Current.FindResource("PrimaryHueMidBrush") 
+                : WpfApplication.Current.FindResource("MaterialDesignDivider");
         }
-        return Application.Current.FindResource("MaterialDesignDivider");
+        return WpfApplication.Current.FindResource("MaterialDesignDivider");
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

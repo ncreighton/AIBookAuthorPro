@@ -83,7 +83,6 @@
 
                 <!-- Approve Button -->
                 <Button Content="Approve Blueprint" 
-                        Style="{StaticResource MaterialDesignRaisedButton}"
                         Command="{Binding ApproveBlueprintCommand}"
                         Margin="0,16,0,0"
                         IsEnabled="{Binding CanApprove}">

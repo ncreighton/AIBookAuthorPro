@@ -44,6 +44,20 @@ public interface IProjectService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets a project by ID.
+    /// </summary>
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result<Project>> GetProjectAsync(
+        Guid projectId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Saves a project.
+    /// </summary>
+    System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result> SaveProjectAsync(
+        Project project,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Deletes a project.
     /// </summary>
     System.Threading.Tasks.Task<AIBookAuthorPro.Core.Common.Result> DeleteAsync(

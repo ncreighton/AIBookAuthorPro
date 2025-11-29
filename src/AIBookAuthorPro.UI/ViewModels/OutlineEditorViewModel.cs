@@ -131,7 +131,7 @@ public partial class OutlineEditorViewModel : ObservableObject
 
         var newItem = new OutlineItem
         {
-            ItemType = (Core.Models.OutlineItemType)(int)type,
+            ItemType = (OutlineItemType)(int)type,
             Title = GetDefaultTitle(type),
             Order = GetNextOrder(SelectedItem?.Item.Id)
         };
@@ -382,7 +382,7 @@ Format as a hierarchical outline.";
         {
             var act = new OutlineItem
             {
-                ItemType = Core.Models.OutlineItemType.Act,
+                ItemType = OutlineItemType.Act,
                 Title = actTitle,
                 Order = order++
             };
@@ -393,7 +393,7 @@ Format as a hierarchical outline.";
             {
                 var chapter = new OutlineItem
                 {
-                    ItemType = Core.Models.OutlineItemType.Chapter,
+                    ItemType = OutlineItemType.Chapter,
                     Title = chapterTitle,
                     Order = chapterOrder++
                 };
@@ -407,7 +407,7 @@ Format as a hierarchical outline.";
     [RelayCommand]
     private async Task CreateChapterFromItemAsync(OutlineItemViewModel? item)
     {
-        if (item?.Item.ItemType != Core.Models.OutlineItemType.Chapter || Project == null) return;
+        if (item?.Item.ItemType != OutlineItemType.Chapter || Project == null) return;
 
         // Check if chapter already exists
         if (item.Item.LinkedChapterId.HasValue)
@@ -533,12 +533,12 @@ public partial class OutlineItemViewModel : ObservableObject
     /// </summary>
     public string Icon => Item.ItemType switch
     {
-        Core.Models.OutlineItemType.Act => "TheaterMasks",
-        Core.Models.OutlineItemType.Part => "BookOpenPageVariant",
-        Core.Models.OutlineItemType.Chapter => "FileDocument",
-        Core.Models.OutlineItemType.Scene => "MovieOpen",
-        Core.Models.OutlineItemType.Beat => "CircleSmall",
-        Core.Models.OutlineItemType.Note => "Note",
+        OutlineItemType.Act => "TheaterMasks",
+        OutlineItemType.Part => "BookOpenPageVariant",
+        OutlineItemType.Chapter => "FileDocument",
+        OutlineItemType.Scene => "MovieOpen",
+        OutlineItemType.Beat => "CircleSmall",
+        OutlineItemType.Note => "Note",
         _ => "Circle"
     };
 

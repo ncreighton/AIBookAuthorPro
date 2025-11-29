@@ -18,42 +18,57 @@ public sealed record GenerationConfiguration
     /// <summary>
     /// AI provider settings.
     /// </summary>
-    public required AIProviderSettings AISettings { get; init; }
+    public AIProviderSettings AISettings { get; init; } = AIProviderSettings.Default;
 
     /// <summary>
     /// Generation behavior settings.
     /// </summary>
-    public required GenerationBehavior Behavior { get; init; }
+    public GenerationBehavior Behavior { get; init; } = GenerationBehavior.Default;
 
     /// <summary>
     /// Automation settings.
     /// </summary>
-    public required AutomationSettings Automation { get; init; }
+    public AutomationSettings Automation { get; init; } = new();
 
     /// <summary>
     /// Quality thresholds.
     /// </summary>
-    public required QualityThresholds QualityThresholds { get; init; }
+    public QualityThresholds QualityThresholds { get; init; } = new();
 
     /// <summary>
     /// Retry settings.
     /// </summary>
-    public required RetrySettings Retry { get; init; }
+    public RetrySettings Retry { get; init; } = new();
 
     /// <summary>
     /// Cost limits.
     /// </summary>
-    public required CostLimits CostLimits { get; init; }
+    public CostLimits CostLimits { get; init; } = new();
 
     /// <summary>
     /// Notification settings.
     /// </summary>
-    public required NotificationSettings Notifications { get; init; }
+    public NotificationSettings Notifications { get; init; } = new();
 
     /// <summary>
     /// Output settings.
     /// </summary>
-    public required OutputSettings Output { get; init; }
+    public OutputSettings Output { get; init; } = new();
+
+    /// <summary>
+    /// Content settings for generation.
+    /// </summary>
+    public ContentSettings ContentSettings { get; init; } = new();
+
+    /// <summary>
+    /// Context window size in tokens.
+    /// </summary>
+    public int ContextWindowSize { get; init; } = 128000;
+
+    /// <summary>
+    /// Creates a default configuration.
+    /// </summary>
+    public static GenerationConfiguration Default => new();
 }
 
 /// <summary>
@@ -64,12 +79,17 @@ public sealed record AIProviderSettings
     /// <summary>
     /// Primary provider to use.
     /// </summary>
-    public required string PrimaryProvider { get; init; }
+    public string PrimaryProvider { get; init; } = "Anthropic";
 
     /// <summary>
     /// Primary model.
     /// </summary>
-    public required string PrimaryModel { get; init; }
+    public string PrimaryModel { get; init; } = "claude-sonnet-4-20250514";
+
+    /// <summary>
+    /// Default settings.
+    /// </summary>
+    public static AIProviderSettings Default => new();
 
     /// <summary>
     /// Fallback provider.
@@ -115,7 +135,12 @@ public sealed record GenerationBehavior
     /// <summary>
     /// Generate chapters sequentially or in parallel.
     /// </summary>
-    public required GenerationMode Mode { get; init; }
+    public GenerationMode Mode { get; init; } = GenerationMode.Sequential;
+
+    /// <summary>
+    /// Default settings.
+    /// </summary>
+    public static GenerationBehavior Default => new() { ContextCompression = "smart" };
 
     /// <summary>
     /// Max parallel generations (if parallel mode).
@@ -150,7 +175,7 @@ public sealed record GenerationBehavior
     /// <summary>
     /// Context compression strategy.
     /// </summary>
-    public required string ContextCompression { get; init; }
+    public string ContextCompression { get; init; } = "smart";
 }
 
 /// <summary>
@@ -423,17 +448,17 @@ public sealed record QualityGateConfiguration
     /// <summary>
     /// Continuity checks.
     /// </summary>
-    public required ContinuityCheckConfig ContinuityChecks { get; init; }
+    public ContinuityCheckConfig ContinuityChecks { get; init; } = new();
 
     /// <summary>
     /// Style consistency checks.
     /// </summary>
-    public required StyleCheckConfig StyleChecks { get; init; }
+    public StyleCheckConfig StyleChecks { get; init; } = new();
 
     /// <summary>
     /// Auto-revision settings.
     /// </summary>
-    public required AutoRevisionConfig AutoRevision { get; init; }
+    public AutoRevisionConfig AutoRevision { get; init; } = new();
 }
 
 /// <summary>
@@ -444,7 +469,7 @@ public sealed record QualityDimensionConfig
     /// <summary>
     /// Dimension name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Enabled.
@@ -558,4 +583,50 @@ public sealed record AutoRevisionConfig
     /// Always require approval after revision.
     /// </summary>
     public bool RequireApprovalAfterRevision { get; init; } = false;
+}
+
+/// <summary>
+/// Content generation settings.
+/// </summary>
+public sealed record ContentSettings
+{
+    /// <summary>
+    /// Target words per scene.
+    /// </summary>
+    public int TargetWordsPerScene { get; init; } = 1500;
+
+    /// <summary>
+    /// Minimum words per scene.
+    /// </summary>
+    public int MinWordsPerScene { get; init; } = 800;
+
+    /// <summary>
+    /// Maximum words per scene.
+    /// </summary>
+    public int MaxWordsPerScene { get; init; } = 3000;
+
+    /// <summary>
+    /// Target words per chapter.
+    /// </summary>
+    public int TargetWordsPerChapter { get; init; } = 4000;
+
+    /// <summary>
+    /// Include chapter headers.
+    /// </summary>
+    public bool IncludeChapterHeaders { get; init; } = true;
+
+    /// <summary>
+    /// Include scene breaks.
+    /// </summary>
+    public bool IncludeSceneBreaks { get; init; } = true;
+
+    /// <summary>
+    /// Topics to avoid in generated content.
+    /// </summary>
+    public List<string> AvoidTopics { get; init; } = new();
+
+    /// <summary>
+    /// Content rating (e.g., PG, PG-13, R, etc.).
+    /// </summary>
+    public string ContentRating { get; init; } = "PG-13";
 }

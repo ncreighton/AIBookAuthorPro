@@ -220,14 +220,11 @@ public partial class CoverViewModel : ObservableObject
             }
 
             // Load available providers
-            var providersResult = await _coverService.GetAvailableProvidersAsync(cancellationToken);
-            if (providersResult.IsSuccess)
+            var providers = _coverService.GetAvailableProviders();
+            AvailableProviders.Clear();
+            foreach (var provider in providers)
             {
-                AvailableProviders.Clear();
-                foreach (var provider in providersResult.Value!)
-                {
-                    AvailableProviders.Add(provider);
-                }
+                AvailableProviders.Add(provider);
             }
 
             // Load templates
@@ -521,8 +518,9 @@ public partial class CoverViewModel : ObservableObject
 
         try
         {
-            var customizations = new Dictionary<string, string>();
             // Add any customizations from UI
+            CoverTextElements? customizations = null;
+            // TODO: Build customizations from UI fields if needed
 
             var result = await _coverService.CreateFromTemplateAsync(
                 CurrentProjectId.Value,

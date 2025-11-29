@@ -94,7 +94,7 @@
 
                         <Button
                             Grid.Column="2"
-                            Style="{StaticResource MaterialDesignRaisedAccentButton}"
+                            Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
                             Content="Start Creating"
                             FontSize="16"
                             Padding="24,12"

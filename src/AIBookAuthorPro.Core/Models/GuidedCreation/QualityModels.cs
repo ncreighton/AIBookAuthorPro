@@ -18,12 +18,12 @@ public sealed record ComprehensiveQualityReport
     /// <summary>
     /// Chapter ID.
     /// </summary>
-    public required Guid ChapterId { get; init; }
+    public Guid ChapterId { get; init; }
 
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// When evaluated.
@@ -33,64 +33,64 @@ public sealed record ComprehensiveQualityReport
     /// <summary>
     /// Overall score (0-100).
     /// </summary>
-    public required double OverallScore { get; init; }
+    public double OverallScore { get; init; }
 
     /// <summary>
     /// Verdict.
     /// </summary>
-    public required QualityVerdict Verdict { get; init; }
+    public QualityVerdict Verdict { get; init; } = QualityVerdict.NeedsWork;
 
     // ================== DIMENSION SCORES ==================
 
     /// <summary>
     /// Narrative quality score.
     /// </summary>
-    public required DimensionScore NarrativeQuality { get; init; }
+    public DimensionScore NarrativeQuality { get; init; } = new();
 
     /// <summary>
     /// Character consistency score.
     /// </summary>
-    public required DimensionScore CharacterConsistency { get; init; }
+    public DimensionScore CharacterConsistency { get; init; } = new();
 
     /// <summary>
     /// Plot adherence score.
     /// </summary>
-    public required DimensionScore PlotAdherence { get; init; }
+    public DimensionScore PlotAdherence { get; init; } = new();
 
     /// <summary>
     /// Style consistency score.
     /// </summary>
-    public required DimensionScore StyleConsistency { get; init; }
+    public DimensionScore StyleConsistency { get; init; } = new();
 
     /// <summary>
     /// Pacing quality score.
     /// </summary>
-    public required DimensionScore PacingQuality { get; init; }
+    public DimensionScore PacingQuality { get; init; } = new();
 
     /// <summary>
     /// Dialogue quality score.
     /// </summary>
-    public required DimensionScore DialogueQuality { get; init; }
+    public DimensionScore DialogueQuality { get; init; } = new();
 
     /// <summary>
     /// Description quality score.
     /// </summary>
-    public required DimensionScore DescriptionQuality { get; init; }
+    public DimensionScore DescriptionQuality { get; init; } = new();
 
     /// <summary>
     /// Emotional impact score.
     /// </summary>
-    public required DimensionScore EmotionalImpact { get; init; }
+    public DimensionScore EmotionalImpact { get; init; } = new();
 
     /// <summary>
     /// Continuity accuracy score.
     /// </summary>
-    public required DimensionScore ContinuityAccuracy { get; init; }
+    public DimensionScore ContinuityAccuracy { get; init; } = new();
 
     /// <summary>
     /// Readability score.
     /// </summary>
-    public required DimensionScore ReadabilityScore { get; init; }
+    public DimensionScore ReadabilityScore { get; init; } = new();
 
     // ================== ISSUES ==================
 
@@ -114,6 +114,16 @@ public sealed record ComprehensiveQualityReport
     /// </summary>
     public int MinorIssueCount => Issues.Count(i => i.Severity == QualityIssueSeverity.Minor);
 
+    /// <summary>
+    /// Total issue count.
+    /// </summary>
+    public int TotalIssueCount => Issues.Count;
+
+    /// <summary>
+    /// Readability alias for ReadabilityScore.
+    /// </summary>
+    public DimensionScore Readability { get => ReadabilityScore; init => ReadabilityScore = value; }
+
     // ================== SUGGESTIONS ==================
 
     /// <summary>
@@ -121,12 +131,22 @@ public sealed record ComprehensiveQualityReport
     /// </summary>
     public List<ImprovementSuggestion> Suggestions { get; init; } = new();
 
+    /// <summary>
+    /// Alias for Suggestions.
+    /// </summary>
+    public List<ImprovementSuggestion> ImprovementSuggestions { get => Suggestions; init => Suggestions = value; }
+
     // ================== AUTO-REVISION ==================
 
     /// <summary>
     /// Whether auto-revision is recommended.
     /// </summary>
-    public required bool RecommendAutoRevision { get; init; }
+    public bool RecommendAutoRevision { get; init; }
+
+    /// <summary>
+    /// Alias for RecommendAutoRevision.
+    /// </summary>
+    public bool AutoRevisionRecommended { get => RecommendAutoRevision; init => RecommendAutoRevision = value; }
 
     /// <summary>
     /// Revision instructions if auto-revision recommended.
@@ -147,12 +167,17 @@ public sealed record DimensionScore
     /// <summary>
     /// Dimension name.
     /// </summary>
-    public required string Dimension { get; init; }
+    public string Dimension { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Alias for Dimension.
+    /// </summary>
+    public string DimensionName { get => Dimension; init => Dimension = value; }
 
     /// <summary>
     /// Score (0-100).
     /// </summary>
-    public required double Score { get; init; }
+    public double Score { get; init; }
 
     /// <summary>
     /// Weight in overall score.
@@ -162,7 +187,7 @@ public sealed record DimensionScore
     /// <summary>
     /// Explanation.
     /// </summary>
-    public required string Explanation { get; init; }
+    public string Explanation { get; init; } = string.Empty;
 
     /// <summary>
     /// Strengths identified.
@@ -193,12 +218,12 @@ public sealed record QualityIssue
     /// <summary>
     /// Severity.
     /// </summary>
-    public required QualityIssueSeverity Severity { get; init; }
+    public QualityIssueSeverity Severity { get; init; } = QualityIssueSeverity.Minor;
 
     /// <summary>
     /// Category.
     /// </summary>
-    public required string Category { get; init; }
+    public string Category { get; init; } = string.Empty;
 
     /// <summary>
     /// Subcategory.
@@ -208,12 +233,17 @@ public sealed record QualityIssue
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Location in text.
     /// </summary>
-    public required string Location { get; init; }
+    public string Location { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Alias for Location.
+    /// </summary>
+    public string LocationInText { get => Location; init => Location = value; }
 
     /// <summary>
     /// Problematic text excerpt.
@@ -249,17 +279,17 @@ public sealed record ImprovementSuggestion
     /// <summary>
     /// Category.
     /// </summary>
-    public required string Category { get; init; }
+    public string Category { get; init; } = string.Empty;
 
     /// <summary>
     /// Suggestion.
     /// </summary>
-    public required string Suggestion { get; init; }
+    public string Suggestion { get; init; } = string.Empty;
 
     /// <summary>
     /// Expected impact.
     /// </summary>
-    public required string ExpectedImpact { get; init; }
+    public string ExpectedImpact { get; init; } = string.Empty;
 
     /// <summary>
     /// Priority (1-10).
@@ -280,12 +310,12 @@ public sealed record RevisionInstruction
     /// <summary>
     /// Instruction type.
     /// </summary>
-    public required string Type { get; init; }
+    public string Type { get; init; } = string.Empty;
 
     /// <summary>
     /// Target location.
     /// </summary>
-    public required string TargetLocation { get; init; }
+    public string TargetLocation { get; init; } = string.Empty;
 
     /// <summary>
     /// Current text.
@@ -295,7 +325,7 @@ public sealed record RevisionInstruction
     /// <summary>
     /// Instruction.
     /// </summary>
-    public required string Instruction { get; init; }
+    public string Instruction { get; init; } = string.Empty;
 
     /// <summary>
     /// Suggested replacement.
@@ -305,7 +335,7 @@ public sealed record RevisionInstruction
     /// <summary>
     /// Priority.
     /// </summary>
-    public required int Priority { get; init; }
+    public int Priority { get; init; }
 
     /// <summary>
     /// Issues this addresses.
@@ -326,22 +356,22 @@ public sealed record ContinuityReport
     /// <summary>
     /// Chapter ID.
     /// </summary>
-    public required Guid ChapterId { get; init; }
+    public Guid ChapterId { get; init; }
 
     /// <summary>
     /// Chapter number.
     /// </summary>
-    public required int ChapterNumber { get; init; }
+    public int ChapterNumber { get; init; }
 
     /// <summary>
     /// Whether passes check.
     /// </summary>
-    public required bool PassesContinuityCheck { get; init; }
+    public bool PassesContinuityCheck { get; init; }
 
     /// <summary>
     /// Continuity score (0-100).
     /// </summary>
-    public required double ContinuityScore { get; init; }
+    public double ContinuityScore { get; init; }
 
     /// <summary>
     /// Checked at.
@@ -396,42 +426,42 @@ public sealed record CharacterContinuityIssue
     /// <summary>
     /// Character ID.
     /// </summary>
-    public required Guid CharacterId { get; init; }
+    public Guid CharacterId { get; init; }
 
     /// <summary>
     /// Character name.
     /// </summary>
-    public required string CharacterName { get; init; }
+    public string CharacterName { get; init; } = string.Empty;
 
     /// <summary>
     /// Issue type.
     /// </summary>
-    public required ContinuityIssueType Type { get; init; }
+    public ContinuityIssueType Type { get; init; } = ContinuityIssueType.CharacterBehavior;
 
     /// <summary>
     /// Severity.
     /// </summary>
-    public required QualityIssueSeverity Severity { get; init; }
+    public QualityIssueSeverity Severity { get; init; } = QualityIssueSeverity.Minor;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Expected behavior/state.
     /// </summary>
-    public required string Expected { get; init; }
+    public string Expected { get; init; } = string.Empty;
 
     /// <summary>
     /// Actual behavior/state.
     /// </summary>
-    public required string Actual { get; init; }
+    public string Actual { get; init; } = string.Empty;
 
     /// <summary>
     /// Location in text.
     /// </summary>
-    public required string LocationInText { get; init; }
+    public string LocationInText { get; init; } = string.Empty;
 
     /// <summary>
     /// Source chapter (where expectation was set).
@@ -457,22 +487,22 @@ public sealed record PlotContinuityIssue
     /// <summary>
     /// Issue type.
     /// </summary>
-    public required ContinuityIssueType Type { get; init; }
+    public ContinuityIssueType Type { get; init; } = ContinuityIssueType.CharacterBehavior;
 
     /// <summary>
     /// Severity.
     /// </summary>
-    public required QualityIssueSeverity Severity { get; init; }
+    public QualityIssueSeverity Severity { get; init; } = QualityIssueSeverity.Minor;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Location in text.
     /// </summary>
-    public required string LocationInText { get; init; }
+    public string LocationInText { get; init; } = string.Empty;
 
     /// <summary>
     /// Contradiction with.
@@ -498,32 +528,32 @@ public sealed record TimelineContinuityIssue
     /// <summary>
     /// Issue type.
     /// </summary>
-    public required ContinuityIssueType Type { get; init; }
+    public ContinuityIssueType Type { get; init; } = ContinuityIssueType.CharacterBehavior;
 
     /// <summary>
     /// Severity.
     /// </summary>
-    public required QualityIssueSeverity Severity { get; init; }
+    public QualityIssueSeverity Severity { get; init; } = QualityIssueSeverity.Minor;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Expected timeline.
     /// </summary>
-    public required string ExpectedTimeline { get; init; }
+    public string ExpectedTimeline { get; init; } = string.Empty;
 
     /// <summary>
     /// Actual timeline in text.
     /// </summary>
-    public required string ActualTimeline { get; init; }
+    public string ActualTimeline { get; init; } = string.Empty;
 
     /// <summary>
     /// Location in text.
     /// </summary>
-    public required string LocationInText { get; init; }
+    public string LocationInText { get; init; } = string.Empty;
 
     /// <summary>
     /// Suggested fix.
@@ -544,37 +574,37 @@ public sealed record SettingContinuityIssue
     /// <summary>
     /// Location name.
     /// </summary>
-    public required string LocationName { get; init; }
+    public string LocationName { get; init; } = string.Empty;
 
     /// <summary>
     /// Issue type.
     /// </summary>
-    public required ContinuityIssueType Type { get; init; }
+    public ContinuityIssueType Type { get; init; } = ContinuityIssueType.CharacterBehavior;
 
     /// <summary>
     /// Severity.
     /// </summary>
-    public required QualityIssueSeverity Severity { get; init; }
+    public QualityIssueSeverity Severity { get; init; } = QualityIssueSeverity.Minor;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Expected detail.
     /// </summary>
-    public required string Expected { get; init; }
+    public string Expected { get; init; } = string.Empty;
 
     /// <summary>
     /// Actual detail.
     /// </summary>
-    public required string Actual { get; init; }
+    public string Actual { get; init; } = string.Empty;
 
     /// <summary>
     /// Location in text.
     /// </summary>
-    public required string LocationInText { get; init; }
+    public string LocationInText { get; init; } = string.Empty;
 
     /// <summary>
     /// Suggested fix.
@@ -590,37 +620,37 @@ public sealed record ObjectContinuityIssue
     /// <summary>
     /// Object name.
     /// </summary>
-    public required string ObjectName { get; init; }
+    public string ObjectName { get; init; } = string.Empty;
 
     /// <summary>
     /// Issue type.
     /// </summary>
-    public required ContinuityIssueType Type { get; init; }
+    public ContinuityIssueType Type { get; init; } = ContinuityIssueType.CharacterBehavior;
 
     /// <summary>
     /// Severity.
     /// </summary>
-    public required QualityIssueSeverity Severity { get; init; }
+    public QualityIssueSeverity Severity { get; init; } = QualityIssueSeverity.Minor;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Expected state.
     /// </summary>
-    public required string ExpectedState { get; init; }
+    public string ExpectedState { get; init; } = string.Empty;
 
     /// <summary>
     /// Actual state.
     /// </summary>
-    public required string ActualState { get; init; }
+    public string ActualState { get; init; } = string.Empty;
 
     /// <summary>
     /// Location in text.
     /// </summary>
-    public required string LocationInText { get; init; }
+    public string LocationInText { get; init; } = string.Empty;
 
     /// <summary>
     /// Source chapter.

@@ -18,42 +18,42 @@ public sealed record StyleGuide
     /// <summary>
     /// Overall voice description.
     /// </summary>
-    public required VoiceProfile Voice { get; init; }
+    public VoiceProfile Voice { get; init; } = new();
 
     /// <summary>
     /// Prose style guidelines.
     /// </summary>
-    public required ProseStyle Prose { get; init; }
+    public ProseStyle Prose { get; init; } = new();
 
     /// <summary>
     /// Dialogue guidelines.
     /// </summary>
-    public required DialogueGuidelines Dialogue { get; init; }
+    public DialogueGuidelines Dialogue { get; init; } = new();
 
     /// <summary>
     /// Description guidelines.
     /// </summary>
-    public required DescriptionGuidelines Description { get; init; }
+    public DescriptionGuidelines Description { get; init; } = new();
 
     /// <summary>
     /// Action scene guidelines.
     /// </summary>
-    public required ActionGuidelines Action { get; init; }
+    public ActionGuidelines Action { get; init; } = new();
 
     /// <summary>
     /// Emotional scene guidelines.
     /// </summary>
-    public required EmotionalGuidelines Emotional { get; init; }
+    public EmotionalGuidelines Emotional { get; init; } = new();
 
     /// <summary>
     /// Pacing guidelines.
     /// </summary>
-    public required PacingGuidelines Pacing { get; init; }
+    public PacingGuidelines Pacing { get; init; } = new();
 
     /// <summary>
     /// Genre-specific conventions.
     /// </summary>
-    public required GenreConventions GenreConventions { get; init; }
+    public GenreConventions GenreConventions { get; init; } = new();
 
     /// <summary>
     /// Sample passages demonstrating the style.
@@ -73,7 +73,7 @@ public sealed record StyleGuide
     /// <summary>
     /// Formatting conventions.
     /// </summary>
-    public required FormattingConventions Formatting { get; init; }
+    public FormattingConventions Formatting { get; init; } = new();
 }
 
 /// <summary>
@@ -84,7 +84,17 @@ public sealed record VoiceProfile
     /// <summary>
     /// Overall voice description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Point of view (First Person, Third Person Limited, etc.)
+    /// </summary>
+    public string PointOfView { get; init; } = "Third Person Limited";
+
+    /// <summary>
+    /// Tense (Past, Present).
+    /// </summary>
+    public string Tense { get; init; } = "Past";
 
     /// <summary>
     /// Tone keywords.
@@ -94,17 +104,17 @@ public sealed record VoiceProfile
     /// <summary>
     /// Personality of the narrative voice.
     /// </summary>
-    public required string NarrativePersonality { get; init; }
+    public string NarrativePersonality { get; init; } = string.Empty;
 
     /// <summary>
     /// Distance from characters (close, medium, distant).
     /// </summary>
-    public required string NarrativeDistance { get; init; }
+    public string NarrativeDistance { get; init; } = string.Empty;
 
     /// <summary>
     /// Reliability of narrator.
     /// </summary>
-    public required string NarratorReliability { get; init; }
+    public string NarratorReliability { get; init; } = string.Empty;
 
     /// <summary>
     /// Humor level and type.
@@ -114,12 +124,12 @@ public sealed record VoiceProfile
     /// <summary>
     /// Emotional transparency.
     /// </summary>
-    public required string EmotionalTransparency { get; init; }
+    public string EmotionalTransparency { get; init; } = string.Empty;
 
     /// <summary>
     /// Philosophical depth.
     /// </summary>
-    public required string PhilosophicalDepth { get; init; }
+    public string PhilosophicalDepth { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -130,7 +140,7 @@ public sealed record HumorProfile
     /// <summary>
     /// Level (none, light, moderate, heavy).
     /// </summary>
-    public required string Level { get; init; }
+    public string Level { get; init; } = string.Empty;
 
     /// <summary>
     /// Types of humor used.
@@ -156,57 +166,72 @@ public sealed record ProseStyle
     /// <summary>
     /// Sentence length preference.
     /// </summary>
-    public required string SentenceLength { get; init; }
+    public string SentenceLength { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Sentence style description.
+    /// </summary>
+    public string SentenceStyle { get; init; } = string.Empty;
 
     /// <summary>
     /// Sentence variety guidance.
     /// </summary>
-    public required string SentenceVariety { get; init; }
+    public string SentenceVariety { get; init; } = string.Empty;
 
     /// <summary>
     /// Paragraph length.
     /// </summary>
-    public required string ParagraphLength { get; init; }
+    public string ParagraphLength { get; init; } = string.Empty;
 
     /// <summary>
     /// Vocabulary level.
     /// </summary>
-    public required string VocabularyLevel { get; init; }
+    public string VocabularyLevel { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Preferred words to use.
+    /// </summary>
+    public List<string> PreferredWords { get; init; } = new();
+
+    /// <summary>
+    /// Words to avoid.
+    /// </summary>
+    public List<string> AvoidWords { get; init; } = new();
 
     /// <summary>
     /// Imagery density.
     /// </summary>
-    public required string ImageryDensity { get; init; }
+    public string ImageryDensity { get; init; } = string.Empty;
 
     /// <summary>
     /// Metaphor usage.
     /// </summary>
-    public required MetaphorGuidelines Metaphors { get; init; }
+    public MetaphorGuidelines Metaphors { get; init; } = new();
 
     /// <summary>
     /// Rhythm and flow notes.
     /// </summary>
-    public required string Rhythm { get; init; }
+    public string Rhythm { get; init; } = string.Empty;
 
     /// <summary>
     /// Show vs tell ratio guidance.
     /// </summary>
-    public required string ShowVsTell { get; init; }
+    public string ShowVsTell { get; init; } = string.Empty;
 
     /// <summary>
     /// Filtering words (felt, saw, heard) usage.
     /// </summary>
-    public required string FilteringWords { get; init; }
+    public string FilteringWords { get; init; } = string.Empty;
 
     /// <summary>
     /// Adverb usage.
     /// </summary>
-    public required string AdverbUsage { get; init; }
+    public string AdverbUsage { get; init; } = string.Empty;
 
     /// <summary>
     /// Passive voice usage.
     /// </summary>
-    public required string PassiveVoice { get; init; }
+    public string PassiveVoice { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -217,7 +242,7 @@ public sealed record MetaphorGuidelines
     /// <summary>
     /// Frequency.
     /// </summary>
-    public required string Frequency { get; init; }
+    public string Frequency { get; init; } = string.Empty;
 
     /// <summary>
     /// Types preferred.
@@ -243,12 +268,12 @@ public sealed record ExtendedMetaphor
     /// <summary>
     /// The metaphor.
     /// </summary>
-    public required string Metaphor { get; init; }
+    public string Metaphor { get; init; } = string.Empty;
 
     /// <summary>
     /// Meaning.
     /// </summary>
-    public required string Meaning { get; init; }
+    public string Meaning { get; init; } = string.Empty;
 
     /// <summary>
     /// Where it appears.
@@ -264,32 +289,42 @@ public sealed record DialogueGuidelines
     /// <summary>
     /// Dialogue to narrative ratio.
     /// </summary>
-    public required string DialogueRatio { get; init; }
+    public string DialogueRatio { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Alias for DialogueRatio.
+    /// </summary>
+    public string DialogueToNarrativeRatio { get => DialogueRatio; init => DialogueRatio = value; }
 
     /// <summary>
     /// Dialogue tag preferences.
     /// </summary>
-    public required DialogueTagGuidelines Tags { get; init; }
+    public DialogueTagGuidelines Tags { get; init; } = new();
+
+    /// <summary>
+    /// Tag style description (convenience).
+    /// </summary>
+    public string TagStyle { get => Tags?.TagPlacement ?? string.Empty; }
 
     /// <summary>
     /// Subtext level.
     /// </summary>
-    public required string SubtextLevel { get; init; }
+    public string SubtextLevel { get; init; } = string.Empty;
 
     /// <summary>
     /// Interruption style.
     /// </summary>
-    public required string InterruptionStyle { get; init; }
+    public string InterruptionStyle { get; init; } = string.Empty;
 
     /// <summary>
     /// How to handle accents/dialects.
     /// </summary>
-    public required string AccentHandling { get; init; }
+    public string AccentHandling { get; init; } = string.Empty;
 
     /// <summary>
     /// Exposition in dialogue guidance.
     /// </summary>
-    public required string ExpositionHandling { get; init; }
+    public string ExpositionHandling { get; init; } = string.Empty;
 
     /// <summary>
     /// Phone/text message formatting.
@@ -299,7 +334,7 @@ public sealed record DialogueGuidelines
     /// <summary>
     /// Internal monologue style.
     /// </summary>
-    public required string InternalMonologue { get; init; }
+    public string InternalMonologue { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -315,17 +350,17 @@ public sealed record DialogueTagGuidelines
     /// <summary>
     /// When to use action beats instead.
     /// </summary>
-    public required string ActionBeatUsage { get; init; }
+    public string ActionBeatUsage { get; init; } = string.Empty;
 
     /// <summary>
     /// Tag placement preferences.
     /// </summary>
-    public required string TagPlacement { get; init; }
+    public string TagPlacement { get; init; } = string.Empty;
 
     /// <summary>
     /// Said/asked frequency.
     /// </summary>
-    public required string SaidFrequency { get; init; }
+    public string SaidFrequency { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -336,32 +371,32 @@ public sealed record DescriptionGuidelines
     /// <summary>
     /// Setting description depth.
     /// </summary>
-    public required string SettingDepth { get; init; }
+    public string SettingDepth { get; init; } = string.Empty;
 
     /// <summary>
     /// Character description approach.
     /// </summary>
-    public required string CharacterDescriptionApproach { get; init; }
+    public string CharacterDescriptionApproach { get; init; } = string.Empty;
 
     /// <summary>
     /// Sensory balance.
     /// </summary>
-    public required SensoryBalance SensoryBalance { get; init; }
+    public SensoryBalance SensoryBalance { get; init; } = new();
 
     /// <summary>
     /// Description pacing.
     /// </summary>
-    public required string DescriptionPacing { get; init; }
+    public string DescriptionPacing { get; init; } = string.Empty;
 
     /// <summary>
     /// Integration with action.
     /// </summary>
-    public required string ActionIntegration { get; init; }
+    public string ActionIntegration { get; init; } = string.Empty;
 
     /// <summary>
     /// World-building integration.
     /// </summary>
-    public required string WorldBuildingIntegration { get; init; }
+    public string WorldBuildingIntegration { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -408,32 +443,32 @@ public sealed record ActionGuidelines
     /// <summary>
     /// Sentence structure in action.
     /// </summary>
-    public required string SentenceStructure { get; init; }
+    public string SentenceStructure { get; init; } = string.Empty;
 
     /// <summary>
     /// Detail level.
     /// </summary>
-    public required string DetailLevel { get; init; }
+    public string DetailLevel { get; init; } = string.Empty;
 
     /// <summary>
     /// Choreography clarity.
     /// </summary>
-    public required string ChoreographyClarity { get; init; }
+    public string ChoreographyClarity { get; init; } = string.Empty;
 
     /// <summary>
     /// Violence level.
     /// </summary>
-    public required string ViolenceLevel { get; init; }
+    public string ViolenceLevel { get; init; } = string.Empty;
 
     /// <summary>
     /// Emotional anchoring.
     /// </summary>
-    public required string EmotionalAnchoring { get; init; }
+    public string EmotionalAnchoring { get; init; } = string.Empty;
 
     /// <summary>
     /// Time compression/expansion.
     /// </summary>
-    public required string TimeManipulation { get; init; }
+    public string TimeManipulation { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -444,27 +479,27 @@ public sealed record EmotionalGuidelines
     /// <summary>
     /// Emotional depth.
     /// </summary>
-    public required string EmotionalDepth { get; init; }
+    public string EmotionalDepth { get; init; } = string.Empty;
 
     /// <summary>
     /// Vulnerability level.
     /// </summary>
-    public required string VulnerabilityLevel { get; init; }
+    public string VulnerabilityLevel { get; init; } = string.Empty;
 
     /// <summary>
     /// Physical manifestation of emotion.
     /// </summary>
-    public required string PhysicalManifestation { get; init; }
+    public string PhysicalManifestation { get; init; } = string.Empty;
 
     /// <summary>
     /// Restraint vs release.
     /// </summary>
-    public required string RestraintVsRelease { get; init; }
+    public string RestraintVsRelease { get; init; } = string.Empty;
 
     /// <summary>
     /// Romantic content level.
     /// </summary>
-    public required string RomanticContentLevel { get; init; }
+    public string RomanticContentLevel { get; init; } = string.Empty;
 
     /// <summary>
     /// Heat level if applicable.
@@ -480,32 +515,32 @@ public sealed record PacingGuidelines
     /// <summary>
     /// Overall pacing description.
     /// </summary>
-    public required string Overall { get; init; }
+    public string Overall { get; init; } = string.Empty;
 
     /// <summary>
     /// Scene transition style.
     /// </summary>
-    public required string SceneTransitions { get; init; }
+    public string SceneTransitions { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter ending style.
     /// </summary>
-    public required string ChapterEndings { get; init; }
+    public string ChapterEndings { get; init; } = string.Empty;
 
     /// <summary>
     /// Chapter opening style.
     /// </summary>
-    public required string ChapterOpenings { get; init; }
+    public string ChapterOpenings { get; init; } = string.Empty;
 
     /// <summary>
     /// Cliffhanger usage.
     /// </summary>
-    public required string CliffhangerUsage { get; init; }
+    public string CliffhangerUsage { get; init; } = string.Empty;
 
     /// <summary>
     /// Breather scene guidance.
     /// </summary>
-    public required string BreatherScenes { get; init; }
+    public string BreatherScenes { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -516,7 +551,7 @@ public sealed record GenreConventions
     /// <summary>
     /// Primary genre.
     /// </summary>
-    public required string PrimaryGenre { get; init; }
+    public string PrimaryGenre { get; init; } = string.Empty;
 
     /// <summary>
     /// Conventions to follow.
@@ -547,17 +582,17 @@ public sealed record GenreConvention
     /// <summary>
     /// Convention name.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// How to implement.
     /// </summary>
-    public required string Implementation { get; init; }
+    public string Implementation { get; init; } = string.Empty;
 }
 
 /// <summary>
@@ -568,17 +603,17 @@ public sealed record StyleSample
     /// <summary>
     /// Category (opening, dialogue, action, etc.).
     /// </summary>
-    public required string Category { get; init; }
+    public string Category { get; init; } = string.Empty;
 
     /// <summary>
     /// The sample text.
     /// </summary>
-    public required string Sample { get; init; }
+    public string Sample { get; init; } = string.Empty;
 
     /// <summary>
     /// What it demonstrates.
     /// </summary>
-    public required string Demonstrates { get; init; }
+    public string Demonstrates { get; init; } = string.Empty;
 
     /// <summary>
     /// Notes.
@@ -594,17 +629,17 @@ public sealed record FormattingConventions
     /// <summary>
     /// Scene break marker.
     /// </summary>
-    public required string SceneBreakMarker { get; init; }
+    public string SceneBreakMarker { get; init; } = string.Empty;
 
     /// <summary>
     /// Thought formatting.
     /// </summary>
-    public required string ThoughtFormatting { get; init; }
+    public string ThoughtFormatting { get; init; } = string.Empty;
 
     /// <summary>
     /// Emphasis formatting.
     /// </summary>
-    public required string EmphasisFormatting { get; init; }
+    public string EmphasisFormatting { get; init; } = string.Empty;
 
     /// <summary>
     /// Letter/document formatting.
@@ -614,10 +649,10 @@ public sealed record FormattingConventions
     /// <summary>
     /// Flashback indication.
     /// </summary>
-    public required string FlashbackIndication { get; init; }
+    public string FlashbackIndication { get; init; } = string.Empty;
 
     /// <summary>
     /// Time skip indication.
     /// </summary>
-    public required string TimeSkipIndication { get; init; }
+    public string TimeSkipIndication { get; init; } = string.Empty;
 }

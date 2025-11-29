@@ -129,35 +129,65 @@ public enum CompressionStrategy
 /// </summary>
 public sealed record ChapterGenerationContext
 {
+    /// <summary>Chapter number.</summary>
+    public int ChapterNumber { get; init; }
+
     /// <summary>Chapter blueprint.</summary>
-    public required ChapterBlueprint Blueprint { get; init; }
+    public ChapterBlueprint ChapterBlueprint { get; init; } = new();
+
+    /// <summary>Chapter blueprint (alias for ChapterBlueprint).</summary>
+    public ChapterBlueprint Blueprint { get => ChapterBlueprint; init => ChapterBlueprint = value; }
 
     /// <summary>System prompt.</summary>
-    public required string SystemPrompt { get; init; }
+    public string SystemPrompt { get; init; } = string.Empty;
 
     /// <summary>Story context (previous chapters summary).</summary>
-    public required string StoryContext { get; init; }
+    public string StoryContext { get; init; } = string.Empty;
+
+    /// <summary>Narrative context.</summary>
+    public string NarrativeContext { get; init; } = string.Empty;
 
     /// <summary>Character context.</summary>
-    public required string CharacterContext { get; init; }
+    public string CharacterContext { get; init; } = string.Empty;
 
     /// <summary>Location context.</summary>
-    public required string LocationContext { get; init; }
+    public string LocationContext { get; init; } = string.Empty;
+
+    /// <summary>World context.</summary>
+    public string WorldContext { get; init; } = string.Empty;
 
     /// <summary>Plot context.</summary>
-    public required string PlotContext { get; init; }
+    public string PlotContext { get; init; } = string.Empty;
 
     /// <summary>Style context.</summary>
-    public required string StyleContext { get; init; }
+    public string StyleContext { get; init; } = string.Empty;
 
     /// <summary>Specific instructions for this chapter.</summary>
-    public required string ChapterInstructions { get; init; }
+    public string ChapterInstructions { get; init; } = string.Empty;
 
     /// <summary>Must-include elements.</summary>
     public List<string> MustInclude { get; init; } = new();
 
     /// <summary>Must-avoid elements.</summary>
     public List<string> MustAvoid { get; init; } = new();
+
+    /// <summary>Previous chapter summaries.</summary>
+    public List<string> PreviousChapterSummaries { get; init; } = new();
+
+    /// <summary>Character states.</summary>
+    public List<CharacterStateSnapshot> CharacterStates { get; init; } = new();
+
+    /// <summary>Active setups.</summary>
+    public List<SetupPayoff> ActiveSetups { get; init; } = new();
+
+    /// <summary>Due payoffs.</summary>
+    public List<SetupPayoff> DuePayoffs { get; init; } = new();
+
+    /// <summary>Token budget.</summary>
+    public int TokenBudget { get; init; }
+
+    /// <summary>Generation config.</summary>
+    public GenerationConfiguration? GenerationConfig { get; init; }
 
     /// <summary>Total token count.</summary>
     public int TotalTokens { get; init; }
@@ -166,7 +196,7 @@ public sealed record ChapterGenerationContext
     public int AvailableTokensForGeneration { get; init; }
 
     /// <summary>Context summary for metadata.</summary>
-    public required GenerationContextSummary Summary { get; init; }
+    public GenerationContextSummary Summary { get; init; } = new();
 }
 
 /// <summary>
@@ -175,20 +205,26 @@ public sealed record ChapterGenerationContext
 public sealed record SceneGenerationContext
 {
     /// <summary>Scene blueprint.</summary>
-    public required SceneBlueprint Blueprint { get; init; }
+    public SceneBlueprint Blueprint { get; init; } = new();
 
     /// <summary>Parent chapter context.</summary>
-    public required ChapterGenerationContext ChapterContext { get; init; }
+    public ChapterGenerationContext ChapterContext { get; init; } = new();
 
     /// <summary>Previous scenes in this chapter.</summary>
     public List<string> PreviousSceneContent { get; init; } = new();
 
+    /// <summary>Alias for PreviousSceneContent.</summary>
+    public List<string> PreviousScenes { get => PreviousSceneContent; init => PreviousSceneContent = value; }
+
+    /// <summary>Scene number.</summary>
+    public int SceneNumber { get; init; }
+
     /// <summary>Scene-specific instructions.</summary>
-    public required string SceneInstructions { get; init; }
+    public string SceneInstructions { get; init; } = string.Empty;
 
     /// <summary>Transition from previous scene.</summary>
     public string? TransitionInstruction { get; init; }
 
     /// <summary>Target word count for scene.</summary>
-    public required int TargetWordCount { get; init; }
+    public int TargetWordCount { get; init; }
 }

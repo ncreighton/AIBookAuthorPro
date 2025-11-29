@@ -8,6 +8,7 @@ using AIBookAuthorPro.Application.Services.GuidedCreation;
 using AIBookAuthorPro.Core.Common;
 using AIBookAuthorPro.Core.Models.GuidedCreation;
 using AIBookAuthorPro.Core.Services;
+using CoreGenerationOptions = AIBookAuthorPro.Core.Services.GenerationOptions;
 using Microsoft.Extensions.Logging;
 
 namespace AIBookAuthorPro.Infrastructure.Services.GuidedCreation;
@@ -49,26 +50,35 @@ public sealed class ContinuityVerificationService : IContinuityVerificationServi
             var objectIssues = new List<ObjectContinuityIssue>();
 
             // Verify character continuity
+            var characterIds = new List<Guid>();
             var charResult = await VerifyCharacterContinuityAsync(
-                chapter.Content?.Text ?? "", context, cancellationToken);
+                chapter.Content ?? "", characterIds, chapter.CharacterStates, 
+                context.CharacterBible ?? new CharacterBible(), cancellationToken);
             if (charResult.IsSuccess)
                 characterIssues.AddRange(charResult.Value!);
 
             // Verify plot continuity
+            var previousEvents = context.PreviousChapters?
+                .SelectMany(c => c.KeyEvents ?? new List<string>())
+                .ToList() ?? new List<string>();
             var plotResult = await VerifyPlotContinuityAsync(
-                chapter.Content?.Text ?? "", context, cancellationToken);
+                chapter.Content ?? "", context.Blueprint,
+                context.PlotArchitecture ?? new PlotArchitecture(), previousEvents, cancellationToken);
             if (plotResult.IsSuccess)
                 plotIssues.AddRange(plotResult.Value!);
 
             // Verify timeline continuity
+            var timelineEvents = context.World?.Timeline?.Events ?? new List<TimelineEvent>();
             var timeResult = await VerifyTimelineContinuityAsync(
-                chapter.Content?.Text ?? "", context, cancellationToken);
+                chapter.Content ?? "", context.Blueprint.Timeline,
+                timelineEvents, cancellationToken);
             if (timeResult.IsSuccess)
                 timelineIssues.AddRange(timeResult.Value!);
 
             // Verify setting continuity
+            var locationIds = context.Blueprint.LocationIds ?? new List<Guid>();
             var settingResult = await VerifySettingContinuityAsync(
-                chapter.Content?.Text ?? "", context, cancellationToken);
+                chapter.Content ?? "", locationIds, context.World ?? new WorldBible(), cancellationToken);
             if (settingResult.IsSuccess)
                 settingIssues.AddRange(settingResult.Value!);
 
@@ -94,7 +104,7 @@ public sealed class ContinuityVerificationService : IContinuityVerificationServi
                 TimelineIssues = timelineIssues,
                 SettingIssues = settingIssues,
                 ObjectIssues = objectIssues,
-                TotalIssueCount = totalIssues,
+                // TotalIssueCount is computed from issue lists
                 CriticalIssueCount = criticalIssues
             };
 
@@ -118,15 +128,17 @@ public sealed class ContinuityVerificationService : IContinuityVerificationServi
     /// <inheritdoc />
     public async Task<Result<List<CharacterContinuityIssue>>> VerifyCharacterContinuityAsync(
         string content,
-        ContinuityVerificationContext context,
+        List<Guid> expectedCharacters,
+        List<CharacterStateSnapshot> characterStates,
+        CharacterBible characterBible,
         CancellationToken cancellationToken = default)
     {
         var issues = new List<CharacterContinuityIssue>();
 
-        if (context.CharacterBible == null)
+        if (characterBible == null)
             return Result<List<CharacterContinuityIssue>>.Success(issues);
 
-        var characterNames = context.CharacterBible.MainCharacters?
+        var characterNames = characterBible.MainCharacters?
             .Select(c => c.FullName).ToList() ?? new List<string>();
 
         if (!characterNames.Any())
@@ -134,32 +146,32 @@ public sealed class ContinuityVerificationService : IContinuityVerificationServi
 
         var prompt = $@"Check for character continuity issues in this chapter.
 
-Known characters: {string.Join(", ", characterNames)}
+Known Characters: {string.Join(", ", characterNames)}
 
 Previous character states:
-{JsonSerializer.Serialize(context.CharacterStates?.Take(5) ?? Enumerable.Empty<CharacterStateSnapshot>())}
+{JsonSerializer.Serialize(characterStates?.Take(5) ?? Enumerable.Empty<CharacterStateSnapshot>())}
 
 Chapter content:
 {content.Substring(0, Math.Min(content.Length, 6000))}
 
 Check for:
-1. Characters knowing things they shouldn't know yet
-2. Characters behaving inconsistently with established traits
-3. Characters appearing in wrong locations
+1. CharacterBible knowing things they shouldn't know yet
+2. CharacterBible behaving inconsistently with established traits
+3. CharacterBible appearing in wrong locations
 4. Physical description changes
 5. Relationship inconsistencies
 
 Respond in JSON:
 {{
-  "issues": [
+  ""issues"": [
     {{
-      "characterName": "name",
-      "issueType": "CharacterKnowledge|CharacterBehavior|CharacterAppearance|CharacterLocation",
-      "severity": "Critical|Major|Minor",
-      "description": "description",
-      "expected": "what was expected",
-      "actual": "what was found",
-      "suggestedFix": "how to fix"
+      ""characterName"": ""name"",
+      ""issueType"": ""CharacterKnowledge|CharacterBehavior|CharacterAppearance|CharacterLocation"",
+      ""severity"": ""Critical|Major|Minor"",
+      ""description"": ""description"",
+      ""expected"": ""what was expected"",
+      ""actual"": ""what was found"",
+      ""suggestedFix"": ""how to fix""
     }}
   ]
 }}";
@@ -168,7 +180,7 @@ Respond in JSON:
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.2, MaxTokens = 2000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.2, MaxTokens = 2000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -187,12 +199,14 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<List<PlotContinuityIssue>>> VerifyPlotContinuityAsync(
         string content,
-        ContinuityVerificationContext context,
+        ChapterBlueprint blueprint,
+        PlotArchitecture plotArchitecture,
+        List<string> previousEvents,
         CancellationToken cancellationToken = default)
     {
         var issues = new List<PlotContinuityIssue>();
 
-        var previousEvents = context.PreviousEvents?.Take(20).ToList() ?? new List<string>();
+        var recentEvents = previousEvents?.Take(20).ToList() ?? new List<string>();
         if (!previousEvents.Any())
             return Result<List<PlotContinuityIssue>>.Success(issues);
 
@@ -212,14 +226,14 @@ Check for:
 
 Respond in JSON:
 {{
-  "issues": [
+  ""issues"": [
     {{
-      "plotThread": "thread name",
-      "issueType": "Contradiction|ForgottenThread|FutureReference|CausalityError",
-      "severity": "Critical|Major|Minor",
-      "description": "description",
-      "contradictionWith": "what it contradicts",
-      "suggestedFix": "how to fix"
+      ""plotThread"": ""thread name"",
+      ""issueType"": ""Contradiction|ForgottenThread|FutureReference|CausalityError"",
+      ""severity"": ""Critical|Major|Minor"",
+      ""description"": ""description"",
+      ""contradictionWith"": ""what it contradicts"",
+      ""suggestedFix"": ""how to fix""
     }}
   ]
 }}";
@@ -228,7 +242,7 @@ Respond in JSON:
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.2, MaxTokens = 2000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.2, MaxTokens = 2000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -247,12 +261,13 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<List<TimelineContinuityIssue>>> VerifyTimelineContinuityAsync(
         string content,
-        ContinuityVerificationContext context,
+        TimelinePosition timelinePosition,
+        List<TimelineEvent> previousTimeline,
         CancellationToken cancellationToken = default)
     {
         var issues = new List<TimelineContinuityIssue>();
 
-        var timelineEvents = context.TimelineEvents?.Take(10).ToList() ?? new List<string>();
+        var timelineEvents = previousTimeline?.Take(10).ToList() ?? new List<TimelineEvent>();
 
         var prompt = $@"Check for timeline/temporal continuity issues in this chapter.
 
@@ -270,14 +285,14 @@ Check for:
 
 Respond in JSON:
 {{
-  "issues": [
+  ""issues"": [
     {{
-      "issueType": "TimeSkip|ChronologyError|SeasonMismatch|AgeInconsistency",
-      "severity": "Critical|Major|Minor",
-      "description": "description",
-      "expectedTimeline": "expected",
-      "actualTimeline": "found",
-      "suggestedFix": "how to fix"
+      ""issueType"": ""TimeSkip|ChronologyError|SeasonMismatch|AgeInconsistency"",
+      ""severity"": ""Critical|Major|Minor"",
+      ""description"": ""description"",
+      ""expectedTimeline"": ""expected"",
+      ""actualTimeline"": ""found"",
+      ""suggestedFix"": ""how to fix""
     }}
   ]
 }}";
@@ -286,7 +301,7 @@ Respond in JSON:
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.2, MaxTokens = 1500, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.2, MaxTokens = 1500, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -305,15 +320,16 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<List<SettingContinuityIssue>>> VerifySettingContinuityAsync(
         string content,
-        ContinuityVerificationContext context,
+        List<Guid> expectedLocations,
+        WorldBible worldBible,
         CancellationToken cancellationToken = default)
     {
         var issues = new List<SettingContinuityIssue>();
 
-        if (context.WorldBible == null)
+        if (worldBible == null)
             return Result<List<SettingContinuityIssue>>.Success(issues);
 
-        var locations = context.WorldBible.Locations?.Take(10)
+        var locations = worldBible.Locations?.Take(10)
             .Select(l => $"{l.Name}: {l.Description}").ToList() ?? new List<string>();
 
         if (!locations.Any())
@@ -334,15 +350,15 @@ Check for:
 
 Respond in JSON:
 {{
-  "issues": [
+  ""issues"": [
     {{
-      "locationName": "name",
-      "issueType": "DescriptionChange|GeographyError|DetailContradiction",
-      "severity": "Critical|Major|Minor",
-      "description": "description",
-      "expected": "expected",
-      "actual": "found",
-      "suggestedFix": "how to fix"
+      ""locationName"": ""name"",
+      ""issueType"": ""DescriptionChange|GeographyError|DetailContradiction"",
+      ""severity"": ""Critical|Major|Minor"",
+      ""description"": ""description"",
+      ""expected"": ""expected"",
+      ""actual"": ""found"",
+      ""suggestedFix"": ""how to fix""
     }}
   ]
 }}";
@@ -351,7 +367,7 @@ Respond in JSON:
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.2, MaxTokens = 1500, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.2, MaxTokens = 1500, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -370,7 +386,7 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<List<ObjectContinuityIssue>>> VerifyObjectContinuityAsync(
         string content,
-        ContinuityVerificationContext context,
+        List<TrackedObject> trackedObjects,
         CancellationToken cancellationToken = default)
     {
         // Track important objects mentioned in the story
@@ -380,6 +396,7 @@ Respond in JSON:
     /// <inheritdoc />
     public async Task<Result<List<CharacterStateSnapshot>>> ExtractCharacterStatesAsync(
         string content,
+        List<Guid> characters,
         CharacterBible characterBible,
         CancellationToken cancellationToken = default)
     {
@@ -392,21 +409,21 @@ Respond in JSON:
 
         var prompt = $@"Extract character states at the end of this chapter.
 
-Characters to track: {string.Join(", ", characterNames)}
+CharacterBible to track: {string.Join(", ", characterNames)}
 
 Chapter content:
 {content.Substring(0, Math.Min(content.Length, 6000))}
 
 For each character present, provide:
 {{
-  "states": [
+  ""states"": [
     {{
-      "characterName": "name",
-      "emotionalState": "current emotional state",
-      "location": "where they are at end of chapter",
-      "knowledgeGained": ["new info they learned"],
-      "relationshipChanges": ["any relationship changes"],
-      "arcProgress": "progress in their arc"
+      ""characterName"": ""name"",
+      ""emotionalState"": ""current emotional state"",
+      ""location"": ""where they are at end of chapter"",
+      ""knowledgeGained"": [""new info they learned""],
+      ""relationshipChanges"": [""any relationship changes""],
+      ""arcProgress"": ""progress in their arc""
     }}
   ]
 }}";
@@ -415,7 +432,7 @@ For each character present, provide:
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.3, MaxTokens = 2000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.3, MaxTokens = 2000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -445,14 +462,14 @@ Chapter content:
 
 List the key events that happened (5-10 events):
 {{
-  "events": ["event 1", "event 2", ...]
+  ""events"": [""event 1"", ""event 2"", ...]
 }}";
 
         try
         {
             var response = await _aiService.GenerateAsync(
                 prompt,
-                new GenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
+                new CoreGenerationOptions { Temperature = 0.3, MaxTokens = 1000, ResponseFormat = "json" },
                 cancellationToken);
 
             if (response.IsSuccess)
@@ -478,45 +495,28 @@ List the key events that happened (5-10 events):
 
     /// <inheritdoc />
     public async Task<Result<string>> BuildContinuityContextAsync(
-        List<GeneratedChapter> previousChapters,
-        CharacterBible? characterBible,
-        WorldBible? worldBible,
-        int maxContextTokens = 4000,
+        List<GeneratedChapter> chapters,
+        int maxContextSize,
         CancellationToken cancellationToken = default)
     {
         var contextParts = new List<string>();
 
-        // Add character summaries
-        if (characterBible?.MainCharacters?.Any() == true)
-        {
-            var charSummary = "CHARACTERS:\n" + string.Join("\n",
-                characterBible.MainCharacters.Take(5).Select(c =>
-                    $"- {c.FullName}: {c.Concept}"));
-            contextParts.Add(charSummary);
-        }
-
         // Add recent chapter summaries
-        if (previousChapters?.Any() == true)
+        if (chapters?.Any() == true)
         {
             var chapterSummaries = "RECENT EVENTS:\n" + string.Join("\n",
-                previousChapters.TakeLast(3).Select(c =>
-                    $"Chapter {c.ChapterNumber}: {c.Summaries?.AISummary ?? "Events occurred"}"));
+                chapters.TakeLast(3).Select(c =>
+                    $"Chapter {c.ChapterNumber}: {c.Summaries?.AISummary ?? c.Summary ?? "Events occurred"}"));
             contextParts.Add(chapterSummaries);
-        }
-
-        // Add world context
-        if (worldBible?.Overview != null)
-        {
-            contextParts.Add($"SETTING: {worldBible.Overview.Description}");
         }
 
         var context = string.Join("\n\n", contextParts);
 
         // Compress if too long
         var estimatedTokens = _aiService.EstimateTokens(context);
-        if (estimatedTokens > maxContextTokens)
+        if (estimatedTokens > maxContextSize)
         {
-            context = context.Substring(0, Math.Min(context.Length, maxContextTokens * 3));
+            context = context.Substring(0, Math.Min(context.Length, maxContextSize * 3));
         }
 
         return Result<string>.Success(context);
@@ -560,8 +560,8 @@ List the key events that happened (5-10 events):
                         Type = ParseContinuityIssueType(issue.GetProperty("issueType").GetString()),
                         Severity = ParseSeverity(issue.GetProperty("severity").GetString()),
                         Description = issue.GetProperty("description").GetString() ?? "",
-                        Expected = issue.TryGetProperty("expected", out var exp) ? exp.GetString() : null,
-                        Actual = issue.TryGetProperty("actual", out var act) ? act.GetString() : null,
+                        Expected = issue.TryGetProperty("expected", out var exp) ? exp.GetString() ?? "" : "",
+                        Actual = issue.TryGetProperty("actual", out var act) ? act.GetString() ?? "" : "",
                         SuggestedFix = issue.TryGetProperty("suggestedFix", out var fix) ? fix.GetString() : null
                     });
                 }
@@ -587,7 +587,7 @@ List the key events that happened (5-10 events):
                 {
                     issues.Add(new PlotContinuityIssue
                     {
-                        Type = issue.GetProperty("issueType").GetString() ?? "Unknown",
+                        Type = ParseContinuityIssueType(issue.GetProperty("issueType").GetString()),
                         Severity = ParseSeverity(issue.GetProperty("severity").GetString()),
                         Description = issue.GetProperty("description").GetString() ?? "",
                         ContradictionWith = issue.TryGetProperty("contradictionWith", out var con) ? con.GetString() : null,
@@ -616,11 +616,11 @@ List the key events that happened (5-10 events):
                 {
                     issues.Add(new TimelineContinuityIssue
                     {
-                        Type = issue.GetProperty("issueType").GetString() ?? "Unknown",
+                        Type = ParseContinuityIssueType(issue.GetProperty("issueType").GetString()),
                         Severity = ParseSeverity(issue.GetProperty("severity").GetString()),
                         Description = issue.GetProperty("description").GetString() ?? "",
-                        ExpectedTimeline = issue.TryGetProperty("expectedTimeline", out var exp) ? exp.GetString() : null,
-                        ActualTimeline = issue.TryGetProperty("actualTimeline", out var act) ? act.GetString() : null,
+                        ExpectedTimeline = issue.TryGetProperty("expectedTimeline", out var exp) ? exp.GetString() ?? "" : "",
+                        ActualTimeline = issue.TryGetProperty("actualTimeline", out var act) ? act.GetString() ?? "" : "",
                         SuggestedFix = issue.TryGetProperty("suggestedFix", out var fix) ? fix.GetString() : null
                     });
                 }
@@ -646,12 +646,12 @@ List the key events that happened (5-10 events):
                 {
                     issues.Add(new SettingContinuityIssue
                     {
-                        LocationName = issue.TryGetProperty("locationName", out var loc) ? loc.GetString() : null,
-                        Type = issue.GetProperty("issueType").GetString() ?? "Unknown",
+                        LocationName = issue.TryGetProperty("locationName", out var loc) ? loc.GetString() ?? "" : "",
+                        Type = ParseContinuityIssueType(issue.GetProperty("issueType").GetString()),
                         Severity = ParseSeverity(issue.GetProperty("severity").GetString()),
                         Description = issue.GetProperty("description").GetString() ?? "",
-                        Expected = issue.TryGetProperty("expected", out var exp) ? exp.GetString() : null,
-                        Actual = issue.TryGetProperty("actual", out var act) ? act.GetString() : null,
+                        Expected = issue.TryGetProperty("expected", out var exp) ? exp.GetString() ?? "" : "",
+                        Actual = issue.TryGetProperty("actual", out var act) ? act.GetString() ?? "" : "",
                         SuggestedFix = issue.TryGetProperty("suggestedFix", out var fix) ? fix.GetString() : null
                     });
                 }
@@ -679,13 +679,27 @@ List the key events that happened (5-10 events):
                     var character = characterBible.MainCharacters?
                         .FirstOrDefault(c => c.FullName?.Equals(charName, StringComparison.OrdinalIgnoreCase) == true);
 
+                    // Parse arc progress - try to extract a percentage or default to 0
+                    var arcProgress = 0;
+                    if (state.TryGetProperty("arcProgress", out var arc))
+                    {
+                        if (arc.ValueKind == JsonValueKind.Number)
+                            arcProgress = arc.GetInt32();
+                        else if (arc.ValueKind == JsonValueKind.String)
+                        {
+                            var arcStr = arc.GetString() ?? "";
+                            if (int.TryParse(arcStr.Replace("%", "").Trim(), out var parsed))
+                                arcProgress = parsed;
+                        }
+                    }
+
                     states.Add(new CharacterStateSnapshot
                     {
                         CharacterId = character?.Id ?? Guid.Empty,
                         CharacterName = charName ?? "Unknown",
-                        EmotionalState = state.TryGetProperty("emotionalState", out var es) ? es.GetString() : null,
-                        Location = state.TryGetProperty("location", out var loc) ? loc.GetString() : null,
-                        ArcProgress = state.TryGetProperty("arcProgress", out var arc) ? arc.GetString() : null
+                        EmotionalState = state.TryGetProperty("emotionalState", out var es) ? es.GetString() ?? "" : "",
+                        Location = state.TryGetProperty("location", out var loc) ? loc.GetString() ?? "" : "",
+                        ArcProgress = arcProgress
                     });
                 }
             }
@@ -726,3 +740,7 @@ List the key events that happened (5-10 events):
 
     #endregion
 }
+
+
+
+
